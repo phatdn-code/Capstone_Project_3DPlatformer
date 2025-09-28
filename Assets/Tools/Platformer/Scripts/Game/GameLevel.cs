@@ -72,7 +72,16 @@ namespace PLAYERTWO.PlatformerProject
 		{
 			get
 			{
-				m_stars ??= new bool[Game.instance.starsPerLevel];
+				if (m_stars == null)
+				{
+					// Initialize with default 3 stars if Game.instance is not available
+					int starsCount = 3;
+					if (Game.instance != null)
+					{
+						starsCount = Game.instance.starsPerLevel;
+					}
+					m_stars = new bool[starsCount];
+				}
 				return m_stars;
 			}
 			set => m_stars = value;

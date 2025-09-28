@@ -17,6 +17,8 @@ TagManager:
   - Interactive/Rail
   - Hitbox
   - Gravity Field
+  - Ground
+  - Wall
   layers:
   - Default
   - TransparentFX

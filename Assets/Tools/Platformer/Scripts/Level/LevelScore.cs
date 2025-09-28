@@ -97,8 +97,25 @@ namespace PLAYERTWO.PlatformerProject
 
 		protected virtual void Start()
 		{
-			if (m_level)
-				stars = m_level.GetStarts();
+			if (m_level != null)
+			{
+				try
+				{
+					stars = m_level.GetStarts();
+				}
+				catch (System.NullReferenceException)
+				{
+					// Fallback to default stars array if GetStarts() fails
+					stars = new bool[3]; // Assuming 3 stars per level
+					Debug.LogWarning("Level.GetStarts() returned null, using default stars array");
+				}
+			}
+			else
+			{
+				// Fallback if m_level is null
+				stars = new bool[3];
+				Debug.LogWarning("Level reference is null, using default stars array");
+			}
 
 			OnScoreLoaded.Invoke();
 		}

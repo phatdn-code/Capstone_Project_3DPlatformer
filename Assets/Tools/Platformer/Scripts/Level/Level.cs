@@ -163,7 +163,15 @@ namespace PLAYERTWO.PlatformerProject
 		/// <summary>
 		/// Returns the array of stars collected in the Level.
 		/// </summary>
-		public virtual bool[] GetStarts() => (bool[])gameLevel.stars.Clone();
+		public virtual bool[] GetStarts() 
+		{
+			if (gameLevel == null || gameLevel.stars == null)
+			{
+				// Return default empty stars array if gameLevel or stars is null
+				return new bool[3]; // Assuming 3 stars per level
+			}
+			return (bool[])gameLevel.stars.Clone();
+		}
 
 		/// <summary>
 		/// Loads the finish scene of this Level.

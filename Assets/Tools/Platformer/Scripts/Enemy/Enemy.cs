@@ -73,39 +73,63 @@ namespace PLAYERTWO.PlatformerProject
 			enemyEvents.OnRevive.Invoke();
 		}
 
-		public virtual void Accelerate(Vector3 direction, float acceleration, float topSpeed) =>
+	public virtual void Accelerate(Vector3 direction, float acceleration, float topSpeed)
+	{
+		if (stats != null && stats.current != null)
 			Accelerate(direction, stats.current.turningDrag, acceleration, topSpeed);
+	}
 
 		/// <summary>
 		/// Smoothly sets Lateral Velocity to zero by its deceleration stats.
 		/// </summary>
-		public virtual void Decelerate() => Decelerate(stats.current.deceleration);
+		public virtual void Decelerate()
+	{
+		if (stats != null && stats.current != null)
+			Decelerate(stats.current.deceleration);
+	}
 
 		/// <summary>
 		/// Smoothly sets Lateral Velocity to zero by its friction stats.
 		/// </summary>
-		public virtual void Friction() => Decelerate(stats.current.friction);
+		public virtual void Friction()
+	{
+		if (stats != null && stats.current != null)
+			Decelerate(stats.current.friction);
+	}
 
 		/// <summary>
 		/// Applies a downward force by its gravity stats.
 		/// </summary>
-		public virtual void Gravity() => Gravity(stats.current.gravity);
+		public virtual void Gravity()
+	{
+		if (stats != null && stats.current != null)
+			Gravity(stats.current.gravity);
+	}
 
 		/// <summary>
 		/// Applies a downward force when ground by its snap stats.
 		/// </summary>
-		public virtual void SnapToGround() => SnapToGround(stats.current.snapForce);
+		public virtual void SnapToGround()
+	{
+		if (stats != null && stats.current != null)
+			SnapToGround(stats.current.snapForce);
+	}
 
 		/// <summary>
 		/// Rotate the Enemy forward to a given direction.
 		/// </summary>
 		/// <param name="direction">The direction you want it to face.</param>
-		public virtual void FaceDirectionSmooth(Vector3 direction) => FaceDirection(direction, stats.current.rotationSpeed);
+		public virtual void FaceDirectionSmooth(Vector3 direction)
+	{
+		if (stats != null && stats.current != null)
+			FaceDirection(direction, stats.current.rotationSpeed);
+	}
 
 		public virtual void ContactAttack(Collider other)
 		{
 			if (!other.CompareTag(GameTags.Player)) return;
 			if (!other.TryGetComponent(out Player player)) return;
+			if (stats == null || stats.current == null) return;
 
 			var stepping = controller.bounds.max + Vector3.down * stats.current.contactSteppingTolerance;
 
@@ -115,7 +139,8 @@ namespace PLAYERTWO.PlatformerProject
 					lateralVelocity = -localForward * stats.current.contactPushBackForce;
 
 				player.ApplyDamage(stats.current.contactDamage, transform.position);
-				enemyEvents.OnPlayerContact?.Invoke();
+				if (enemyEvents != null)
+					enemyEvents.OnPlayerContact?.Invoke();
 			}
 		}
 
@@ -124,39 +149,41 @@ namespace PLAYERTWO.PlatformerProject
 		/// </summary>
 		protected virtual void HandleSight()
 		{
-			if (!player)
+			if (!player && stats != null && stats.current != null && m_sightOverlaps != null)
 			{
 				var overlaps = Physics.OverlapSphereNonAlloc(position, stats.current.spotRange, m_sightOverlaps);
 
 				for (int i = 0; i < overlaps; i++)
 				{
-					if (m_sightOverlaps[i].CompareTag(GameTags.Player))
+					if (m_sightOverlaps[i] != null && m_sightOverlaps[i].CompareTag(GameTags.Player))
 					{
 						if (m_sightOverlaps[i].TryGetComponent<Player>(out var player))
 						{
 							this.player = player;
 							OnPlayerSpotted();
-							enemyEvents.OnPlayerSpotted?.Invoke();
+							if (enemyEvents != null)
+								enemyEvents.OnPlayerSpotted?.Invoke();
 							return;
 						}
 					}
 				}
 			}
-			else
+			else if (player != null)
 			{
 				var distance = Vector3.Distance(position, player.position);
 
-				if ((player.health.current == 0) || (distance > stats.current.viewRange))
+				if ((player.health != null && player.health.current == 0) || (stats != null && stats.current != null && distance > stats.current.viewRange))
 				{
 					player = null;
-					enemyEvents.OnPlayerScaped?.Invoke();
+					if (enemyEvents != null)
+						enemyEvents.OnPlayerScaped?.Invoke();
 				}
 			}
 		}
 
 		protected virtual void OnPlayerSpotted()
 		{
-			if (stats.current.followTargetOnSight)
+			if (stats != null && stats.current != null && stats.current.followTargetOnSight && states != null)
 				states.Change<FollowEnemyState>();
 		}
 
