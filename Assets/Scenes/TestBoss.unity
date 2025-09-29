@@ -2633,6 +2633,109 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e5e33fbe10d53a343aabf9ae5aff9f15, type: 3}
+--- !u!1001 &226295016
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.20154381
+      objectReference: {fileID: 0}
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.803212
+      objectReference: {fileID: 0}
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.5573566
+      objectReference: {fileID: 0}
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.05986854
+      objectReference: {fileID: 0}
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 14.894
+      objectReference: {fileID: 0}
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -160.61
+      objectReference: {fileID: 0}
+    - target: {fileID: 3138966342111069299, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -107.927
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.2785094
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.528
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.35025
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948005818183921356, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755892518623081590, guid: ed8c321356198254b938637497f24e4e,
+        type: 3}
+      propertyPath: m_Name
+      value: Trooper Robot
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ed8c321356198254b938637497f24e4e, type: 3}
 --- !u!1001 &241277171
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8953,41 +9056,30 @@ MonoBehaviour:
   m_attackRange: 3
   bombPrefab: {fileID: 5267716585136757911, guid: bbfe97e993c31fa4094d64cc68c46df7,
     type: 3}
-  fireballPrefab: {fileID: 3479256699514117584, guid: 94bc65ca3942005469bb5fa9aea87d5a,
-    type: 3}
-  usePoolManager: 1
-  centerPoint: {fileID: 654874162}
-  wanderRadius: 25.2
   rightHandSpawnPoint: {fileID: 672415508}
   leftHandSpawnPoint: {fileID: 576529113}
-  fireballSpawnPoint: {fileID: 376344247}
   bombThrowForce: 15
   bombDamage: 50
   bombFuseTime: 2
   bombExplosionRadius: 8
   bombExplosionForce: 800
-  fireballSpeed: 12
+  fireballPrefab: {fileID: 3479256699514117584, guid: 94bc65ca3942005469bb5fa9aea87d5a,
+    type: 3}
+  fireballSpawnPoint: {fileID: 376344247}
   fireballDamage: 25
+  fireballSpeed: 12
   fireballLifetime: 10
-  rotationSpeed: 5
-  rotationDelay: 0.3
-  movementRadius: 20
-  movementSpeed: 6
+  centerPoint: {fileID: 654874162}
+  wanderRadius: 25.2
   movementRestTime: 2
-  movementBoundary: 20
-  attackToMovementDelay: 2
-  startAttackDelay: 3
-  restAfterBombs: 2
-  restAfterFireballs: 3
-  bombExplosionEffect: {fileID: 0}
-  fireballEffect: {fileID: 0}
-  minFireballShots: 1
-  maxFireballShots: 2
-  maxBombShots: 2
-  player: {fileID: 483954186}
-  autoFindPlayer: 1
+  rotationSpeed: 5
+  rotationThreshold: 5
   skinAnimator: {fileID: 733593910}
   animatorController: {fileID: 9100000, guid: 6b5e39241fe38fd4f8dbd451135b651c, type: 2}
+  bombExplosionEffect: {fileID: 0}
+  fireballEffect: {fileID: 0}
+  player: {fileID: 483954186}
+  autoFindPlayer: 1
 --- !u!195 &878620062
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -21337,3 +21429,4 @@ SceneRoots:
   - {fileID: 705962411}
   - {fileID: 878620060}
   - {fileID: 1623012071}
+  - {fileID: 226295016}
