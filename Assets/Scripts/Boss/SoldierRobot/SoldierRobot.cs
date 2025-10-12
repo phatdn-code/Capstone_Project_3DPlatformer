@@ -1,269 +1,276 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-using PLAYERTWO.PlatformerProject;
-using BossBomb = PLAYERTWO.PlatformerProject.BossBomb;
-using BossFireball = PLAYERTWO.PlatformerProject.BossFireball;
+using DG.Tweening;
 
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Soldier Robot Boss - Đơn giản hóa hoàn toàn
+    /// Boss SoldierRobot: điều khiển logic di chuyển, tấn công (bom, cầu lửa),
+    /// và trình tự hành vi (attack sequence).
     /// </summary>
     public class SoldierRobot : BaseBoss
     {
-        [Header("Bomb Settings")]
-        [SerializeField] private GameObject bombPrefab;
-        [SerializeField] private Transform rightHandSpawnPoint;
-        [SerializeField] private Transform leftHandSpawnPoint;
-        [SerializeField] private float bombThrowForce = 10f;
-        [SerializeField] private float bombDamage = 50f;
-        [SerializeField] private float bombFuseTime = 3f;
-        [SerializeField] private float bombExplosionRadius = 5f;
-        [SerializeField] private float bombExplosionForce = 15f;
+        // ─────────────────────────────────────────────
+        // Bomb Settings
+        [field: Header("Bomb Settings")]
+        [field: SerializeField] public BossBomb BombPrefab { get; private set; }
+        [field: SerializeField] public Transform RightHandSpawnPoint { get; private set; }
+        [field: SerializeField] public Transform LeftHandSpawnPoint { get; private set; }
+        [field: SerializeField] public float BombThrowForce { get; private set; } = 10f;
+        [field: SerializeField] public float BombDamage { get; private set; } = 50f;
+        [field: SerializeField] public float BombFuseTime { get; private set; } = 3f;
+        [field: SerializeField] public float BombExplosionRadius { get; private set; } = 5f;
+        [field: SerializeField] public float BombExplosionForce { get; private set; } = 15f;
 
-        [Header("Fireball Settings")]
-        [SerializeField] private GameObject fireballPrefab;
-        [SerializeField] private Transform fireballSpawnPoint;
-        [SerializeField] private float fireballDamage = 30f;
-        [SerializeField] private float fireballSpeed = 8f;
-        [SerializeField] private float fireballLifetime = 5f;
+        // ─────────────────────────────────────────────
+        // Fireball Settings
+        [field: Header("Fireball Settings")]
+        [field: SerializeField] public BossFireball FireballPrefab { get; private set; }
+        [field: SerializeField] public Transform FireballSpawnPoint { get; private set; }
+        [field: SerializeField] public float FireballDamage { get; private set; } = 30f;
+        [field: SerializeField] public float FireballSpeed { get; private set; } = 8f;
+        [field: SerializeField] public float FireballLifetime { get; private set; } = 5f;
 
+
+        // ─────────────────────────────────────────────
+        // Movement Settings
         [Header("Movement Settings")]
         [SerializeField] private Transform centerPoint;
         [SerializeField] private float wanderRadius = 10f;
         [SerializeField] private float movementRestTime = 2f;
+        [SerializeField] private float movementSpeedMultiplier = 1.5f;
 
         [Header("Rotation Settings")]
         [SerializeField] private float rotationSpeed = 5f;
-        [SerializeField] private float rotationThreshold = 5f; // Góc tối thiểu để bắt đầu xoay
+        [SerializeField] private float rotationThreshold = 5f;
 
-        [Header("Animation")]
-        [SerializeField] private Animator skinAnimator;
-        [SerializeField] private RuntimeAnimatorController animatorController;
+        // ─────────────────────────────────────────────
+        // Animation & Effects
+        [field: Header("Animation")]
+        [field: SerializeField] public Animator SkinAnimator { get; private set; }
 
-        [Header("Effects")]
-        [SerializeField] private GameObject bombExplosionEffect;
-        [SerializeField] private GameObject fireballEffect;
+        [field: Header("Effects")]
+        [field: SerializeField] public GameObject BombExplosionEffect { get; private set; }
+        [field: SerializeField] public GameObject FireballEffect { get; private set; }
 
+        // ─────────────────────────────────────────────
+        // Player
         [Header("Player")]
         [SerializeField] private new Player player;
         [SerializeField] private bool autoFindPlayer = true;
 
-        // Components
+        // ─────────────────────────────────────────────
+        // Components & State
         private NavMeshAgent agent;
+        private bool m_isInAttackSequence;
+        private int m_currentStep;
+        private bool m_isMoving;
+        private float m_originalSpeed;
 
-        // Attack sequence state
-        private bool m_isInAttackSequence = false;
-        private int m_currentStep = 0; // 0: bomb right, 1: bomb left, 2: fireball, 3: move
-        private bool m_isMoving = false;
-
+        // ─────────────────────────────────────────────
+        // Unity Lifecycle
+        /// <summary>
+        /// Unity lifecycle: khởi tạo boss khi scene bắt đầu.
+        /// </summary>
         protected override void Start()
         {
             base.Start();
-
-            // Tự động lấy NavMeshAgent
-            agent = GetComponent<NavMeshAgent>();
-            if (agent == null)
-            {
-                Debug.LogError($"❌ NavMeshAgent component not found!");
-            }
-
-            // Tự động tìm Player
-            if (player == null && autoFindPlayer)
-            {
-                player = Object.FindFirstObjectByType<Player>();
-            }
-
-            // Bắt đầu attack sequence
+            InitializeComponents();
+            InitializePlayer();
             StartAttackSequence();
         }
 
+        /// <summary>
+        /// Khởi tạo các component quan trọng (NavMeshAgent, tốc độ gốc).
+        /// </summary>
+        private void InitializeComponents()
+        {
+            agent = GetComponent<NavMeshAgent>();
+
+            if (agent == null)
+                Debug.LogError("❌ NavMeshAgent not found!");
+
+            else m_originalSpeed = agent.speed;
+        }
+
+        /// <summary>
+        /// Tìm player trong scene (nếu chưa gán thủ công).
+        /// </summary>
+        private void InitializePlayer()
+        {
+            if (player == null && autoFindPlayer)
+                player = FindFirstObjectByType<Player>();
+        }
+
+        // ─────────────────────────────────────────────
+        // Attack Sequence
+        /// <summary>
+        /// Bắt đầu trình tự tấn công (chạy liên tục).
+        /// </summary>
         private void StartAttackSequence()
         {
             if (m_isInAttackSequence) return;
 
             m_isInAttackSequence = true;
             m_currentStep = 0;
-
-            Debug.Log($"🎯 Starting attack sequence");
-
-            // Bắt đầu với bomb tay phải
             StartCoroutine(ExecuteAttackSequence());
         }
 
+        /// <summary>
+        /// Trình tự hành vi: bắn bom phải → bom trái → cầu lửa → di chuyển.
+        /// </summary>
         private IEnumerator ExecuteAttackSequence()
         {
-            // Bước 1: Bắn bomb tay phải
-            Debug.Log($"💣 Step 1: Shooting bomb with right hand");
+            // Step 1: Bomb right
             ShootBomb(true);
             yield return new WaitForSeconds(1f);
 
-            // Bước 2: Bắn bomb tay trái
-            Debug.Log($"💣 Step 2: Shooting bomb with left hand");
+            // Step 2: Bomb left
             ShootBomb(false);
             yield return new WaitForSeconds(3f);
 
-            // Bước 3: Bắn fireball (1-2 quả)
+            // Step 3: Fireball (1–2 lần)
             int fireballCount = Random.Range(1, 3);
-            Debug.Log($"🔥 Step 3: Shooting {fireballCount} fireballs");
 
             for (int i = 0; i < fireballCount; i++)
             {
                 ShootFireball();
-                if (i < fireballCount - 1) // Không nghỉ sau quả cuối
+                if (i < fireballCount - 1)
                     yield return new WaitForSeconds(2f);
             }
 
             yield return new WaitForSeconds(5f);
 
-            // Bước 4: Di chuyển
-            Debug.Log($"🚶 Step 4: Moving to new position");
+            // Step 4: Move
             yield return StartCoroutine(MoveToNewPosition());
 
-            // Reset và lặp lại
             m_isInAttackSequence = false;
             StartAttackSequence();
         }
 
+        // ─────────────────────────────────────────────
+        // Combat
+        /// <summary>
+        /// Gọi animation ném bom (tay phải hoặc trái).
+        /// </summary>
         private void ShootBomb(bool useRightHand)
         {
             if (m_isMoving) return;
-
-            Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
+            Transform spawnPoint = useRightHand ? RightHandSpawnPoint : LeftHandSpawnPoint;
             if (spawnPoint == null) return;
 
-            // Xoay về hướng player trước khi bắn
             StartCoroutine(RotateTowardsPlayer(() =>
             {
-                // Trigger animation sau khi đã xoay
-                if (skinAnimator != null)
-                {
-                    if (useRightHand)
-                        skinAnimator.SetTrigger("RightHandShoot");
-                    else
-                        skinAnimator.SetTrigger("LeftHandShoot");
-                }
+                SkinAnimator?.SetTrigger(useRightHand ? "RightHandShoot" : "LeftHandShoot");
             }));
-        }
-
-        private void ShootFireball()
-        {
-            if (m_isMoving) return;
-
-            // Xoay về hướng player trước khi bắn
-            StartCoroutine(RotateTowardsPlayer(() =>
-            {
-                // Trigger animation sau khi đã xoay
-                if (skinAnimator != null)
-                    skinAnimator.SetTrigger("FireballShoot");
-            }));
-        }
-
-        // Animation Events
-        public void ShootBombFromAnimation(bool useRightHand)
-        {
-            if (m_isMoving) return;
-
-            Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
-            if (spawnPoint == null) return;
-
-            GameObject bomb = Instantiate(bombPrefab, spawnPoint.position, spawnPoint.rotation);
-            SetupBomb(bomb);
-        }
-
-        public void CreateFireballFromAnimation()
-        {
-            if (m_isMoving) return;
-
-            if (fireballPrefab == null || fireballSpawnPoint == null) return;
-
-            GameObject fireball = Instantiate(fireballPrefab, fireballSpawnPoint.position, fireballSpawnPoint.rotation);
-            SetupFireball(fireball);
-        }
-
-        private void SetupBomb(GameObject bomb)
-        {
-            var bombComponent = bomb.GetComponent<BossBomb>();
-            if (bombComponent == null)
-            {
-                bombComponent = bomb.AddComponent<BossBomb>();
-            }
-
-            if (player == null && autoFindPlayer)
-                player = Object.FindFirstObjectByType<Player>();
-
-            if (player != null)
-                bombComponent.SetupFromPool(player, bombThrowForce, (int)bombDamage, bombFuseTime, bombExplosionRadius, bombExplosionForce);
-        }
-
-        private void SetupFireball(GameObject fireball)
-        {
-            var fireballComponent = fireball.GetComponent<BossFireball>();
-
-            if (fireballComponent == null)
-                fireballComponent = fireball.AddComponent<BossFireball>();
-
-            fireballComponent.SetupFromPool((int)fireballDamage, fireballSpeed, fireballLifetime);
-        }
-
-        private IEnumerator MoveToNewPosition()
-        {
-            if (m_isMoving) yield break;
-
-            m_isMoving = true;
-
-            // Tìm vị trí mới cách xa vị trí hiện tại
-            Vector3 newPosition = GetNewPosition();
-            agent.SetDestination(newPosition);
-
-            if (skinAnimator != null)
-                skinAnimator.SetBool("isMoving", true);
-
-            // Chờ đến nơi
-            while (agent.pathPending || agent.remainingDistance > 0.2f)
-                yield return null;
-
-            if (skinAnimator != null)
-                skinAnimator.SetBool("isMoving", false);
-
-            yield return new WaitForSeconds(movementRestTime);
-
-            m_isMoving = false;
-        }
-
-        private Vector3 GetNewPosition()
-        {
-            Vector3 center = centerPoint != null ? centerPoint.position : transform.position;
-            Vector3 currentPos = transform.position;
-
-            // Tìm vị trí cách xa vị trí hiện tại
-            Vector3 randomDirection;
-            int attempts = 0;
-            float minDistance = wanderRadius * 0.5f;
-
-            do
-            {
-                randomDirection = Random.insideUnitSphere * wanderRadius;
-                randomDirection += center;
-                attempts++;
-            }
-            while (Vector3.Distance(currentPos, randomDirection) < minDistance && attempts < 10);
-
-            NavMeshHit hit;
-            bool found = NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, 1);
-
-            if (!found)
-                found = NavMesh.SamplePosition(randomDirection, out hit, wanderRadius * 2f, 1);
-
-            if (!found)
-                return transform.position;
-
-            return hit.position;
         }
 
         /// <summary>
-        /// Xoay boss về hướng player một cách mượt mà
+        /// Gọi animation bắn cầu lửa.
+        /// </summary>
+        private void ShootFireball()
+        {
+            if (m_isMoving) return;
+            StartCoroutine(RotateTowardsPlayer(() => SkinAnimator?.SetTrigger("FireballShoot")));
+        }
+
+        /// <summary>
+        /// Được gọi từ animation event để tạo bomb thực sự.
+        /// </summary>
+        public void ShootBombFromAnimation(bool useRightHand)
+        {
+            if (m_isMoving) return;
+            Transform spawnPoint = useRightHand ? RightHandSpawnPoint : LeftHandSpawnPoint;
+            if (spawnPoint == null || BombPrefab == null) return;
+
+            BossBomb bomb = PoolManager.Instance.ReuseComponent(
+                BombPrefab.gameObject, spawnPoint.position, BombPrefab.transform.rotation)?.GetComponent<BossBomb>();
+
+            if (bomb != null)
+                SetupBomb(bomb);
+
+            SetupBomb(bomb);
+        }
+
+        /// <summary>
+        /// Được gọi từ animation event để tạo fireball thực sự.
+        /// </summary>
+        public void CreateFireballFromAnimation()
+        {
+            if (m_isMoving || FireballPrefab == null || FireballSpawnPoint == null) return;
+
+            BossFireball fireball = PoolManager.Instance.ReuseComponent(
+                FireballPrefab.gameObject, FireballSpawnPoint.position, FireballSpawnPoint.rotation)
+                ?.GetComponent<BossFireball>();
+
+            SetupFireball(fireball);
+        }
+
+        /// <summary>
+        /// Setup thông số cho bomb vừa spawn.
+        /// </summary>
+        private void SetupBomb(BossBomb bomb)
+        {
+            if (player == null && autoFindPlayer)
+                player = FindFirstObjectByType<Player>();
+
+            if (player != null)
+                bomb.SetupFromPool(player, BombThrowForce, (int)BombDamage,
+                                   BombFuseTime, BombExplosionRadius, BombExplosionForce);
+        }
+
+        /// <summary>
+        /// Setup thông số cho fireball vừa spawn.
+        /// </summary>
+        private void SetupFireball(BossFireball fireball)
+        {
+            fireball.SetupFromPool((int)FireballDamage, FireballSpeed, FireballLifetime);
+        }
+
+        // ─────────────────────────────────────────────
+        // Movement & Rotation
+        /// <summary>
+        /// Di chuyển boss đến vị trí ngẫu nhiên trong bán kính wanderRadius.
+        /// </summary>
+        private IEnumerator MoveToNewPosition()
+        {
+            if (m_isMoving) yield break;
+            m_isMoving = true;
+
+            if (agent != null)
+                agent.speed = m_originalSpeed * movementSpeedMultiplier;
+
+            Vector3 newPosition = GetNewPosition();
+            agent.SetDestination(newPosition);
+
+            SkinAnimator?.SetBool("isMoving", true);
+
+            while (agent.pathPending || agent.remainingDistance > 0.2f)
+                yield return null;
+
+            SkinAnimator?.SetBool("isMoving", false);
+            if (agent != null) agent.speed = m_originalSpeed;
+
+            yield return new WaitForSeconds(movementRestTime);
+            m_isMoving = false;
+        }
+
+        /// <summary>
+        /// Lấy vị trí ngẫu nhiên trong bán kính wanderRadius (dựa trên NavMesh).
+        /// </summary>
+        private Vector3 GetNewPosition()
+        {
+            Vector3 center = centerPoint != null ? centerPoint.position : transform.position;
+            Vector3 randomDirection = Random.insideUnitSphere * wanderRadius + center;
+
+            return NavMesh.SamplePosition(randomDirection, out var hit, wanderRadius, NavMesh.AllAreas)
+                ? hit.position
+                : transform.position;
+        }
+
+        /// <summary>
+        /// Xoay boss hướng về phía player, sau đó gọi onComplete.
         /// </summary>
         private IEnumerator RotateTowardsPlayer(System.Action onComplete = null)
         {
@@ -273,23 +280,21 @@ namespace PLAYERTWO.PlatformerProject
                 yield break;
             }
 
-            Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
-            directionToPlayer.y = 0; // Chỉ xoay trên trục Y
+            Vector3 direction = (player.transform.position - transform.position).normalized;
+            direction.y = 0;
 
-            if (directionToPlayer.magnitude < 0.1f)
+            if (direction.magnitude < 0.1f)
             {
                 onComplete?.Invoke();
                 yield break;
             }
 
-            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
             float angleDifference = Quaternion.Angle(transform.rotation, targetRotation);
 
-            // Chỉ xoay nếu góc khác biệt đủ lớn
             if (angleDifference > rotationThreshold)
             {
-                float rotationTime = angleDifference / (rotationSpeed * 90f); // Tính thời gian xoay
-
+                float rotationTime = angleDifference / (rotationSpeed * 90f);
                 Quaternion startRotation = transform.rotation;
                 float elapsedTime = 0f;
 
@@ -297,62 +302,30 @@ namespace PLAYERTWO.PlatformerProject
                 {
                     elapsedTime += Time.deltaTime;
                     float progress = elapsedTime / rotationTime;
-
                     transform.rotation = Quaternion.Slerp(startRotation, targetRotation, progress);
                     yield return null;
                 }
-
                 transform.rotation = targetRotation;
             }
 
             onComplete?.Invoke();
         }
 
-        // Public methods for animation events
-        public void TriggerRightHandShoot()
+        // ─────────────────────────────────────────────
+        // Animation Helper
+        /// <summary>
+        /// Trigger animation theo tên (chỉ khi không di chuyển).
+        /// </summary>
+        public void TriggerAnimation(string triggerName)
         {
-            if (m_isMoving) return;
-            if (skinAnimator != null)
-                skinAnimator.SetTrigger("RightHandShoot");
+            if (!m_isMoving) SkinAnimator?.SetTrigger(triggerName);
         }
 
-        public void TriggerLeftHandShoot()
-        {
-            if (m_isMoving) return;
-            if (skinAnimator != null)
-                skinAnimator.SetTrigger("LeftHandShoot");
-        }
-
-        public void TriggerFireballShoot()
-        {
-            if (m_isMoving) return;
-            if (skinAnimator != null)
-                skinAnimator.SetTrigger("FireballShoot");
-        }
-
-        // Public properties and methods for other classes
-        public Animator SkinAnimator => skinAnimator;
-        public RuntimeAnimatorController AnimatorController => animatorController;
-        public GameObject BombPrefab => bombPrefab;
-        public GameObject FireballPrefab => fireballPrefab;
-        public GameObject BombExplosionEffect => bombExplosionEffect;
-        public GameObject FireballEffect => fireballEffect;
-        public Transform RightHandSpawnPoint => rightHandSpawnPoint;
-        public Transform LeftHandSpawnPoint => leftHandSpawnPoint;
-        public Transform FireballSpawnPoint => fireballSpawnPoint;
-
-        // Setter methods for factory
-        public void SetBombPrefab(GameObject newPrefab) => bombPrefab = newPrefab;
-        public void SetFireballPrefab(GameObject newPrefab) => fireballPrefab = newPrefab;
-        public void SetBombExplosionEffect(GameObject newEffect) => bombExplosionEffect = newEffect;
-        public void SetFireballEffect(GameObject newEffect) => fireballEffect = newEffect;
-        public void SetRightHandSpawnPoint(Transform newPoint) => rightHandSpawnPoint = newPoint;
-        public void SetLeftHandSpawnPoint(Transform newPoint) => leftHandSpawnPoint = newPoint;
-        public void SetFireballSpawnPoint(Transform newPoint) => fireballSpawnPoint = newPoint;
-        public void SetSkinAnimator(Animator newAnimator) => skinAnimator = newAnimator;
-        public void SetAnimatorController(RuntimeAnimatorController newController) => animatorController = newController;
-
-        // Attack state info
+        // ─────────────────────────────────────────────
+        // Debug
+        /// <summary>
+        /// Trả về trạng thái hiện tại của attack sequence.
+        /// </summary>
         public string GetAttackStateInfo()
         {
             return $"AttackSequence: {m_isInAttackSequence}, Step: {m_currentStep}, Moving: {m_isMoving}";

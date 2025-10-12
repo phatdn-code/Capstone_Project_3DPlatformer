@@ -3,133 +3,131 @@ using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
 {
+    /// <summary>
+    /// Quản lý vòng đời trận Boss Fight:
+    /// - Khởi động, kết thúc trận
+    /// - Bắt sự kiện thay đổi giai đoạn, boss bị đánh bại
+    /// - Phát tín hiệu event ra UI / gameplay khác
+    /// </summary>
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Boss Manager")]
     public class BossManager : SingletonMonobehaviour<BossManager>
     {
+        #region === Inspector Fields ===
+
         [Header("Boss Settings")]
         [Tooltip("Boss hiện tại trong scene")]
         [SerializeField] private BaseBoss currentBoss;
-        
+
         [Tooltip("Có tự động tìm boss trong scene không")]
         [SerializeField] private bool autoFindBoss = true;
-        
+
         [Tooltip("Thời gian delay trước khi bắt đầu boss fight")]
         [SerializeField] private float bossFightStartDelay = 2f;
 
         [Header("Boss Events")]
         [Tooltip("Được gọi khi boss fight bắt đầu")]
         [SerializeField] private UnityEvent OnBossFightStart;
-        
+
         [Tooltip("Được gọi khi boss fight kết thúc")]
         [SerializeField] private UnityEvent OnBossFightEnd;
-        
-        [Tooltip("Được gọi khi boss chuyển giai đoạn")]
+
+        [Tooltip("Được gọi khi boss chuyển giai đoạn (phase change)")]
         [SerializeField] private UnityEvent<int> OnBossPhaseChanged;
-        
+
         [Tooltip("Được gọi khi boss bị đánh bại hoàn toàn")]
         [SerializeField] private UnityEvent OnBossDefeated;
 
-        private bool m_bossFightActive = false;
-        private bool m_bossDefeated = false;
+        #endregion
+
+        #region === Runtime State ===
+
+        private bool m_bossFightActive = false;   // Trận boss có đang diễn ra không
+        private bool m_bossDefeated = false;      // Boss đã bị hạ gục hoàn toàn chưa
+
+        #endregion
+
+        #region === Properties ===
 
         /// <summary>
-        /// Boss fight có đang diễn ra không
+        /// Kiểm tra trận boss có đang diễn ra không
         /// </summary>
         public bool isBossFightActive => m_bossFightActive;
 
         /// <summary>
-        /// Boss đã bị đánh bại chưa
+        /// Kiểm tra boss đã bị đánh bại chưa
         /// </summary>
         public bool isBossDefeated => m_bossDefeated;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            InitializeBoss();
-        }
+        /// <summary>
+        /// Trả về boss hiện tại
+        /// </summary>
+        public BaseBoss boss => currentBoss;
+
+        #endregion
+
+        #region === Unity Lifecycle ===
 
         private void Start()
         {
+            // Nếu bật autoFindBoss và chưa gán, tự động tìm boss trong scene
             if (autoFindBoss && currentBoss == null)
-            {
-                FindBossInScene();
-            }
+                currentBoss = FindFirstObjectByType<BaseBoss>();
 
+            // Nếu có boss → đăng ký sự kiện
             if (currentBoss != null)
-            {
-                SetupBossEvents();
-                StartBossFight();
-            }
+                RegisterBossEvents(currentBoss);
         }
 
-        /// <summary>
-        /// Khởi tạo boss
-        /// </summary>
-        private void InitializeBoss()
+        private void OnDestroy()
         {
-            if (currentBoss == null && autoFindBoss)
-            {
-                FindBossInScene();
-            }
+            // Gỡ đăng ký sự kiện khi Manager bị hủy
+            if (currentBoss != null)
+                UnregisterBossEvents(currentBoss);
         }
 
+        #endregion
+
+        #region === Event Registration ===
+
         /// <summary>
-        /// Tìm boss trong scene
+        /// Đăng ký các sự kiện từ Boss (phase change, defeated)
         /// </summary>
-        public void FindBossInScene()
+        private void RegisterBossEvents(BaseBoss boss)
         {
-            currentBoss = BossUtils.FindBoss();
-            
-            if (currentBoss == null)
-            {
-                Debug.LogWarning("BossManager: Không tìm thấy Boss trong scene!");
-            }
-            else
-            {
-                Debug.Log("BossManager: Đã tìm thấy Boss trong scene!");
-            }
+            boss.OnBossPhaseStartEvent.AddListener(OnPhaseChangedHandler);
+            boss.bossHealth.OnBossDefeated.AddListener(OnBossDefeatedHandler);
         }
 
         /// <summary>
-        /// Thiết lập các sự kiện boss
+        /// Hủy đăng ký sự kiện từ Boss
         /// </summary>
-        private void SetupBossEvents()
+        private void UnregisterBossEvents(BaseBoss boss)
         {
-            BossUtils.SetupBossEvents(currentBoss, 
-                onPhaseStart: OnBossPhaseStart,
-                onPhaseChanged: OnBossPhaseChangedHandler,
-                onBossDefeated: OnBossDefeatedHandler);
+            boss.OnBossPhaseStartEvent.RemoveListener(OnPhaseChangedHandler);
+            boss.bossHealth.OnBossDefeated.RemoveListener(OnBossDefeatedHandler);
         }
 
+        #endregion
+
+        #region === Boss Fight Control ===
+
         /// <summary>
-        /// Bắt đầu boss fight
+        /// Bắt đầu trận boss fight (nếu có boss và chưa bắt đầu)
         /// </summary>
         public void StartBossFight()
         {
-            if (currentBoss == null)
-            {
-                Debug.LogWarning("BossManager: Không có boss để bắt đầu fight!");
-                return;
-            }
-
-            if (m_bossFightActive) return;
-
-            Debug.Log("BossManager: Bắt đầu Boss Fight!");
-            
-            Invoke(nameof(ActivateBossFight), bossFightStartDelay);
+            if (currentBoss == null || m_bossFightActive) return;
+            StartCoroutine(StartBossFightRoutine());
         }
 
         /// <summary>
-        /// Kích hoạt boss fight
+        /// Coroutine thực hiện delay trước khi bắt đầu boss fight
         /// </summary>
-        private void ActivateBossFight()
+        private System.Collections.IEnumerator StartBossFightRoutine()
         {
+            yield return new WaitForSeconds(bossFightStartDelay);
             m_bossFightActive = true;
-            m_bossDefeated = false;
-            
             OnBossFightStart?.Invoke();
-            
-            Debug.Log("BossManager: Boss Fight đã được kích hoạt!");
         }
 
         /// <summary>
@@ -138,94 +136,32 @@ namespace PLAYERTWO.PlatformerProject
         public void EndBossFight()
         {
             if (!m_bossFightActive) return;
-
             m_bossFightActive = false;
             OnBossFightEnd?.Invoke();
-            
-            Debug.Log("BossManager: Boss Fight đã kết thúc!");
         }
+
+        #endregion
+
+        #region === Event Handlers ===
 
         /// <summary>
-        /// Reset boss về trạng thái ban đầu
+        /// Khi boss chuyển sang giai đoạn mới
         /// </summary>
-        public void ResetBoss()
+        private void OnPhaseChangedHandler(int newPhase)
         {
-            if (currentBoss == null) return;
-
-            currentBoss.ResetBoss();
-            m_bossFightActive = false;
-            m_bossDefeated = false;
-            
-            Debug.Log("BossManager: Boss đã được reset!");
-        }
-
-        /// <summary>
-        /// Lấy thông tin boss hiện tại
-        /// </summary>
-        public BossInfo GetBossInfo()
-        {
-            if (currentBoss == null) return null;
-
-            return new BossInfo
-            {
-                currentHealth = currentBoss.bossHealth.currentHealth,
-                maxHealth = currentBoss.bossHealth.initialHealth,
-                currentPhase = currentBoss.bossHealth.currentPhase,
-                phaseName = currentBoss.currentPhase?.phaseName ?? "Unknown",
-                bossType = currentBoss.GetType().Name,
-                isDead = currentBoss.bossHealth.isDead,
-                isTransitioning = currentBoss.bossHealth.isTransitioning
-            };
-        }
-
-        // Event Handlers
-        private void OnBossPhaseStart(int phase)
-        {
-            Debug.Log($"BossManager: Boss bắt đầu giai đoạn {phase + 1}");
-            OnBossPhaseChanged?.Invoke(phase);
-        }
-
-        private void OnBossPhaseChangedHandler(int newPhase)
-        {
-            Debug.Log($"BossManager: Boss chuyển giai đoạn {newPhase + 1}");
             OnBossPhaseChanged?.Invoke(newPhase);
         }
 
+        /// <summary>
+        /// Khi boss bị đánh bại hoàn toàn
+        /// </summary>
         private void OnBossDefeatedHandler()
         {
             m_bossDefeated = true;
-            m_bossFightActive = false;
-            
+            EndBossFight();
             OnBossDefeated?.Invoke();
-            OnBossFightEnd?.Invoke();
-            
-            Debug.Log("BossManager: Boss đã bị đánh bại hoàn toàn!");
         }
 
-        private void OnDestroy()
-        {
-            // Cleanup events
-            if (currentBoss != null)
-            {
-                currentBoss.OnBossPhaseStartEvent.RemoveListener(OnBossPhaseStart);
-                currentBoss.bossHealth.OnPhaseChanged.RemoveListener(OnBossPhaseChangedHandler);
-                currentBoss.bossHealth.OnBossDefeated.RemoveListener(OnBossDefeatedHandler);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Cấu trúc thông tin boss
-    /// </summary>
-    [System.Serializable]
-    public class BossInfo
-    {
-        public int currentHealth;
-        public int maxHealth;
-        public int currentPhase;
-        public string phaseName;
-        public string bossType;
-        public bool isDead;
-        public bool isTransitioning;
+        #endregion
     }
 }

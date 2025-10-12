@@ -1,160 +1,123 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Utility class chứa các helper methods chung cho boss system
+    /// Lớp tiện ích (Utility class) chứa các hàm hỗ trợ chung cho hệ thống Boss.
+    /// Không lưu trữ state, chỉ cung cấp các hàm static dùng chung.
     /// </summary>
     public static class BossUtils
     {
+        // ─────────────────────────────────────────────────────────────
+        // FIND / SEARCH UTILITIES
+        // ─────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Tìm Player trong scene với conditional compilation
+        /// Tìm Player trong scene (dùng API khác nhau tùy Unity version).
         /// </summary>
         public static Player FindPlayer()
         {
-#if UNITY_6000_0_OR_NEWER
             return Object.FindFirstObjectByType<Player>();
-#else
-            return Object.FindObjectOfType<Player>();
-#endif
         }
-        
+
         /// <summary>
-        /// Tìm BaseBoss trong scene với conditional compilation
+        /// Tìm BaseBoss trong scene (dùng API khác nhau tùy Unity version).
         /// </summary>
         public static BaseBoss FindBoss()
         {
-#if UNITY_6000_0_OR_NEWER
             return Object.FindFirstObjectByType<BaseBoss>();
-#else
-            return Object.FindObjectOfType<BaseBoss>();
-#endif
         }
-        
+
         /// <summary>
-        /// Tìm component với conditional compilation
+        /// Tìm component T đầu tiên trong scene.
         /// </summary>
         public static T FindComponent<T>() where T : Component
         {
-#if UNITY_6000_0_OR_NEWER
             return Object.FindFirstObjectByType<T>();
-#else
-            return Object.FindObjectOfType<T>();
-#endif
         }
-        
+
+        // ─────────────────────────────────────────────────────────────
+        // GAMEOBJECT UTILITIES
+        // ─────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Lấy BossHealth component từ GameObject
+        /// Kích hoạt/ẩn một GameObject (nếu khác null).
         /// </summary>
-        public static BossHealth GetBossHealth(GameObject obj)
+        public static void SetActiveSafe(GameObject go, bool active)
         {
-            return obj.GetComponent<BossHealth>();
+            if (go != null) go.SetActive(active);
         }
-        
+
         /// <summary>
-        /// Reset GameObject về pool (deactivate)
+        /// Tìm child theo tên (tìm đệ quy trong hierarchy).
         /// </summary>
-        public static void ReturnToPool(GameObject obj)
+        public static Transform FindChildRecursive(Transform parent, string childName)
         {
-            if (obj != null)
-            {
-                obj.SetActive(false);
-            }
-        }
-        
-        /// <summary>
-        /// Activate GameObject từ pool
-        /// </summary>
-        public static void ActivateFromPool(GameObject obj)
-        {
-            if (obj != null)
-            {
-                obj.SetActive(true);
-            }
-        }
-        
-        /// <summary>
-        /// Kiểm tra GameObject có active không
-        /// </summary>
-        public static bool IsActive(GameObject obj)
-        {
-            return obj != null && obj.activeInHierarchy;
-        }
-        
-        /// <summary>
-        /// Tìm child transform theo tên (recursive)
-        /// </summary>
-        public static Transform FindChildTransform(Transform parent, string childName)
-        {
-            if (parent == null) return null;
-            
-            // Tìm trực tiếp
-            Transform found = parent.Find(childName);
-            if (found != null) return found;
-            
-            // Tìm recursive trong children
             foreach (Transform child in parent)
             {
-                found = FindChildTransform(child, childName);
-                if (found != null) return found;
+                if (child.name == childName)
+                    return child;
+
+                var result = FindChildRecursive(child, childName);
+                if (result != null) return result;
             }
-            
             return null;
         }
-        
+
+        // ─────────────────────────────────────────────────────────────
+        // MATH / POSITION UTILITIES
+        // ─────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Tạo random offset cho projectile
+        /// Sinh ra vị trí ngẫu nhiên xung quanh gốc với offset (trong hình tròn).
         /// </summary>
-        public static Vector3 GetRandomOffset(float range)
+        public static Vector3 GetRandomOffsetPosition(Vector3 origin, float radius)
         {
-            return new Vector3(
-                Random.Range(-range, range),
-                0,
-                Random.Range(-range, range)
-            );
+            Vector2 randomCircle = Random.insideUnitCircle * radius;
+            return origin + new Vector3(randomCircle.x, 0, randomCircle.y);
         }
-        
+
         /// <summary>
-        /// Tính toán direction từ source đến target
+        /// Tính hướng (vector unit) từ A đến B.
         /// </summary>
-        public static Vector3 GetDirection(Vector3 source, Vector3 target)
+        public static Vector3 GetDirection(Vector3 from, Vector3 to)
         {
-            return (target - source).normalized;
+            return (to - from).normalized;
         }
-        
+
+        // ─────────────────────────────────────────────────────────────
+        // BOSS EVENTS SETUP
+        // ─────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Setup boss events với optional callbacks
+        /// Gắn các listener cho Boss events một cách an toàn.
+        /// Cho phép truyền callback tuỳ chọn (null thì bỏ qua).
         /// </summary>
-        public static void SetupBossEvents(BaseBoss boss, UnityEngine.Events.UnityAction<int> onPhaseStart = null, 
-                                        UnityEngine.Events.UnityAction<string> onSpecialAbility = null,
-                                        UnityEngine.Events.UnityAction<int> onPhaseChanged = null,
-                                        UnityEngine.Events.UnityAction onBossHealed = null,
-                                        UnityEngine.Events.UnityAction onBossDefeated = null)
+        public static void SetupBossEvents(
+            BaseBoss boss,
+            UnityAction<int> onPhaseStart = null,
+            UnityAction<string> onSpecialAbility = null,
+            UnityAction<int> onPhaseChanged = null,
+            UnityAction onBossHealed = null,
+            UnityAction onBossDefeated = null)
         {
-            if (boss == null) return;
-            
+            if (boss == null || boss.bossHealth == null) return;
+
             if (onPhaseStart != null)
                 boss.OnBossPhaseStartEvent.AddListener(onPhaseStart);
-                
+
             if (onSpecialAbility != null)
                 boss.OnSpecialAbilityUsedEvent.AddListener(onSpecialAbility);
-                
+
             if (onPhaseChanged != null)
                 boss.bossHealth.OnPhaseChanged.AddListener(onPhaseChanged);
-                
+
             if (onBossHealed != null)
                 boss.bossHealth.OnBossHealed.AddListener(onBossHealed);
-                
+
             if (onBossDefeated != null)
                 boss.bossHealth.OnBossDefeated.AddListener(onBossDefeated);
-        }
-        
-        /// <summary>
-        /// Kiểm tra distance giữa 2 points
-        /// </summary>
-        public static float GetDistance(Vector3 point1, Vector3 point2)
-        {
-            return Vector3.Distance(point1, point2);
         }
     }
 }

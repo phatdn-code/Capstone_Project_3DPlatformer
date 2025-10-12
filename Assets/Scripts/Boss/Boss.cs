@@ -5,6 +5,7 @@ namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
     /// Base class cho tất cả các loại boss
+    /// Quản lý máu, phase, hành vi và sự kiện chung
     /// </summary>
     [RequireComponent(typeof(BossHealth))]
     [RequireComponent(typeof(EnemyStatsManager))]
@@ -13,87 +14,63 @@ namespace PLAYERTWO.PlatformerProject
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Base Boss")]
     public abstract class BaseBoss : Enemy
     {
+        // ───────────────────────────────────────────────
+        // Serialized Fields
+        // ───────────────────────────────────────────────
         [Header("Boss Settings")]
-        [Tooltip("Hiệu ứng chuyển giai đoạn")]
+        [Tooltip("Hiệu ứng khi boss đổi giai đoạn hoặc dùng kỹ năng đặc biệt")]
         [SerializeField] private GameObject phaseTransitionEffect;
-        
+
         [Header("Boss Events")]
         [Tooltip("Được gọi khi boss bắt đầu giai đoạn mới")]
         [SerializeField] private UnityEvent<int> OnBossPhaseStart;
-        
+
         [Tooltip("Được gọi khi boss sử dụng kỹ năng đặc biệt")]
         [SerializeField] private UnityEvent<string> OnSpecialAbilityUsed;
 
-        protected BossHealth m_bossHealth;
-        protected float m_lastAttackTime;
-        protected float m_specialAbilityCooldown;
-        protected bool m_isAttacking = false;
-
-        // Serialized fields
+        [Tooltip("Danh sách các giai đoạn của boss")]
         [SerializeField] private BossPhase[] m_phases = new BossPhase[3];
+
+        [Tooltip("Khoảng thời gian giữa 2 đòn tấn công thường")]
         [SerializeField] private float m_attackInterval = 2f;
+
+        [Tooltip("Tầm tấn công thường của boss")]
         [SerializeField] private float m_attackRange = 3f;
 
-        /// <summary>
-        /// Component quản lý máu boss
-        /// </summary>
+        // ───────────────────────────────────────────────
+        // Protected Fields
+        // ───────────────────────────────────────────────
+        protected BossHealth m_bossHealth;
+        protected float m_lastAttackTime;           // thời điểm boss tấn công gần nhất
+        protected float m_specialAbilityCooldown;   // thời điểm skill đặc biệt sẵn sàng
+        protected bool m_isAttacking = false;       // flag đang tấn công
+
+        // ───────────────────────────────────────────────
+        // Public Properties
+        // ───────────────────────────────────────────────
         public BossHealth bossHealth => m_bossHealth;
-
-        /// <summary>
-        /// Các giai đoạn của boss
-        /// </summary>
-        public BossPhase[] phases
-        {
-            get => m_phases;
-            set => m_phases = value;
-        }
-
-        /// <summary>
-        /// Thời gian giữa các đợt tấn công
-        /// </summary>
-        public float attackInterval
-        {
-            get => m_attackInterval;
-            set => m_attackInterval = value;
-        }
-
-        /// <summary>
-        /// Tầm tấn công
-        /// </summary>
-        public float attackRange
-        {
-            get => m_attackRange;
-            set => m_attackRange = value;
-        }
-
-        /// <summary>
-        /// Event khi boss bắt đầu giai đoạn mới
-        /// </summary>
+        public BossPhase[] phases { get => m_phases; set => m_phases = value; }
+        public float attackInterval { get => m_attackInterval; set => m_attackInterval = value; }
+        public float attackRange { get => m_attackRange; set => m_attackRange = value; }
         public UnityEvent<int> OnBossPhaseStartEvent => OnBossPhaseStart;
-
-        /// <summary>
-        /// Event khi boss sử dụng kỹ năng đặc biệt
-        /// </summary>
         public UnityEvent<string> OnSpecialAbilityUsedEvent => OnSpecialAbilityUsed;
 
-        /// <summary>
-        /// Giai đoạn hiện tại của boss
-        /// </summary>
-        public BossPhase currentPhase
-        {
-            get
-            {
-                if (m_phases.Length > 0 && m_bossHealth.currentPhase < m_phases.Length)
-                    return m_phases[m_bossHealth.currentPhase];
-                return null;
-            }
-        }
+        /// <summary> Trả về giai đoạn hiện tại của boss </summary>
+        public BossPhase currentPhase =>
+            (m_phases.Length > 0 && m_bossHealth.currentPhase < m_phases.Length)
+                ? m_phases[m_bossHealth.currentPhase] : null;
 
-        /// <summary>
-        /// Boss có đang trong quá trình chuyển giai đoạn không
-        /// </summary>
+        /// <summary> Cho biết boss có đang trong quá trình chuyển phase không </summary>
         public bool isTransitioning => m_bossHealth.isTransitioning;
 
+        // ───────────────────────────────────────────────
+        // Unity Lifecycle
+        // ───────────────────────────────────────────────
+
+        /// <summary>
+        /// Hàm Start của Unity
+        /// Khởi tạo BossHealth, các phase và gắn sự kiện
+        /// </summary>
         protected virtual void Start()
         {
             InitializeBossHealth();
@@ -101,41 +78,39 @@ namespace PLAYERTWO.PlatformerProject
             SetupPhaseEvents();
         }
 
+        /// <summary>
+        /// Hàm update (kế thừa từ Enemy)
+        /// Liên tục gọi hành vi boss nếu còn sống và không chuyển phase
+        /// </summary>
         protected override void OnUpdate()
         {
             base.OnUpdate();
-            
+
             if (m_bossHealth != null && !m_bossHealth.isDead && !m_bossHealth.isTransitioning)
-            {
                 UpdateBossBehavior();
-            }
         }
 
-        /// <summary>
-        /// Khởi tạo component BossHealth
-        /// </summary>
+        // ───────────────────────────────────────────────
+        // Initialization
+        // ───────────────────────────────────────────────
+
+        /// <summary> Tìm hoặc thêm component BossHealth </summary>
         private void InitializeBossHealth()
         {
             m_bossHealth = GetComponent<BossHealth>();
+
             if (m_bossHealth == null)
             {
                 m_bossHealth = gameObject.AddComponent<BossHealth>();
                 Debug.Log($"✅ Tạo BossHealth component cho {gameObject.name}");
             }
-            else
-            {
-                Debug.Log($"✅ Tìm thấy BossHealth component cho {gameObject.name}");
-            }
         }
 
-        /// <summary>
-        /// Khởi tạo các giai đoạn boss
-        /// </summary>
+        /// <summary> Nếu chưa có phases thì tạo mặc định 3 phase với stats tăng dần </summary>
         private void InitializePhases()
         {
             if (m_phases.Length == 0)
             {
-                // Tạo 3 giai đoạn mặc định
                 m_phases = new BossPhase[3];
                 for (int i = 0; i < 3; i++)
                 {
@@ -157,23 +132,19 @@ namespace PLAYERTWO.PlatformerProject
             }
         }
 
-        /// <summary>
-        /// Lấy màu sắc cho từng giai đoạn
-        /// </summary>
+        /// <summary> Lấy màu sắc hiển thị cho từng phase </summary>
         private Color GetPhaseColor(int phase)
         {
             switch (phase)
             {
-                case 0: return Color.red;
-                case 1: return Color.yellow;
-                case 2: return Color.magenta;
+                case 0: return Color.white;
+                case 1: return Color.white;
+                case 2: return Color.red;
                 default: return Color.white;
             }
         }
 
-        /// <summary>
-        /// Thiết lập các sự kiện giai đoạn
-        /// </summary>
+        /// <summary> Gắn các sự kiện phase từ BossHealth </summary>
         private void SetupPhaseEvents()
         {
             m_bossHealth.OnPhaseChanged.AddListener(OnPhaseChanged);
@@ -181,168 +152,128 @@ namespace PLAYERTWO.PlatformerProject
             m_bossHealth.OnBossDefeated.AddListener(OnBossDefeated);
         }
 
-        /// <summary>
-        /// Cập nhật hành vi boss - Override trong các class con
-        /// </summary>
+        // ───────────────────────────────────────────────
+        // Boss Behavior
+        // ───────────────────────────────────────────────
+
+        /// <summary> Hàm chính điều khiển hành vi boss: update stats, attack, skill </summary>
         protected virtual void UpdateBossBehavior()
         {
             if (currentPhase == null) return;
 
-            // Cập nhật stats theo giai đoạn hiện tại
             UpdateStatsForCurrentPhase();
 
-            // Kiểm tra tấn công
-            if (CanAttack())
-            {
-                PerformAttack();
-            }
-
-            // Kiểm tra kỹ năng đặc biệt
-            if (CanUseSpecialAbility())
-            {
-                UseSpecialAbility();
-            }
+            if (CanAttack()) PerformAttack();
+            if (CanUseSpecialAbility()) UseSpecialAbility();
         }
 
-        /// <summary>
-        /// Cập nhật stats theo giai đoạn hiện tại
-        /// </summary>
+        /// <summary> Cập nhật màu & scale của boss theo phase hiện tại </summary>
         private void UpdateStatsForCurrentPhase()
         {
             if (currentPhase == null) return;
 
-            // Cập nhật màu sắc
             var renderers = GetComponentsInChildren<Renderer>();
             foreach (var renderer in renderers)
             {
                 if (renderer.material != null)
-                {
                     renderer.material.color = currentPhase.phaseColor;
-                }
             }
 
-            // Cập nhật kích thước
             transform.localScale = currentPhase.scale;
         }
 
-        /// <summary>
-        /// Kiểm tra có thể tấn công không - Override trong các class con
-        /// </summary>
+        // ───────────────────────────────────────────────
+        // Combat
+        // ───────────────────────────────────────────────
+
+        /// <summary> Kiểm tra điều kiện để boss tấn công thường </summary>
         protected virtual bool CanAttack()
         {
-            if (player == null) return false;
-            if (m_isAttacking) return false;
-
+            if (player == null || m_isAttacking) return false;
             float distance = Vector3.Distance(transform.position, player.position);
             return distance <= m_attackRange && Time.time >= m_lastAttackTime + m_attackInterval;
         }
 
-        /// <summary>
-        /// Thực hiện tấn công - Override trong các class con
-        /// </summary>
+        /// <summary> Thực hiện tấn công thường vào player </summary>
         protected virtual void PerformAttack()
         {
             m_isAttacking = true;
             m_lastAttackTime = Time.time;
 
-            // Tấn công player
             if (player != null)
             {
                 player.ApplyDamage(currentPhase.damage, transform.position);
                 Debug.Log($"{GetType().Name} tấn công với {currentPhase.damage} sát thương!");
             }
 
-            // Hiệu ứng tấn công
-            if (enemyEvents != null)
-            {
-                enemyEvents.OnPlayerContact?.Invoke();
-            }
-
-            // Reset trạng thái tấn công
+            enemyEvents?.OnPlayerContact?.Invoke();
             Invoke(nameof(ResetAttackState), currentPhase.attackSpeed);
         }
 
-        /// <summary>
-        /// Reset trạng thái tấn công
-        /// </summary>
+        /// <summary> Reset lại trạng thái sau khi tấn công </summary>
         protected virtual void ResetAttackState()
         {
             m_isAttacking = false;
         }
 
-        /// <summary>
-        /// Kiểm tra có thể sử dụng kỹ năng đặc biệt không
-        /// </summary>
+        /// <summary> Kiểm tra điều kiện có thể dùng kỹ năng đặc biệt </summary>
         private bool CanUseSpecialAbility()
         {
-            if (currentPhase == null) return false;
-            if (!currentPhase.canUseSpecialAbility) return false;
+            if (currentPhase == null || !currentPhase.canUseSpecialAbility) return false;
             return Time.time >= m_specialAbilityCooldown;
         }
 
-        /// <summary>
-        /// Sử dụng kỹ năng đặc biệt - Override trong các class con
-        /// </summary>
+        /// <summary> Thực thi kỹ năng đặc biệt và gọi event </summary>
         protected virtual void UseSpecialAbility()
         {
             m_specialAbilityCooldown = Time.time + currentPhase.specialAbilityCooldown;
-            
             Debug.Log($"{GetType().Name} sử dụng: {currentPhase.specialAbilityName}");
+
             OnSpecialAbilityUsed?.Invoke(currentPhase.specialAbilityName);
 
-            // Hiệu ứng kỹ năng đặc biệt
             if (phaseTransitionEffect != null)
-            {
                 Instantiate(phaseTransitionEffect, transform.position, Quaternion.identity);
-            }
         }
 
-        /// <summary>
-        /// Xử lý khi boss chuyển giai đoạn
-        /// </summary>
+        // ───────────────────────────────────────────────
+        // Event Handlers
+        // ───────────────────────────────────────────────
+
+        /// <summary> Xử lý khi boss chuyển sang giai đoạn mới </summary>
         protected virtual void OnPhaseChanged(int newPhase)
         {
             Debug.Log($"Boss chuyển sang {m_phases[newPhase].phaseName}!");
             OnBossPhaseStart?.Invoke(newPhase);
 
-            // Hiệu ứng chuyển giai đoạn
             if (phaseTransitionEffect != null)
-            {
                 Instantiate(phaseTransitionEffect, transform.position, Quaternion.identity);
-            }
         }
 
-        /// <summary>
-        /// Xử lý khi boss hồi phục
-        /// </summary>
+        /// <summary> Xử lý khi boss hồi máu đầy (event từ BossHealth) </summary>
         protected virtual void OnBossHealed()
         {
             Debug.Log("Boss đã hồi phục hoàn toàn!");
         }
 
-        /// <summary>
-        /// Xử lý khi boss bị đánh bại
-        /// </summary>
+        /// <summary> Xử lý khi boss bị hạ gục hoàn toàn </summary>
         protected virtual void OnBossDefeated()
         {
             Debug.Log("Boss đã bị đánh bại hoàn toàn!");
-            // Có thể thêm hiệu ứng chết, drop items, etc.
         }
 
-        /// <summary>
-        /// Ghi đè phương thức ApplyDamage để sử dụng BossHealth
-        /// </summary>
+        // ───────────────────────────────────────────────
+        // Misc
+        // ───────────────────────────────────────────────
+
+        /// <summary> Gọi khi boss nhận damage từ bên ngoài </summary>
         public override void ApplyDamage(int amount, Vector3 origin)
         {
             if (m_bossHealth.isDead || m_bossHealth.isTransitioning) return;
-
             m_bossHealth.TakeDamage(amount);
             enemyEvents.OnDamage?.Invoke();
         }
 
-        /// <summary>
-        /// Reset boss về trạng thái ban đầu
-        /// </summary>
+        /// <summary> Reset lại toàn bộ trạng thái boss (dùng khi restart level) </summary>
         public void ResetBoss()
         {
             m_bossHealth.ResetBoss();

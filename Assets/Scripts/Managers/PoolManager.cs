@@ -54,7 +54,7 @@ public class PoolManager : SingletonMonobehaviour<PoolManager>
         int poolKey = prefab.GetInstanceID();
         string prefabName = prefab.name;
 
-        // Create a parent GameObject to organize pooled objects
+        // Tạo anchor object chứa pool
         GameObject parentObject = new(prefabName + "Anchor");
         parentObject.transform.SetParent(objectPoolTransform);
 
@@ -62,34 +62,40 @@ public class PoolManager : SingletonMonobehaviour<PoolManager>
         {
             poolDictionary.Add(poolKey, new Queue<Component>());
 
+            // ✅ Fallback componentType = Transform nếu trống
+            if (string.IsNullOrEmpty(componentType))
+                componentType = "Transform";
+
+            // ✅ Hỗ trợ đầy đủ namespace
+            Type componentTypeObj =
+                Type.GetType(componentType)
+                ?? Type.GetType($"UnityEngine.{componentType}")
+                ?? Type.GetType($"PLAYERTWO.PlatformerProject.{componentType}");
+
+            if (componentTypeObj == null)
+            {
+                Debug.LogWarning($"⚠️ PoolManager: Không tìm thấy componentType '{componentType}' cho prefab '{prefab.name}'. Dùng Transform mặc định.");
+                componentTypeObj = typeof(Transform);
+            }
+
             for (int i = 0; i < poolSize; i++)
             {
                 GameObject newObject = Instantiate(prefab, parentObject.transform);
                 newObject.SetActive(false);
 
-                // Tìm component type với namespace đầy đủ
-                Type componentTypeObj = Type.GetType(componentType);
-                if (componentTypeObj == null)
-                {
-                    // Thử với namespace đầy đủ
-                    componentTypeObj = Type.GetType($"PLAYERTWO.PlatformerProject.{componentType}");
-                }
-                
-                if (componentTypeObj == null)
-                {
-                    continue;
-                }
-                
                 Component component = newObject.GetComponent(componentTypeObj);
+
                 if (component == null)
-                {
-                    continue;
-                }
-                
+                    // ✅ Nếu prefab không có componentType đó, dùng Transform luôn
+                    component = newObject.transform;
+
                 poolDictionary[poolKey].Enqueue(component);
             }
+
+            Debug.Log($"✅ PoolManager: Khởi tạo {poolSize} '{componentType}' cho prefab '{prefab.name}'.");
         }
     }
+
 
     #endregion
 
@@ -120,63 +126,61 @@ public class PoolManager : SingletonMonobehaviour<PoolManager>
 
     #region === Internal Helpers ===
 
-        /// <summary>
-        /// Dequeues and re-enqueues a component from the pool.
-        /// </summary>
-        private Component GetComponentFromPool(int poolKey)
+    /// <summary>
+    /// Lấy component từ pool (dequeue, reset trạng thái vật lý, tắt gameObject).
+    /// </summary>
+    private Component GetComponentFromPool(int poolKey)
+    {
+        if (!poolDictionary.ContainsKey(poolKey) || poolDictionary[poolKey].Count == 0)
         {
-            Component component = poolDictionary[poolKey].Dequeue();
-            poolDictionary[poolKey].Enqueue(component);
-
-            // Force deactivate GameObject để đảm bảo clean state
-            component.gameObject.SetActive(false);
-            
-            // Reset Rigidbody nếu có
-            Rigidbody rb = component.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-            
-            // Disable collider để tránh collision với chính nó
-            Collider col = component.GetComponent<Collider>();
-            if (col != null)
-            {
-                col.enabled = false;
-            }
-
-            return component;
+            Debug.LogWarning($"⚠️ PoolManager: Pool rỗng hoặc chưa được khởi tạo cho key {poolKey}");
+            return null;
         }
 
-        /// <summary>
-        /// Resets transform and scale of a reused component.
-        /// </summary>
-        private void ResetObject(Component component, Vector3 position, Quaternion rotation, GameObject prefab)
+        Component component = poolDictionary[poolKey].Dequeue();
+        poolDictionary[poolKey].Enqueue(component);
+
+        // Reset trạng thái vật lý & collider
+        ResetPhysicsAndCollider(component, resetCollider: true, enableCollider: false);
+
+        // Deactivate để đảm bảo clean state
+        component.gameObject.SetActive(false);
+        return component;
+    }
+
+    /// <summary>
+    /// Đặt lại vị trí, xoay, scale, và kích hoạt object lấy từ pool.
+    /// </summary>
+    private void ResetObject(Component component, Vector3 position, Quaternion rotation, GameObject prefab)
+    {
+        Transform t = component.transform;
+        t.position = position;
+        t.rotation = rotation;
+        t.localScale = prefab.transform.localScale;
+
+        // Reset vật lý và collider
+        ResetPhysicsAndCollider(component, resetCollider: true, enableCollider: true);
+
+        // Bật object
+        component.gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// Reset velocity, angularVelocity, và bật/tắt collider.
+    /// </summary>
+    private void ResetPhysicsAndCollider(Component component, bool resetCollider, bool enableCollider)
+    {
+        // Reset Rigidbody nếu có
+        if (component.TryGetComponent(out Rigidbody rb))
         {
-            Transform t = component.transform;
-            t.position = position;
-            t.rotation = rotation;
-            t.localScale = prefab.transform.localScale;
-            
-            // Reset Rigidbody nếu có
-            Rigidbody rb = component.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-            
-            // Re-enable collider
-            Collider col = component.GetComponent<Collider>();
-            if (col != null)
-            {
-                col.enabled = true;
-            }
-            
-            // Activate GameObject
-            component.gameObject.SetActive(true);
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
         }
+
+        if (resetCollider && component.TryGetComponent(out Collider col))
+            col.enabled = enableCollider;
+    }
+
 
     #endregion
 }

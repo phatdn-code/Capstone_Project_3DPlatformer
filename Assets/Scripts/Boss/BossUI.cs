@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening; // ✅ Dùng DOTween để quản lý animation
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -8,45 +9,60 @@ namespace PLAYERTWO.PlatformerProject
     public class BossUI : SingletonMonobehaviour<BossUI>
     {
         [Header("UI References")]
-        [Tooltip("Thanh máu boss")]
         [SerializeField] private Slider bossHealthBar;
-        
-        [Tooltip("Text hiển thị tên giai đoạn")]
         [SerializeField] private TextMeshProUGUI phaseNameText;
-        
-        [Tooltip("Text hiển thị máu boss")]
         [SerializeField] private TextMeshProUGUI healthText;
-        
-        [Tooltip("Panel chứa UI boss")]
         [SerializeField] private GameObject bossUIPanel;
-        
-        [Tooltip("Text thông báo chuyển giai đoạn")]
         [SerializeField] private TextMeshProUGUI phaseTransitionText;
-        
-        [Tooltip("Text thông báo kỹ năng đặc biệt")]
         [SerializeField] private TextMeshProUGUI specialAbilityText;
 
         [Header("Animation Settings")]
-        [Tooltip("Thời gian hiển thị thông báo")]
-        [SerializeField] private float notificationDuration = 3f;
-        
-        [Tooltip("Tốc độ animation thanh máu")]
-        [SerializeField] private float healthBarAnimationSpeed = 2f;
+        [SerializeField] private float notificationDuration = 3f;   // thời gian giữ thông báo
+        [SerializeField] private float healthBarAnimationSpeed = 2f; // tốc độ mượt máu
+        [SerializeField] private float fadeDuration = 0.5f;          // thời gian fade in/out
 
         private BaseBoss m_boss;
         private bool m_isVisible = false;
 
+        // Tween quản lý notification
+        private Tween hideTween;
+
+        // ─────────────────────────────────────────────────────
+        // Unity Lifecycle
+        // ─────────────────────────────────────────────────────
         protected override void Awake()
         {
             base.Awake();
             InitializeBossUI();
         }
 
+        private void Update()
+        {
+            if (m_boss != null && m_boss.bossHealth != null)
+                UpdateHealthBar();
+        }
+
+        private void OnDestroy()
+        {
+            if (m_boss != null)
+            {
+                m_boss.OnBossPhaseStartEvent.RemoveListener(OnBossPhaseStart);
+                m_boss.OnSpecialAbilityUsedEvent.RemoveListener(OnSpecialAbilityUsed);
+                m_boss.bossHealth.OnPhaseChanged.RemoveListener(OnPhaseChanged);
+                m_boss.bossHealth.OnBossHealed.RemoveListener(OnBossHealed);
+                m_boss.bossHealth.OnBossDefeated.RemoveListener(OnBossDefeated);
+            }
+
+            hideTween?.Kill();
+        }
+
+        // ─────────────────────────────────────────────────────
+        // Initialization
+        // ─────────────────────────────────────────────────────
         private void InitializeBossUI()
         {
-            // Tìm boss trong scene
             m_boss = BossUtils.FindBoss();
-            
+
             if (m_boss == null)
             {
                 Debug.LogWarning("Không tìm thấy Boss trong scene!");
@@ -57,17 +73,6 @@ namespace PLAYERTWO.PlatformerProject
             UpdateUI();
         }
 
-        private void Update()
-        {
-            if (m_boss != null && m_boss.bossHealth != null)
-            {
-                UpdateHealthBar();
-            }
-        }
-
-        /// <summary>
-        /// Thiết lập các sự kiện từ boss
-        /// </summary>
         private void SetupBossEvents()
         {
             BossUtils.SetupBossEvents(m_boss,
@@ -78,117 +83,95 @@ namespace PLAYERTWO.PlatformerProject
                 onBossDefeated: OnBossDefeated);
         }
 
-        /// <summary>
-        /// Cập nhật UI
-        /// </summary>
+        // ─────────────────────────────────────────────────────
+        // UI Updates
+        // ─────────────────────────────────────────────────────
         private void UpdateUI()
         {
             if (m_boss == null) return;
-
             UpdateHealthBar();
             UpdatePhaseName();
             UpdateHealthText();
         }
 
-        /// <summary>
-        /// Cập nhật thanh máu
-        /// </summary>
         private void UpdateHealthBar()
         {
             if (bossHealthBar == null || m_boss.bossHealth == null) return;
 
             float targetHealth = m_boss.bossHealth.healthPercentage;
             float currentHealth = bossHealthBar.value;
-            
-            // Smooth animation cho thanh máu
-            float newHealth = Mathf.Lerp(currentHealth, targetHealth, 
+            bossHealthBar.value = Mathf.Lerp(currentHealth, targetHealth,
                 healthBarAnimationSpeed * Time.deltaTime);
-            
-            bossHealthBar.value = newHealth;
         }
 
-        /// <summary>
-        /// Cập nhật tên giai đoạn
-        /// </summary>
         private void UpdatePhaseName()
         {
             if (phaseNameText == null || m_boss.currentPhase == null) return;
-
             phaseNameText.text = m_boss.currentPhase.phaseName;
         }
 
-        /// <summary>
-        /// Cập nhật text máu
-        /// </summary>
         private void UpdateHealthText()
         {
             if (healthText == null || m_boss.bossHealth == null) return;
-
             healthText.text = $"{m_boss.bossHealth.currentHealth} / {m_boss.bossHealth.initialHealth}";
         }
 
-        /// <summary>
-        /// Hiển thị/ẩn UI boss
-        /// </summary>
         public void SetBossUIVisible(bool visible)
         {
             m_isVisible = visible;
-            
             if (bossUIPanel != null)
-            {
                 bossUIPanel.SetActive(visible);
-            }
         }
 
-        /// <summary>
-        /// Hiển thị thông báo chuyển giai đoạn
-        /// </summary>
+        // ─────────────────────────────────────────────────────
+        // Notifications (Fade in/out bằng DOTween)
+        // ─────────────────────────────────────────────────────
         private void ShowPhaseTransitionNotification(int newPhase)
         {
             if (phaseTransitionText == null) return;
-
             string message = $"BOSS CHUYỂN SANG GIAI ĐOẠN {newPhase + 1}!";
             ShowNotification(phaseTransitionText, message);
         }
 
-        /// <summary>
-        /// Hiển thị thông báo kỹ năng đặc biệt
-        /// </summary>
         private void ShowSpecialAbilityNotification(string abilityName)
         {
             if (specialAbilityText == null) return;
-
             string message = $"BOSS SỬ DỤNG: {abilityName}!";
             ShowNotification(specialAbilityText, message);
         }
 
         /// <summary>
-        /// Hiển thị thông báo chung
+        /// Hiển thị text notification với fade in/out
         /// </summary>
         private void ShowNotification(TextMeshProUGUI textComponent, string message)
         {
             if (textComponent == null) return;
 
             textComponent.text = message;
+
+            // Reset alpha = 0 trước khi bật
+            var color = textComponent.color;
+            color.a = 0;
+            textComponent.color = color;
             textComponent.gameObject.SetActive(true);
 
-            // Tự động ẩn sau một khoảng thời gian
-            Invoke(nameof(HideNotification), notificationDuration);
+            // Hủy tween cũ nếu có
+            hideTween?.Kill();
+
+            // Fade in
+            textComponent.DOFade(1f, fadeDuration);
+
+            // Sau khi giữ notificationDuration, fade out rồi ẩn
+            hideTween = DOVirtual.DelayedCall(notificationDuration, () =>
+            {
+                textComponent.DOFade(0f, fadeDuration)
+                    .OnComplete(() => textComponent.gameObject.SetActive(false));
+            });
         }
 
-        /// <summary>
-        /// Ẩn thông báo
-        /// </summary>
-        private void HideNotification()
-        {
-            if (phaseTransitionText != null)
-                phaseTransitionText.gameObject.SetActive(false);
-            
-            if (specialAbilityText != null)
-                specialAbilityText.gameObject.SetActive(false);
-        }
-
+        // ─────────────────────────────────────────────────────
         // Event Handlers
+        // ─────────────────────────────────────────────────────
         private void OnBossPhaseStart(int phase)
         {
             Debug.Log($"Boss UI: Bắt đầu giai đoạn {phase + 1}");
@@ -218,19 +201,6 @@ namespace PLAYERTWO.PlatformerProject
         {
             Debug.Log("Boss UI: Boss đã bị đánh bại");
             SetBossUIVisible(false);
-        }
-
-        private void OnDestroy()
-        {
-            // Cleanup events
-            if (m_boss != null)
-            {
-                m_boss.OnBossPhaseStartEvent.RemoveListener(OnBossPhaseStart);
-                m_boss.OnSpecialAbilityUsedEvent.RemoveListener(OnSpecialAbilityUsed);
-                m_boss.bossHealth.OnPhaseChanged.RemoveListener(OnPhaseChanged);
-                m_boss.bossHealth.OnBossHealed.RemoveListener(OnBossHealed);
-                m_boss.bossHealth.OnBossDefeated.RemoveListener(OnBossDefeated);
-            }
         }
     }
 }
