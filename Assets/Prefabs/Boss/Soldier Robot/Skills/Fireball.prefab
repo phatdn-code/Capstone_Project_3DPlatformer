@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 3
-  speed: 12
+  speed: 20
   lifetime: 10
   collisionRadius: 1.9
   explosionRadius: 3

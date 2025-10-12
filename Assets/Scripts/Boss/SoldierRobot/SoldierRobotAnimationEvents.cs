@@ -27,13 +27,6 @@ namespace PLAYERTWO.PlatformerProject
         {
             Debug.Log($"🎬 SoldierRobotAnimationEvents Start() | GO: {gameObject.name}, Parent: {(transform.parent ? transform.parent.name : "null")}");
 
-            // SoldierRobot
-            if (soldierRobot == null)
-            {
-                soldierRobot = GetComponentInParent<SoldierRobot>();
-                Debug.Log($"🔍 SoldierRobot: {(soldierRobot != null ? "✅ Tìm thấy" : "❌ Null")}");
-            }
-
             // Animator
             if (bossAnimator == null)
             {
@@ -70,6 +63,14 @@ namespace PLAYERTWO.PlatformerProject
         {
             Debug.Log("🎯 OnFireballShoot()");
             soldierRobot?.CreateFireballFromAnimation();
+        }
+
+        /// <summary>
+        /// Gọi tại frame ra đòn trong animation cận chiến.
+        /// </summary>
+        public void OnMeleeHit()
+        {
+            soldierRobot?.ApplyMeleeDamageToPlayer();
         }
 
         /// <summary>Boss nhận damage.</summary>

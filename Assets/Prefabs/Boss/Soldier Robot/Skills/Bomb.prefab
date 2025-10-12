@@ -119,16 +119,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  throwForce: 18
+  throwForce: 12
   speedMultiplier: 1.5
   gravityDelay: 0.7
   aimOffset: 1.5
-  fuseTime: 2
+  fuseTime: 3
   warningTime: 2
   maxScale: 1.2
   pulseDuration: 1
   flashSpeed: 0.2
-  explosionRadius: 4
+  explosionRadius: 6
   explosionForce: 500
   bombRenderer: {fileID: 5209393269655260262}
   explosionEffect: {fileID: 180702, guid: a7c694f0877ea874fa57e033221095c3, type: 3}

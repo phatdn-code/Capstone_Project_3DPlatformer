@@ -1,5 +1,6 @@
-using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -100,16 +101,10 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         // PUBLIC API
         //─────────────────────────────────────────────
-        public void SetupFromPool(Player newTarget, float newThrowForce, int newDamage,
-                                  float newFuseTime, float newExplosionRadius, float newExplosionForce)
+        public void SetupFromPool(Player newTarget)
         {
             isFromPool = true;
             target = newTarget;
-            throwForce = newThrowForce;
-            damage = newDamage;
-            fuseTime = newFuseTime;
-            explosionRadius = newExplosionRadius;
-            explosionForce = newExplosionForce;
 
             ResetBombState();
 
@@ -119,9 +114,6 @@ namespace PLAYERTWO.PlatformerProject
             Invoke(nameof(EnableGravity), gravityDelay);
         }
 
-        /// <summary>
-        /// Kích hoạt nổ (logic + animation).
-        /// </summary>
         public void Explode()
         {
             if (hasExploded) return;
@@ -138,10 +130,6 @@ namespace PLAYERTWO.PlatformerProject
             ApplyExplosionForce();
         }
 
-        /// <summary>
-        /// Gọi từ animation event trong clip “Explode”.
-        /// Sinh hiệu ứng nổ và vô hiệu hóa bom.
-        /// </summary>
         public void OnExplosionEvent()
         {
             if (explosionEffect != null)

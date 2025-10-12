@@ -70,13 +70,12 @@ namespace PLAYERTWO.PlatformerProject
 		/// <param name="amount">The amount you want to decrease.</param>
 		public virtual void Damage(int amount)
 		{
-			if (!recovering)
-			{
-				current -= Mathf.Abs(amount);
-				m_lastDamageTime = Time.time;
-				onDamage?.Invoke();
-			}
-		}
+            if (recovering || isEmpty) return;
+
+            current -= Mathf.Abs(amount);
+            m_lastDamageTime = Time.time;
+            onDamage?.Invoke();
+        }
 
 		/// <summary>
 		/// Set the current health back to its initial value.

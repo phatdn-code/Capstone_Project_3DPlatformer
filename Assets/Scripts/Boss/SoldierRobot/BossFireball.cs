@@ -4,11 +4,9 @@ using UnityEngine;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Cầu lửa của boss (dùng pooling).
-    /// Khi trúng player hoặc tường:
-    /// - Hiển thị hit effect (particle).
-    /// - Gây sát thương lan trong bán kính nhỏ.
-    /// - Đẩy các player gần đó (explosionForce).
+    /// BossFireball — điều khiển cầu lửa của boss (dùng pooling).
+    /// Tự chứa toàn bộ thiết lập damage/speed/lifetime.
+    /// Gây sát thương lan & hiệu ứng khi trúng Player hoặc tường.
     /// </summary>
     [RequireComponent(typeof(Rigidbody), typeof(Collider))]
     public class BossFireball : MonoBehaviour
@@ -37,6 +35,7 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         private Rigidbody rb;
         private bool hasHit;
+        private Player target;
 
         //─────────────────────────────────────────────
         // UNITY LIFECYCLE
@@ -56,7 +55,6 @@ namespace PLAYERTWO.PlatformerProject
         private void Update()
         {
             if (hasHit) return;
-
             transform.Rotate(Vector3.up, 90f * Time.deltaTime);
             CheckCollision();
         }
@@ -70,18 +68,17 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         // PUBLIC API
         //─────────────────────────────────────────────
-        public void SetupFromPool(int dmg, float spd, float life)
+        /// <summary>
+        /// Setup từ Pool — chỉ cần truyền Player target.
+        /// Các thông số khác giữ nguyên trong prefab.
+        /// </summary>
+        public void SetupFromPool(Player newTarget)
         {
-            damage = dmg;
-            speed = spd;
-            lifetime = life;
-
+            target = newTarget;
             hasHit = false;
             ResetPhysics();
 
-            Vector3 dir = transform.forward;
-            dir.y = 0f;
-            dir.Normalize();
+            Vector3 dir = GetLaunchDirection();
             rb.linearVelocity = dir * speed;
 
             StopAllCoroutines();
@@ -90,8 +87,22 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // PHYSICS RESET
+        // INTERNAL HELPERS
         //─────────────────────────────────────────────
+        private Vector3 GetLaunchDirection()
+        {
+            if (target != null)
+            {
+                Vector3 direction = (target.transform.position - transform.position).normalized;
+                direction.y = 0;
+                return direction;
+            }
+
+            Vector3 fallback = transform.forward;
+            fallback.y = 0f;
+            return fallback.normalized;
+        }
+
         private void ResetPhysics()
         {
             if (rb == null) rb = GetComponent<Rigidbody>();
@@ -129,10 +140,7 @@ namespace PLAYERTWO.PlatformerProject
             if (hasHit) return;
             hasHit = true;
 
-            // 🔹 Hiệu ứng va chạm
             SpawnHitEffect();
-
-            // 🔹 Gây damage lan & lực đẩy
             DealExplosionDamage();
             ApplyExplosionForce();
 
@@ -197,7 +205,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // UTILITY
+        // CLEANUP
         //─────────────────────────────────────────────
         private void ResetForPool()
         {
