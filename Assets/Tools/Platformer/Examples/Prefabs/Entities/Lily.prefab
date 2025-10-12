@@ -587,6 +587,9 @@ MonoBehaviour:
     OnCrouchEnded:
       m_PersistentCalls:
         m_Calls: []
+    OnMovementModeChanged:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &5301077863286586920
 GameObject:
   m_ObjectHideFlags: 0
@@ -706,7 +709,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 09788b1b7db5d234b9412b193468fc85, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 09788b1b7db5d234b9412b193468fc85, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -985,6 +988,7 @@ MonoBehaviour:
   rotateToPlatforms: 1
   minSpeedToFall: 5
   maxCeilingAngle: 60
+  m_movingMode: 0
   playerEvents:
     OnJump:
       m_PersistentCalls:
@@ -1044,6 +1048,9 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     OnCrouchEnded:
+      m_PersistentCalls:
+        m_Calls: []
+    OnMovementModeChanged:
       m_PersistentCalls:
         m_Calls: []
   skin: {fileID: 7674229840038231450}
@@ -1235,7 +1242,7 @@ MonoBehaviour:
   grabRadius: 1
   grabLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 16375
 --- !u!114 &698857577358643038
 MonoBehaviour:
   m_ObjectHideFlags: 0
