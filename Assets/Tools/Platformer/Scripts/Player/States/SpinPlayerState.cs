@@ -7,11 +7,31 @@ namespace PLAYERTWO.PlatformerProject
 	{
 		protected override void OnEnter(Player player)
 		{
-			if (!player.isGrounded)
-			{
-				player.verticalVelocity = Vector3.up * player.stats.current.airSpinUpwardForce;
-			}
-		}
+            // Nếu spin trên không => tạo lực đẩy lên
+            if (!player.isGrounded)
+            {
+                player.verticalVelocity = Vector3.up * player.stats.current.airSpinUpwardForce;
+            }
+
+            // Gọi sự kiện Spin (âm thanh, hiệu ứng)
+            player.playerEvents.OnSpin.Invoke();
+
+            // 🌀 Kiểm tra bomb gần player trong bán kính 2m
+            Collider[] hits = Physics.OverlapSphere(player.transform.position, 2f);
+
+            foreach (var hit in hits)
+            {
+                if (hit.CompareTag("Bomb"))
+                {
+                    var bomb = hit.GetComponent<BossBomb>();
+                    if (bomb != null)
+                    {
+                        bomb.SendMessage("OnPlayerHitBomb", SendMessageOptions.DontRequireReceiver);
+                        Debug.Log("💥 Player đánh trúng bomb! Bomb bị phản ngược về boss!");
+                    }
+                }
+            }
+        }
 
 		protected override void OnExit(Player player) { }
 

@@ -14662,6 +14662,9 @@ MonoBehaviour:
     prefab: {fileID: 4562333978557035017, guid: abe93c3485300dc4bb1b6fe2d8ab69c4,
       type: 3}
     componentType: 
+  - poolSize: 10
+    prefab: {fileID: 188560, guid: 9c3b7f4ace8832b40abe6afe89fbcd91, type: 3}
+    componentType: 
 --- !u!4 &1623012071
 Transform:
   m_ObjectHideFlags: 0
@@ -19553,6 +19556,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SoldierRobot
+      objectReference: {fileID: 0}
+    - target: {fileID: 1554781757866288289, guid: b1de0c0a66518e846909001c8c4599d1,
+        type: 3}
+      propertyPath: m_TagString
+      value: Boss
       objectReference: {fileID: 0}
     - target: {fileID: 3435294661278983656, guid: b1de0c0a66518e846909001c8c4599d1,
         type: 3}

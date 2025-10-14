@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
-    /// <summary>
-    /// BossBomb — điều khiển bom: ném, fuse, nổ, pooling, animation event.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Animator))]
     public class BossBomb : MonoBehaviour
@@ -36,6 +33,13 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private SkinnedMeshRenderer bombRenderer;
         [SerializeField] private GameObject explosionEffect;
 
+        [Header("Reflect Settings")]
+        [SerializeField] private GameObject reflectHitEffect;   // particle khi player đánh trúng
+        [SerializeField] private GameObject stunEffect;         // hiệu ứng stun khi bị đánh
+        [SerializeField] private float stunDuration = 0.8f;     // thời gian hiển thị stun
+        [SerializeField] private float reflectArcHeight = 3f;   // độ cong quỹ đạo
+        [SerializeField] private float reflectDuration = 1.2f;  // thời gian bay phản
+
         //─────────────────────────────────────────────
         // RUNTIME FIELDS
         //─────────────────────────────────────────────
@@ -43,15 +47,12 @@ namespace PLAYERTWO.PlatformerProject
         private bool hasLanded;
         private bool fuseStarted;
         private bool isFromPool;
-
         private Rigidbody rb;
         private Animator animator;
         private Player target;
-
         private Material runtimeMat;
         private string colorProp;
         private Color originalColor;
-
         private Tween pulseTween;
         private Tween flashTween;
 
@@ -69,6 +70,10 @@ namespace PLAYERTWO.PlatformerProject
             SetupMaterialReference();
             if (!isFromPool)
                 SetupBombPhysics();
+
+            // 🔹 Luôn tắt stun effect lúc bắt đầu
+            if (stunEffect != null)
+                stunEffect.SetActive(false);
         }
 
         private void Update()
@@ -93,7 +98,6 @@ namespace PLAYERTWO.PlatformerProject
                 hasLanded = true;
                 rb.linearVelocity = Vector3.zero;
                 rb.isKinematic = true;
-
                 DoSquashAndStartFuse();
             }
         }
@@ -105,12 +109,10 @@ namespace PLAYERTWO.PlatformerProject
         {
             isFromPool = true;
             target = newTarget;
-
             ResetBombState();
 
             Vector3 dir = GetLaunchDirection();
             LaunchBomb(dir);
-
             Invoke(nameof(EnableGravity), gravityDelay);
         }
 
@@ -187,15 +189,67 @@ namespace PLAYERTWO.PlatformerProject
         private void DoFlashWarning()
         {
             flashTween?.Kill();
-
             flashTween = DOTween.To(
                 () => runtimeMat.GetColor(colorProp),
                 c => runtimeMat.SetColor(colorProp, c),
-                Color.red,
-                flashSpeed
-            )
-            .SetEase(Ease.InOutSine)
-            .SetLoops(-1, LoopType.Yoyo);
+                Color.red, flashSpeed)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo);
+        }
+
+        //─────────────────────────────────────────────
+        // REFLECT (PHẢN BOMB)
+        //─────────────────────────────────────────────
+        public void OnPlayerHitBomb()
+        {
+            if (hasExploded || !hasLanded) return;
+
+            Debug.Log("💥 Bomb bị player đánh trúng! Phản về boss!");
+
+            // Dừng fuse
+            CancelInvoke(nameof(Explode));
+            fuseStarted = false;
+
+            // Animation "TakeDown"
+            animator?.SetTrigger("TakeDown");
+
+            // Dừng vật lý
+            rb.isKinematic = true;
+            rb.useGravity = false;
+
+            // Particle va chạm
+            if (reflectHitEffect != null)
+            {
+                var fx = PoolManager.Instance.ReuseComponent(reflectHitEffect, transform.position, Quaternion.identity);
+                if (fx == null)
+                    Debug.LogWarning("⚠️ PoolManager chưa có pool cho reflectHitEffect!");
+            }
+
+            // 🔹 Hiệu ứng stun
+            if (stunEffect != null)
+                stunEffect.SetActive(true);
+
+            // Tìm boss
+            var boss = FindFirstObjectByType<SoldierRobot>();
+            if (boss == null)
+            {
+                Debug.LogWarning("⚠️ Không tìm thấy SoldierRobot để phản bomb!");
+                return;
+            }
+
+            // Bay cong về boss
+            Vector3 start = transform.position;
+            Vector3 end = boss.transform.position + Vector3.up * 1.5f;
+            Vector3 mid = (start + end) / 2f + Vector3.up * reflectArcHeight;
+
+            Sequence seq = DOTween.Sequence();
+            seq.Append(transform.DOPath(new Vector3[] { start, mid, end }, reflectDuration, PathType.CatmullRom)
+                .SetEase(Ease.InOutSine))
+                .OnComplete(() =>
+                {
+                    Debug.Log("💥 Bomb chạm boss! Kích nổ!");
+                    Explode();
+                });
         }
 
         //─────────────────────────────────────────────
@@ -203,39 +257,33 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         private void DealExplosionDamage()
         {
-            ForEachPlayerInRange((player, distance, col) =>
-            {
-                float multiplier = Mathf.Clamp01(1f - (distance / explosionRadius));
-                multiplier = Mathf.Max(multiplier, 0.1f);
-                int finalDamage = Mathf.RoundToInt(damage * multiplier);
+            HashSet<Player> damagedPlayers = new HashSet<Player>();
+            Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
 
-                player.ApplyDamage(finalDamage, transform.position);
-            });
+            foreach (var col in colliders)
+            {
+                if (col.CompareTag(GameTags.Player) && col.TryGetComponent<Player>(out var player))
+                {
+                    if (damagedPlayers.Contains(player)) continue;
+
+                    damagedPlayers.Add(player);
+                    player.ApplyDamage(damage, transform.position);
+                }
+            }
         }
 
         private void ApplyExplosionForce()
-        {
-            ForEachPlayerInRange((player, distance, col) =>
-            {
-                if (col.TryGetComponent<Rigidbody>(out var prb))
-                {
-                    Vector3 dir = (col.transform.position - transform.position).normalized;
-                    float forceMul = 1f - (distance / explosionRadius);
-                    prb.AddForce(dir * explosionForce * forceMul, ForceMode.Impulse);
-                }
-            });
-        }
-
-        private void ForEachPlayerInRange(System.Action<Player, float, Collider> action)
         {
             Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
             foreach (var c in colliders)
             {
                 if (!c.CompareTag(GameTags.Player)) continue;
-                if (c.TryGetComponent<Player>(out var player))
+
+                if (c.TryGetComponent<Rigidbody>(out var prb))
                 {
-                    float distance = Vector3.Distance(transform.position, c.transform.position);
-                    action?.Invoke(player, distance, c);
+                    Vector3 dir = (c.transform.position - transform.position).normalized;
+                    float forceMul = 1f - (Vector3.Distance(transform.position, c.transform.position) / explosionRadius);
+                    prb.AddForce(dir * explosionForce * forceMul, ForceMode.Impulse);
                 }
             }
         }
@@ -246,13 +294,12 @@ namespace PLAYERTWO.PlatformerProject
         private void SetupMaterialReference()
         {
             runtimeMat = bombRenderer.material;
-            colorProp = runtimeMat.HasProperty("_BaseColor") ? "_BaseColor" :
-                        runtimeMat.HasProperty("_Color") ? "_Color" :
-                        runtimeMat.HasProperty("_MainColor") ? "_MainColor" : null;
+            colorProp = runtimeMat.HasProperty("_BaseColor") ? "_BaseColor"
+                : runtimeMat.HasProperty("_Color") ? "_Color"
+                : runtimeMat.HasProperty("_MainColor") ? "_MainColor"
+                : null;
 
-            originalColor = colorProp != null
-                ? runtimeMat.GetColor(colorProp)
-                : Color.white;
+            originalColor = colorProp != null ? runtimeMat.GetColor(colorProp) : Color.white;
         }
 
         private void ResetBombState()
@@ -265,7 +312,6 @@ namespace PLAYERTWO.PlatformerProject
             rb.useGravity = false;
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-
             transform.localScale = Vector3.one;
 
             if (runtimeMat != null && colorProp != null)
@@ -273,6 +319,9 @@ namespace PLAYERTWO.PlatformerProject
 
             animator?.Rebind();
             CancelInvoke(nameof(Explode));
+
+            if (stunEffect != null)
+                stunEffect.SetActive(false);
         }
 
         private Vector3 GetLaunchDirection()
@@ -282,7 +331,6 @@ namespace PLAYERTWO.PlatformerProject
                 Vector3 offset = new(Random.Range(-aimOffset, aimOffset), 0, Random.Range(-aimOffset, aimOffset));
                 return (target.transform.position + offset - transform.position).normalized;
             }
-
             return (transform.forward + new Vector3(Random.Range(-0.3f, 0.3f), 0, Random.Range(-0.3f, 0.3f))).normalized;
         }
 
@@ -301,10 +349,8 @@ namespace PLAYERTWO.PlatformerProject
         {
             rb.isKinematic = false;
             rb.useGravity = true;
-
             Vector3 randomOffset = new(Random.Range(-0.5f, 0.5f), 0, Random.Range(-0.5f, 0.5f));
             Vector3 direction = (transform.forward + randomOffset).normalized;
-
             LaunchBomb(direction + Vector3.up * 0.6f);
         }
     }

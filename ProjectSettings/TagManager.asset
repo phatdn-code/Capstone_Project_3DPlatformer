@@ -19,6 +19,8 @@ TagManager:
   - Gravity Field
   - Ground
   - Wall
+  - Bomb
+  - Boss
   layers:
   - Default
   - TransparentFX
