@@ -12,29 +12,30 @@ namespace PLAYERTWO.PlatformerProject
     /// - Bắn cầu lửa.
     /// - Di chuyển ngẫu nhiên sau mỗi chu kỳ tấn công.
     /// </summary>
-    public class SoldierRobot : BaseBoss
+    [DisallowMultipleComponent]
+    public class SoldierRobot : BossCore
     {
         //─────────────────────────────────────────────
         #region === CÀI ĐẶT BOM ===
-        [field: Header("Bomb Settings")]
-        [field: SerializeField] public BossBomb BombPrefab { get; private set; }
-        [field: SerializeField] public Transform RightHandSpawnPoint { get; private set; }
-        [field: SerializeField] public Transform LeftHandSpawnPoint { get; private set; }
+        [Header("Bomb Settings")]
+        [SerializeField] private BossBomb bombPrefab;
+        [SerializeField] private Transform rightHandSpawnPoint;
+        [SerializeField] private Transform leftHandSpawnPoint;
         #endregion
 
         //─────────────────────────────────────────────
         #region === CÀI ĐẶT CẦU LỬA ===
-        [field: Header("Fireball Settings")]
-        [field: SerializeField] public BossFireball FireballPrefab { get; private set; }
-        [field: SerializeField] public Transform FireballSpawnPoint { get; private set; }
+        [Header("Fireball Settings")]
+        [SerializeField] private BossFireball fireballPrefab;
+        [SerializeField] private Transform fireballSpawnPoint;
         #endregion
 
         //─────────────────────────────────────────────
-        #region === CÀI ĐẶT CẬN CHIẾN ===
+        #region === CẬN CHIẾN ===
         [Header("Melee Attack Settings")]
-        [SerializeField] private float meleeRange = 3f;       // Phạm vi tấn công cận chiến
-        [SerializeField] private float meleeCooldown = 2f;    // Thời gian hồi chiêu
-        [SerializeField] private int meleeDamage = 10;        // Sát thương gây ra
+        [SerializeField] private float meleeRange = 3f;
+        [SerializeField] private float meleeCooldown = 2f;
+        [SerializeField] private int meleeDamage = 10;
         #endregion
 
         //─────────────────────────────────────────────
@@ -51,13 +52,10 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         //─────────────────────────────────────────────
-        #region === ANIMATION & HIỆU ỨNG ===
-        [field: Header("Animation")]
-        [field: SerializeField] public Animator SkinAnimator { get; private set; }
-
-        [field: Header("Effects")]
-        [field: SerializeField] public GameObject[] flashBombEffects { get; private set; } // [0] = tay trái, [1] = tay phải
-        [field: SerializeField] public GameObject flashFireballEffect { get; private set; }
+        #region === HIỆU ỨNG ===
+        [Header("Effects")]
+        [SerializeField] private GameObject[] flashBombEffects; // [0] = tay trái, [1] = tay phải
+        [SerializeField] private GameObject flashFireballEffect;
         #endregion
 
         //─────────────────────────────────────────────
@@ -70,6 +68,8 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === BIẾN TRẠNG THÁI ===
         private NavMeshAgent agent;
+        private BossAnimationBase anim;                
+        private SoldierRobotAnimation soldierAnim;
         private bool m_isInAttackSequence;
         private bool m_isMoving;
         private float m_originalSpeed;
@@ -78,8 +78,7 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         //─────────────────────────────────────────────
-        #region === VÒNG ĐỜI UNITY ===
-
+        #region === UNITY LIFECYCLE ===
         protected override void Start()
         {
             base.Start();
@@ -96,32 +95,29 @@ namespace PLAYERTWO.PlatformerProject
             if (player == null) return;
 
             float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-
             if (distanceToPlayer <= meleeRange && Time.time >= nextMeleeTime && !isMeleeAttacking)
                 StartCoroutine(PerformMeleeAttack());
         }
-
         #endregion
 
         //─────────────────────────────────────────────
         #region === KHỞI TẠO ===
-
-        /// <summary>Khởi tạo NavMeshAgent và lưu tốc độ ban đầu.</summary>
         private void InitializeComponents()
         {
+            anim = GetComponent<BossAnimationBase>();
             agent = GetComponent<NavMeshAgent>();
+            soldierAnim = anim as SoldierRobotAnimation;
+
             if (agent != null)
                 m_originalSpeed = agent.speed;
         }
 
-        /// <summary>Tìm Player trong scene nếu chưa được gán.</summary>
         private void InitializePlayer()
         {
             if (player == null && autoFindPlayer)
                 player = FindFirstObjectByType<Player>();
         }
 
-        /// <summary>Tắt tất cả hiệu ứng flash ngay khi bắt đầu game.</summary>
         private void DisableAllEffects()
         {
             if (flashBombEffects != null)
@@ -133,13 +129,10 @@ namespace PLAYERTWO.PlatformerProject
             if (flashFireballEffect != null)
                 flashFireballEffect.SetActive(false);
         }
-
         #endregion
 
         //─────────────────────────────────────────────
         #region === CẬN CHIẾN ===
-
-        /// <summary>Thực hiện chuỗi hành động tấn công cận chiến.</summary>
         private IEnumerator PerformMeleeAttack()
         {
             isMeleeAttacking = true;
@@ -148,11 +141,7 @@ namespace PLAYERTWO.PlatformerProject
             if (agent != null)
                 agent.isStopped = true;
 
-            yield return RotateTowardsPlayer(() =>
-            {
-                SkinAnimator?.SetTrigger("MeleeAttack");
-            });
-
+            yield return RotateTowardsPlayer(() => anim?.PlayMeleeAttack());
             yield return new WaitForSeconds(1f);
 
             if (agent != null)
@@ -161,7 +150,6 @@ namespace PLAYERTWO.PlatformerProject
             isMeleeAttacking = false;
         }
 
-        /// <summary>Gây sát thương khi animation đánh trúng player.</summary>
         public void ApplyMeleeDamageToPlayer()
         {
             if (player == null) return;
@@ -173,22 +161,17 @@ namespace PLAYERTWO.PlatformerProject
                 Debug.Log($"💥 Melee hit player for {meleeDamage} damage!");
             }
         }
-
         #endregion
 
         //─────────────────────────────────────────────
-        #region === TRÌNH TỰ TẤN CÔNG (AI LOOP) ===
-
-        /// <summary>Bắt đầu vòng tấn công (nếu chưa bắt đầu).</summary>
+        #region === TRÌNH TỰ TẤN CÔNG ===
         private void StartAttackSequence()
         {
             if (m_isInAttackSequence) return;
-
             m_isInAttackSequence = true;
             StartCoroutine(ExecuteAttackSequence());
         }
 
-        /// <summary>Chuỗi tấn công: ném bom → bắn cầu lửa → di chuyển.</summary>
         private IEnumerator ExecuteAttackSequence()
         {
             while (true)
@@ -214,60 +197,52 @@ namespace PLAYERTWO.PlatformerProject
                 yield return StartCoroutine(MoveToNewPosition());
             }
         }
-
         #endregion
 
         //─────────────────────────────────────────────
-        #region === TẤN CÔNG TẦM XA ===
-
-        /// <summary>Chuẩn bị hướng ném bom (tay trái hoặc tay phải).</summary>
+        #region === TẦM XA ===
         private void ShootBomb(bool useRightHand)
         {
             if (m_isMoving || isMeleeAttacking) return;
 
-            Transform spawnPoint = useRightHand ? RightHandSpawnPoint : LeftHandSpawnPoint;
+            Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null) return;
 
             StartCoroutine(RotateTowardsPlayer(() =>
             {
-                SkinAnimator?.SetTrigger(useRightHand ? "RightHandShoot" : "LeftHandShoot");
+                soldierAnim?.PlayShootBomb(useRightHand);
             }));
         }
 
-        /// <summary>Được gọi từ Animation Event để tạo quả bom thật.</summary>
         public void ShootBombFromAnimation(bool useRightHand)
         {
             if (m_isMoving) return;
 
-            Transform spawnPoint = useRightHand ? RightHandSpawnPoint : LeftHandSpawnPoint;
-            if (spawnPoint == null || BombPrefab == null) return;
+            Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
+            if (spawnPoint == null || bombPrefab == null) return;
 
             int index = useRightHand ? 1 : 0;
             if (flashBombEffects.Length > index && flashBombEffects[index] != null)
                 flashBombEffects[index].SetActive(true);
 
             BossBomb bomb = PoolManager.Instance.ReuseComponent(
-                BombPrefab.gameObject, spawnPoint.position, BombPrefab.transform.rotation)?.GetComponent<BossBomb>();
+                bombPrefab.gameObject, spawnPoint.position, bombPrefab.transform.rotation)?.GetComponent<BossBomb>();
 
             if (bomb != null && player != null)
-                bomb.SetupFromPool(player);
+                bomb.SetupFromPool(player, this);
         }
 
-        /// <summary>Chuẩn bị hướng bắn cầu lửa.</summary>
         private void ShootFireball()
         {
             if (m_isMoving || isMeleeAttacking) return;
-
-            StartCoroutine(RotateTowardsPlayer(() => SkinAnimator?.SetTrigger("FireballShoot")));
+            StartCoroutine(RotateTowardsPlayer(() => soldierAnim?.PlayFireballShoot()));
         }
 
-        /// <summary>Được gọi từ Animation Event để tạo cầu lửa thật.</summary>
         public void CreateFireballFromAnimation()
         {
-            if (m_isMoving || FireballPrefab == null || FireballSpawnPoint == null) return;
+            if (m_isMoving || fireballPrefab == null || fireballSpawnPoint == null) return;
 
             flashFireballEffect.SetActive(true);
-
             DOVirtual.DelayedCall(0.15f, () =>
             {
                 if (flashFireballEffect != null)
@@ -275,19 +250,16 @@ namespace PLAYERTWO.PlatformerProject
             });
 
             BossFireball fireball = PoolManager.Instance.ReuseComponent(
-                FireballPrefab.gameObject, FireballSpawnPoint.position, FireballSpawnPoint.rotation)
+                fireballPrefab.gameObject, fireballSpawnPoint.position, fireballSpawnPoint.rotation)
                 ?.GetComponent<BossFireball>();
 
             if (fireball != null && player != null)
                 fireball.SetupFromPool(player);
         }
-
         #endregion
 
         //─────────────────────────────────────────────
         #region === DI CHUYỂN ===
-
-        /// <summary>Boss di chuyển đến vị trí ngẫu nhiên trong phạm vi cho phép.</summary>
         private IEnumerator MoveToNewPosition()
         {
             if (m_isMoving) yield break;
@@ -298,13 +270,12 @@ namespace PLAYERTWO.PlatformerProject
 
             Vector3 newPosition = GetNewPosition();
             agent.SetDestination(newPosition);
-
-            SkinAnimator?.SetBool("isMoving", true);
+            anim?.SetMoving(true);
 
             while (agent.pathPending || agent.remainingDistance > 0.2f)
                 yield return null;
 
-            SkinAnimator?.SetBool("isMoving", false);
+            anim?.SetMoving(false);
             if (agent != null)
                 agent.speed = m_originalSpeed;
 
@@ -312,7 +283,6 @@ namespace PLAYERTWO.PlatformerProject
             m_isMoving = false;
         }
 
-        /// <summary>Lấy một vị trí hợp lệ ngẫu nhiên trong bán kính di chuyển.</summary>
         private Vector3 GetNewPosition()
         {
             Vector3 center = centerPoint != null ? centerPoint.position : transform.position;
@@ -323,7 +293,6 @@ namespace PLAYERTWO.PlatformerProject
                 : transform.position;
         }
 
-        /// <summary>Xoay boss hướng về phía player trước khi hành động.</summary>
         private IEnumerator RotateTowardsPlayer(System.Action onComplete = null)
         {
             if (player == null)
@@ -363,7 +332,9 @@ namespace PLAYERTWO.PlatformerProject
 
             onComplete?.Invoke();
         }
-
         #endregion
+
+        //─────────────────────────────────────────────
+        protected override void UpdateBossBehavior() { }
     }
 }

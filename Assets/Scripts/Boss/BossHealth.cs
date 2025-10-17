@@ -1,188 +1,146 @@
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
+using DG.Tweening;
+using System;
 
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Quản lý máu, phase và trạng thái sống/chết của boss.
-    /// Đây là component bắt buộc cho mọi boss.
+    /// Quản lý máu, phase, trạng thái sống/chết của Boss.
+    /// Gửi event cho UI & BossCore khi máu thay đổi hoặc boss bị hạ.
     /// </summary>
+    [DisallowMultipleComponent]
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Boss Health")]
     public class BossHealth : MonoBehaviour
     {
-        // ───────────────────────────────────────────────
-        // Serialized Fields
-        // ───────────────────────────────────────────────
-        [Header("Boss Health Settings")]
-        [Tooltip("Máu ban đầu của boss")]
-        public int initialHealth = 300;
+        //─────────────────────────────────────────────
+        #region === INSPECTOR FIELDS ===
 
-        [Tooltip("Thời gian chuyển giai đoạn (delay hồi phục)")]
-        public float phaseTransitionTime = 3f;
+        [Header("Health Settings")]
+        [SerializeField] private int m_maxHealth = 100;
+        [SerializeField] private int m_currentHealth = 100;
 
-        [Tooltip("Hiệu ứng hồi phục khi boss heal đầy máu")]
-        public GameObject healEffect;
+        [Header("State Flags")]
+        [SerializeField] public int currentPhase = 0;
+        [SerializeField] public bool isTransitioning = false;
+        [SerializeField] public bool isDead = false;
+
+        [Header("Renderers (for Flash Effect)")]
+        [SerializeField] private Renderer[] renderers;
+        [SerializeField] private float flashTime = 0.15f;
 
         [Header("Events")]
-        [Tooltip("Được gọi khi boss chuyển sang giai đoạn mới")]
-        public UnityEvent<int> OnPhaseChanged;
+        public UnityEvent<int> OnPhaseChanged = new UnityEvent<int>();
+        public UnityEvent OnBossHealed = new UnityEvent();
+        public UnityEvent OnBossDefeated = new UnityEvent();
+        public event Action<float> OnHealthChanged; // normalized [0..1]
 
-        [Tooltip("Được gọi khi boss hồi phục máu")]
-        public UnityEvent OnBossHealed;
+        #endregion
 
-        [Tooltip("Được gọi khi boss chết hoàn toàn")]
-        public UnityEvent OnBossDefeated;
+        //─────────────────────────────────────────────
+        #region === PRIVATE RUNTIME DATA ===
 
-        // ───────────────────────────────────────────────
-        // Private Fields
-        // ───────────────────────────────────────────────
-        private int m_currentHealth;
-        private int m_currentPhase = 0;
-        private bool m_isTransitioning = false;
-        private bool m_isDead = false;
+        private Color baseColor;
 
-        // ───────────────────────────────────────────────
-        // Properties
-        // ───────────────────────────────────────────────
+        #endregion
 
-        /// <summary> Máu hiện tại của boss (clamped trong [0, initialHealth]) </summary>
-        public int currentHealth
-        {
-            get => m_currentHealth;
-            private set
-            {
-                m_currentHealth = Mathf.Clamp(value, 0, initialHealth);
+        //─────────────────────────────────────────────
+        #region === UNITY LIFECYCLE ===
 
-                // Nếu máu về 0 và chưa chết -> xử lý chuyển phase
-                if (m_currentHealth <= 0 && !m_isDead)
-                    HandlePhaseTransition();
-            }
-        }
-
-        /// <summary> Giai đoạn hiện tại của boss (0, 1, 2) </summary>
-        public int currentPhase => m_currentPhase;
-
-        /// <summary> Boss đã chết hoàn toàn chưa </summary>
-        public bool isDead => m_isDead;
-
-        /// <summary> Boss có đang chuyển phase không </summary>
-        public bool isTransitioning => m_isTransitioning;
-
-        /// <summary> Tỷ lệ máu hiện tại (0–1) </summary>
-        public float healthPercentage => (float)currentHealth / initialHealth;
-
-        // ───────────────────────────────────────────────
-        // Unity Lifecycle
-        // ───────────────────────────────────────────────
-
-        /// <summary> Khi bắt đầu, thiết lập máu ban đầu </summary>
         private void Start()
         {
-            m_currentHealth = initialHealth;
+            // Lấy renderer nếu chưa gán trong Inspector
+            if (renderers == null || renderers.Length == 0)
+                renderers = GetComponentsInChildren<Renderer>();
+
+            if (renderers.Length > 0)
+                baseColor = renderers[0].material.color;
         }
 
-        // ───────────────────────────────────────────────
-        // Public Methods
-        // ───────────────────────────────────────────────
+        #endregion
 
-        /// <summary>
-        /// Gây sát thương cho boss.
-        /// Nếu boss đang chết hoặc đang chuyển phase thì bỏ qua.
-        /// </summary>
-        public void TakeDamage(int damage)
+        //─────────────────────────────────────────────
+        #region === INITIALIZATION ===
+
+        /// <summary>Gán controller chính cho BossHealth.</summary>
+
+        /// <summary>Khởi tạo lại thông tin phase mới.</summary>
+        public void InitializePhase(int phaseIndex, int phaseMaxHealth)
         {
-            if (m_isDead || m_isTransitioning) return;
+            isTransitioning = true;
+            currentPhase = phaseIndex;
 
-            currentHealth -= damage;
-            Debug.Log($"Boss nhận {damage} sát thương. Máu còn lại: {currentHealth}");
-        }
+            m_maxHealth = Mathf.Max(1, phaseMaxHealth);
+            m_currentHealth = m_maxHealth;
+            isDead = false;
 
-        /// <summary>
-        /// Hồi một lượng máu cho boss (gọi event OnBossHealed).
-        /// </summary>
-        public void Heal(int amount)
-        {
-            if (m_isDead) return;
-
-            currentHealth += amount;
+            // Gửi event
+            OnHealthChanged?.Invoke(1f);
             OnBossHealed?.Invoke();
+            OnPhaseChanged?.Invoke(currentPhase);
 
-            if (healEffect != null)
-                Instantiate(healEffect, transform.position, Quaternion.identity);
+            isTransitioning = false;
         }
 
-        /// <summary>
-        /// Hồi phục toàn bộ máu (full heal).
-        /// </summary>
-        public void FullHeal()
-        {
-            currentHealth = initialHealth;
-            OnBossHealed?.Invoke();
-        }
+        #endregion
 
-        /// <summary>
-        /// Reset boss về trạng thái ban đầu (máu, phase, trạng thái sống).
-        /// </summary>
-        public void ResetBoss()
-        {
-            m_currentHealth = initialHealth;
-            m_currentPhase = 0;
-            m_isDead = false;
-            m_isTransitioning = false;
-        }
+        //─────────────────────────────────────────────
+        #region === PROPERTIES ===
 
-        // ───────────────────────────────────────────────
-        // Private Logic
-        // ───────────────────────────────────────────────
+        public int MaxHealth => m_maxHealth;
+        public int CurrentHealth => m_currentHealth;
+        public float HealthPercentage => m_maxHealth > 0 ? (float)m_currentHealth / m_maxHealth : 0f;
 
-        /// <summary>
-        /// Xử lý khi boss hết máu ở một phase.
-        /// Nếu đã qua tất cả phase → DefeatBoss().
-        /// Ngược lại → bắt đầu coroutine chuyển phase.
-        /// </summary>
-        private void HandlePhaseTransition()
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === HEALTH OPERATIONS ===
+
+        /// <summary>Boss nhận sát thương.</summary>
+        public void TakeDamage(int amount)
         {
-            if (m_currentPhase >= 2) // 0,1,2 = 3 phase
+            if (isDead || isTransitioning) return;
+
+            m_currentHealth = Mathf.Clamp(m_currentHealth - Mathf.Max(0, amount), 0, m_maxHealth);
+            OnHealthChanged?.Invoke(HealthPercentage);
+            Flash();
+
+            if (m_currentHealth <= 0)
             {
-                DefeatBoss();
-                return;
+                isDead = true;
+                OnBossDefeated?.Invoke(); // BossCore sẽ xử lý chuyển phase
             }
-
-            StartCoroutine(TransitionToNextPhase());
         }
 
-        /// <summary>
-        /// Coroutine chuyển sang giai đoạn tiếp theo:
-        /// - Tạm dừng (isTransitioning = true).
-        /// - Đợi một khoảng (phaseTransitionTime).
-        /// - Hồi full máu.
-        /// - Kích hoạt event OnPhaseChanged.
-        /// </summary>
-        private IEnumerator TransitionToNextPhase()
+        /// <summary>Hồi máu đầy và cập nhật max health mới.</summary>
+        public void FullHealTo(int newMax)
         {
-            m_isTransitioning = true;
-            m_currentPhase++;
+            m_maxHealth = Mathf.Max(1, newMax);
+            m_currentHealth = m_maxHealth;
+            isDead = false;
 
-            Debug.Log($"Boss chuyển sang giai đoạn {m_currentPhase + 1}!");
-
-            yield return new WaitForSeconds(phaseTransitionTime);
-
-            FullHeal();
-            m_isTransitioning = false;
-
-            OnPhaseChanged?.Invoke(m_currentPhase);
+            OnHealthChanged?.Invoke(1f);
+            OnBossHealed?.Invoke();
         }
 
-        /// <summary>
-        /// Đánh bại boss hoàn toàn.
-        /// Gọi event OnBossDefeated và đánh dấu isDead = true.
-        /// </summary>
-        private void DefeatBoss()
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === VISUAL FEEDBACK ===
+
+        /// <summary>Hiệu ứng flash khi boss bị trúng đòn.</summary>
+        private void Flash()
         {
-            m_isDead = true;
-            OnBossDefeated?.Invoke();
-            Debug.Log("Boss đã bị đánh bại hoàn toàn!");
+            if (renderers == null || renderers.Length == 0) return;
+
+            foreach (var r in renderers)
+            {
+                var mat = r.material;
+                mat.DOColor(Color.red, flashTime * 0.5f)
+                   .OnComplete(() => mat.DOColor(baseColor, flashTime * 0.5f));
+            }
         }
+
+        #endregion
     }
 }

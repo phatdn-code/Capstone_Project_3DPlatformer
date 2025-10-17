@@ -5,7 +5,6 @@ namespace PLAYERTWO.PlatformerProject
 	[RequireComponent(typeof(EnemyStatsManager))]
 	[RequireComponent(typeof(EnemyStateManager))]
 	[RequireComponent(typeof(WaypointManager))]
-	[RequireComponent(typeof(Health))]
 	[AddComponentMenu("PLAYER TWO/Platformer Project/Enemy/Enemy")]
 	public class Enemy : Entity<Enemy>
 	{

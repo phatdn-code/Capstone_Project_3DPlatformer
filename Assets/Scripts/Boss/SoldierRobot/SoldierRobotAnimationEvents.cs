@@ -9,138 +9,90 @@ namespace PLAYERTWO.PlatformerProject
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Soldier Robot Animation Events")]
     public class SoldierRobotAnimationEvents : MonoBehaviour
     {
-        // ─────────────────────────────────────────────
-        // References
-        [Header("Animation Events")]
-        [Tooltip("Soldier Robot component")]
+        //─────────────────────────────────────────────
+        [Header("References")]
+        [Tooltip("Tham chiếu đến SoldierRobot (logic gameplay).")]
         [SerializeField] private SoldierRobot soldierRobot;
 
-        [Tooltip("Animator của boss")]
+        [Tooltip("Tham chiếu đến SoldierRobotAnimation (điều khiển Animator).")]
+        [SerializeField] private SoldierRobotAnimation soldierAnim;
+
         private Animator bossAnimator;
 
-        // ─────────────────────────────────────────────
-        // Unity Lifecycle
-        /// <summary>
-        /// Khởi tạo SoldierRobot & Animator khi bắt đầu.
-        /// </summary>
+        //─────────────────────────────────────────────
         private void Start()
         {
-            Debug.Log($"🎬 SoldierRobotAnimationEvents Start() | GO: {gameObject.name}, Parent: {(transform.parent ? transform.parent.name : "null")}");
+            // Tự tìm component nếu chưa được gán trong Inspector
+            if (soldierRobot == null)
+                soldierRobot = GetComponentInParent<SoldierRobot>();
 
-            // Animator
+            if (soldierAnim == null)
+                soldierAnim = GetComponentInParent<SoldierRobotAnimation>();
+
+            // Lấy Animator trực tiếp từ SoldierRobotAnimation
+            if (bossAnimator == null && soldierAnim != null)
+                bossAnimator = soldierAnim.GetAnimator();
+
             if (bossAnimator == null)
-            {
-                bossAnimator = soldierRobot?.SkinAnimator ?? GetComponent<Animator>();
-                Debug.Log($"🔍 Animator: {(bossAnimator != null ? "✅ Tìm thấy" : "❌ Null")}");
-            }
+                bossAnimator = GetComponent<Animator>();
+
+#if UNITY_EDITOR
+            Debug.Log($"🎬 SoldierRobotAnimationEvents khởi tạo | Animator: {(bossAnimator ? "✅ Có" : "❌ Null")}");
+#endif
         }
 
-        // ─────────────────────────────────────────────
+        //─────────────────────────────────────────────
         // Animation Event Callbacks
-        /// <summary>Bắn bom từ tay phải (gọi từ clip animation).</summary>
-        public void OnRightHandShoot()
-        {
-            Debug.Log("🎯 OnRightHandShoot()");
-            soldierRobot?.ShootBombFromAnimation(true);
-        }
 
-        /// <summary>Bắn bom từ tay trái (gọi từ clip animation).</summary>
-        public void OnLeftHandShoot()
-        {
-            Debug.Log("🎯 OnLeftHandShoot()");
-            soldierRobot?.ShootBombFromAnimation(false);
-        }
+        public void OnRightHandShoot() => soldierRobot?.ShootBombFromAnimation(true);
+        public void OnLeftHandShoot() => soldierRobot?.ShootBombFromAnimation(false);
+        public void OnFireballShoot() => soldierRobot?.CreateFireballFromAnimation();
+        public void OnMeleeHit() => soldierRobot?.ApplyMeleeDamageToPlayer();
 
-        /// <summary>Bắt đầu animation bắn (có thể thêm hiệu ứng).</summary>
-        public void OnShootStart()
-        {
-            Debug.Log("Animation Event: Bắt đầu animation bắn");
-            PlayShootSound();
-        }
+        public void OnDamageTaken() => PlayDamageSound();
+        public void OnPhaseTransition() => PlayPhaseTransitionEffect();
+        public void OnBossDeath() => PlayDeathEffect();
 
-        /// <summary>Bắn cầu lửa (gọi từ clip animation).</summary>
-        public void OnFireballShoot()
-        {
-            Debug.Log("🎯 OnFireballShoot()");
-            soldierRobot?.CreateFireballFromAnimation();
-        }
+        //─────────────────────────────────────────────
+        // Helpers (stub)
+        private void PlayShootSound() { /* TODO: âm thanh bắn */ }
+        private void PlayDamageSound() { /* TODO: âm thanh trúng */ }
+        private void PlayPhaseTransitionEffect() { /* TODO: hiệu ứng chuyển phase */ }
+        private void PlayDeathEffect() { /* TODO: hiệu ứng chết */ }
 
-        /// <summary>
-        /// Gọi tại frame ra đòn trong animation cận chiến.
-        /// </summary>
-        public void OnMeleeHit()
-        {
-            soldierRobot?.ApplyMeleeDamageToPlayer();
-        }
-
-        /// <summary>Boss nhận damage.</summary>
-        public void OnDamageTaken()
-        {
-            Debug.Log("Animation Event: Boss nhận sát thương");
-            PlayDamageSound();
-        }
-
-        /// <summary>Boss chuyển phase (transition).</summary>
-        public void OnPhaseTransition()
-        {
-            Debug.Log("Animation Event: Boss chuyển giai đoạn");
-            PlayPhaseTransitionEffect();
-        }
-
-        /// <summary>Boss chết.</summary>
-        public void OnBossDeath()
-        {
-            Debug.Log("Animation Event: Boss chết");
-            PlayDeathEffect();
-        }
-
-        // ─────────────────────────────────────────────
-        // Helpers
-
-        private void PlayShootSound() { /* TODO: Thêm âm thanh bắn bom */ }
-        private void PlayDamageSound() { /* TODO: Âm thanh damage */ }
-        private void PlayPhaseTransitionEffect() { /* TODO: Hiệu ứng chuyển phase */ }
-        private void PlayDeathEffect() { /* TODO: Hiệu ứng chết */ }
-
-        /// <summary>Kích hoạt trigger animation từ code.</summary>
+        //─────────────────────────────────────────────
+        // Utility Methods
         public void TriggerAnimation(string animationName)
         {
             if (bossAnimator != null)
             {
                 bossAnimator.SetTrigger(animationName);
+#if UNITY_EDITOR
                 Debug.Log($"🎬 Trigger animation: {animationName}");
+#endif
             }
-
-            else Debug.LogError($"❌ Animator null, không trigger được {animationName}");
+            else Debug.LogWarning($"❌ Không tìm thấy Animator khi trigger {animationName}");
         }
 
-        /// <summary>In ra thông tin debug về animator.</summary>
         public void DebugAnimationState()
         {
-            if (bossAnimator != null)
+            if (bossAnimator == null)
             {
-                var state = bossAnimator.GetCurrentAnimatorStateInfo(0);
-                Debug.Log($"🎬 State Hash: {state.shortNameHash}, Speed: {bossAnimator.speed}, Enabled: {bossAnimator.enabled}");
+                Debug.LogWarning("❌ Animator null - không thể debug");
+                return;
             }
 
-            else Debug.LogError("❌ Animator null - không thể debug");
+            var state = bossAnimator.GetCurrentAnimatorStateInfo(0);
+            Debug.Log($"🎬 State Hash: {state.shortNameHash}, Speed: {bossAnimator.speed}, Enabled: {bossAnimator.enabled}");
         }
 
-        /// <summary>Set parameter float cho animator.</summary>
-        public void SetAnimationParameter(string parameterName, float value)
-        {
-            bossAnimator?.SetFloat(parameterName, value);
-        }
+        public void SetAnimationParameter(string name, float value) => bossAnimator?.SetFloat(name, value);
+        public void SetAnimationParameter(string name, bool value) => bossAnimator?.SetBool(name, value);
 
-        /// <summary>Set parameter bool cho animator.</summary>
-        public void SetAnimationParameter(string parameterName, bool value)
-        {
-            bossAnimator?.SetBool(parameterName, value);
-        }
-
-        // ─────────────────────────────────────────────
+        //─────────────────────────────────────────────
         // Public Setters
-        public void SetSoldierRobot(SoldierRobot newSoldierRobot) => soldierRobot = newSoldierRobot;
+        public void SetSoldierRobot(SoldierRobot newRobot) => soldierRobot = newRobot;
+        public void SetSoldierAnim(SoldierRobotAnimation newAnim) => soldierAnim = newAnim;
         public void SetBossAnimator(Animator newAnimator) => bossAnimator = newAnimator;
     }
 }

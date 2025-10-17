@@ -10,9 +10,9 @@ namespace PLAYERTWO.PlatformerProject
     {
         //─────────────────────────────────────────────
         // INSPECTOR FIELDS
-        //─────────────────────────────────────────────
         [Header("Bomb Settings")]
-        [SerializeField] private int damage = 20;
+        [SerializeField] private int playerDamage = 1;      // Damage gây cho Player
+        [SerializeField] private int bossDamage = 10;       // Damage gây cho Boss khi bị phản
         [SerializeField] private float throwForce = 12f;
         [SerializeField] private float speedMultiplier = 1.5f;
         [SerializeField] private float gravityDelay = 0.7f;
@@ -22,31 +22,34 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float fuseTime = 3f;
         [SerializeField] private float warningTime = 2f;
 
-        [Header("Animation Settings (DOTween)")]
-        [SerializeField] private float maxScale = 1.2f;
-        [SerializeField] private float pulseDuration = 1f;
-        [SerializeField] private float flashSpeed = 0.2f;
-
         [Header("Explosion Settings")]
         [SerializeField] private float explosionRadius = 6f;
         [SerializeField] private float explosionForce = 500f;
         [SerializeField] private SkinnedMeshRenderer bombRenderer;
         [SerializeField] private GameObject explosionEffect;
+        [SerializeField] private GameObject explosionBossEffect;
 
         [Header("Reflect Settings")]
-        [SerializeField] private GameObject reflectHitEffect;   // particle khi player đánh trúng
-        [SerializeField] private GameObject stunEffect;         // hiệu ứng stun khi bị đánh
-        [SerializeField] private float stunDuration = 0.8f;     // thời gian hiển thị stun
-        [SerializeField] private float reflectArcHeight = 3f;   // độ cong quỹ đạo
-        [SerializeField] private float reflectDuration = 1.2f;  // thời gian bay phản
+        [SerializeField] private GameObject reflectHitEffect;
+        [SerializeField] private GameObject stunEffect;
+        [SerializeField] private float stunDuration = 0.8f;
+        [SerializeField] private float reflectArcHeight = 3f;
+        [SerializeField] private float reflectDuration = 1.2f;
+
+        [Header("Animation Settings (DOTween)")]
+        [SerializeField] private float maxScale = 1.2f;
+        [SerializeField] private float pulseDuration = 1f;
+        [SerializeField] private float flashSpeed = 0.2f;
 
         //─────────────────────────────────────────────
-        // RUNTIME FIELDS
-        //─────────────────────────────────────────────
+        // RUNTIME
         private bool hasExploded;
         private bool hasLanded;
         private bool fuseStarted;
         private bool isFromPool;
+        private bool isReflected;
+
+        private SoldierRobot ownerBoss;
         private Rigidbody rb;
         private Animator animator;
         private Player target;
@@ -58,7 +61,6 @@ namespace PLAYERTWO.PlatformerProject
 
         //─────────────────────────────────────────────
         // UNITY LIFECYCLE
-        //─────────────────────────────────────────────
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
@@ -71,7 +73,6 @@ namespace PLAYERTWO.PlatformerProject
             if (!isFromPool)
                 SetupBombPhysics();
 
-            // 🔹 Luôn tắt stun effect lúc bắt đầu
             if (stunEffect != null)
                 stunEffect.SetActive(false);
         }
@@ -93,6 +94,7 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (hasLanded || hasExploded) return;
 
+            // 🔹 Khi bomb rơi xuống đất
             if (collision.gameObject.CompareTag("Ground"))
             {
                 hasLanded = true;
@@ -100,15 +102,19 @@ namespace PLAYERTWO.PlatformerProject
                 rb.isKinematic = true;
                 DoSquashAndStartFuse();
             }
+
+            // 🔹 Nếu bomb đụng boss -> nổ ngay
+            if (collision.gameObject.TryGetComponent<SoldierRobot>(out var boss))
+                OnHitBoss(boss);
         }
 
         //─────────────────────────────────────────────
-        // PUBLIC API
-        //─────────────────────────────────────────────
-        public void SetupFromPool(Player newTarget)
+        // SETUP
+        public void SetupFromPool(Player newTarget, SoldierRobot boss)
         {
             isFromPool = true;
             target = newTarget;
+            ownerBoss = boss;
             ResetBombState();
 
             Vector3 dir = GetLaunchDirection();
@@ -116,38 +122,42 @@ namespace PLAYERTWO.PlatformerProject
             Invoke(nameof(EnableGravity), gravityDelay);
         }
 
-        public void Explode()
+        private void SetupMaterialReference()
         {
-            if (hasExploded) return;
-            hasExploded = true;
+            runtimeMat = bombRenderer.material;
+            colorProp = runtimeMat.HasProperty("_BaseColor") ? "_BaseColor"
+                : runtimeMat.HasProperty("_Color") ? "_Color"
+                : runtimeMat.HasProperty("_MainColor") ? "_MainColor"
+                : null;
 
-            pulseTween?.Kill();
-            flashTween?.Kill();
+            originalColor = colorProp != null ? runtimeMat.GetColor(colorProp) : Color.white;
+        }
+
+        private void ResetBombState()
+        {
+            hasExploded = false;
+            hasLanded = false;
+            fuseStarted = false;
+            isReflected = false;
+
+            rb.isKinematic = false;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            transform.localScale = Vector3.one;
 
             if (runtimeMat != null && colorProp != null)
                 runtimeMat.SetColor(colorProp, originalColor);
 
-            animator?.SetTrigger("Explode");
-            DealExplosionDamage();
-            ApplyExplosionForce();
-        }
+            animator?.Rebind();
+            CancelInvoke(nameof(Explode));
 
-        public void OnExplosionEvent()
-        {
-            if (explosionEffect != null)
-            {
-                var pooled = PoolManager.Instance.ReuseComponent(explosionEffect, transform.position, Quaternion.identity);
-                if (pooled == null)
-                    Debug.LogWarning("⚠️ PoolManager chưa có pool cho explosionEffect!");
-            }
-
-            if (isFromPool)
-                gameObject.SetActive(false);
+            if (stunEffect != null)
+                stunEffect.SetActive(false);
         }
 
         //─────────────────────────────────────────────
         // FUSE & WARNING LOGIC
-        //─────────────────────────────────────────────
         private void DoSquashAndStartFuse()
         {
             transform.DOScale(new Vector3(1.4f, 0.8f, 1.4f), 0.15f)
@@ -199,45 +209,35 @@ namespace PLAYERTWO.PlatformerProject
 
         //─────────────────────────────────────────────
         // REFLECT (PHẢN BOMB)
-        //─────────────────────────────────────────────
         public void OnPlayerHitBomb()
         {
             if (hasExploded || !hasLanded) return;
 
             Debug.Log("💥 Bomb bị player đánh trúng! Phản về boss!");
+            isReflected = true;
 
-            // Dừng fuse
             CancelInvoke(nameof(Explode));
             fuseStarted = false;
 
-            // Animation "TakeDown"
             animator?.SetTrigger("TakeDown");
-
-            // Dừng vật lý
             rb.isKinematic = true;
             rb.useGravity = false;
 
-            // Particle va chạm
             if (reflectHitEffect != null)
-            {
-                var fx = PoolManager.Instance.ReuseComponent(reflectHitEffect, transform.position, Quaternion.identity);
-                if (fx == null)
-                    Debug.LogWarning("⚠️ PoolManager chưa có pool cho reflectHitEffect!");
-            }
+                PoolManager.Instance.ReuseComponent(reflectHitEffect, transform.position, Quaternion.identity);
 
-            // 🔹 Hiệu ứng stun
             if (stunEffect != null)
                 stunEffect.SetActive(true);
 
-            // Tìm boss
-            var boss = FindFirstObjectByType<SoldierRobot>();
+            var boss = ownerBoss;
+
             if (boss == null)
             {
                 Debug.LogWarning("⚠️ Không tìm thấy SoldierRobot để phản bomb!");
                 return;
             }
 
-            // Bay cong về boss
+            // Quỹ đạo bay cong về boss
             Vector3 start = transform.position;
             Vector3 end = boss.transform.position + Vector3.up * 1.5f;
             Vector3 mid = (start + end) / 2f + Vector3.up * reflectArcHeight;
@@ -247,16 +247,57 @@ namespace PLAYERTWO.PlatformerProject
                 .SetEase(Ease.InOutSine))
                 .OnComplete(() =>
                 {
-                    Debug.Log("💥 Bomb chạm boss! Kích nổ!");
-                    Explode();
+                    OnHitBoss(boss);
                 });
+        }
+
+        private void OnHitBoss(SoldierRobot boss)
+        {
+            if (hasExploded) return;
+
+            if (boss.TryGetComponent<BossHealth>(out var bossHealth))
+            {
+                bossHealth.TakeDamage(bossDamage);
+                Debug.Log($"💥 Bomb phản trúng Boss, gây {bossDamage} sát thương!");
+            }
+
+            if (explosionBossEffect != null)
+                PoolManager.Instance.ReuseComponent(explosionBossEffect, transform.position, Quaternion.identity);
+
+            Explode();
         }
 
         //─────────────────────────────────────────────
         // EXPLOSION LOGIC
-        //─────────────────────────────────────────────
+        public void Explode()
+        {
+            if (hasExploded) return;
+            hasExploded = true;
+
+            pulseTween?.Kill();
+            flashTween?.Kill();
+
+            if (runtimeMat != null && colorProp != null)
+                runtimeMat.SetColor(colorProp, originalColor);
+
+            animator?.SetTrigger("Explode");
+            DealExplosionDamage();
+            ApplyExplosionForce();
+        }
+
+        public void OnExplosionEvent()
+        {
+            if (explosionEffect != null && !isReflected)
+                PoolManager.Instance.ReuseComponent(explosionEffect, transform.position, Quaternion.identity);
+
+            if (isFromPool)
+                gameObject.SetActive(false);
+        }
+
         private void DealExplosionDamage()
         {
+            if (isReflected) return;
+
             HashSet<Player> damagedPlayers = new HashSet<Player>();
             Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
 
@@ -265,15 +306,16 @@ namespace PLAYERTWO.PlatformerProject
                 if (col.CompareTag(GameTags.Player) && col.TryGetComponent<Player>(out var player))
                 {
                     if (damagedPlayers.Contains(player)) continue;
-
                     damagedPlayers.Add(player);
-                    player.ApplyDamage(damage, transform.position);
+                    player.ApplyDamage(playerDamage, transform.position);
                 }
             }
         }
 
         private void ApplyExplosionForce()
         {
+            if (isReflected) return;
+
             Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
             foreach (var c in colliders)
             {
@@ -289,41 +331,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // INTERNAL HELPERS
-        //─────────────────────────────────────────────
-        private void SetupMaterialReference()
-        {
-            runtimeMat = bombRenderer.material;
-            colorProp = runtimeMat.HasProperty("_BaseColor") ? "_BaseColor"
-                : runtimeMat.HasProperty("_Color") ? "_Color"
-                : runtimeMat.HasProperty("_MainColor") ? "_MainColor"
-                : null;
-
-            originalColor = colorProp != null ? runtimeMat.GetColor(colorProp) : Color.white;
-        }
-
-        private void ResetBombState()
-        {
-            hasExploded = false;
-            hasLanded = false;
-            fuseStarted = false;
-
-            rb.isKinematic = false;
-            rb.useGravity = false;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            transform.localScale = Vector3.one;
-
-            if (runtimeMat != null && colorProp != null)
-                runtimeMat.SetColor(colorProp, originalColor);
-
-            animator?.Rebind();
-            CancelInvoke(nameof(Explode));
-
-            if (stunEffect != null)
-                stunEffect.SetActive(false);
-        }
-
+        // PHYSICS & LAUNCH HELPERS
         private Vector3 GetLaunchDirection()
         {
             if (target != null)
@@ -353,5 +361,17 @@ namespace PLAYERTWO.PlatformerProject
             Vector3 direction = (transform.forward + randomOffset).normalized;
             LaunchBomb(direction + Vector3.up * 0.6f);
         }
+
+        //─────────────────────────────────────────────
+        // GIZMOS DEBUG VISUALIZATION
+        //─────────────────────────────────────────────
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            // Vẽ phạm vi nổ (vàng)
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, explosionRadius);
+        }
+#endif
     }
 }
