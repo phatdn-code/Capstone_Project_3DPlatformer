@@ -177,5 +177,10 @@ namespace PLAYERTWO.PlatformerProject
 
 			m_otherActivator = collision.collider;
 		}
+
+		public void SetActivatedFalse()
+		{
+            activated = false;
+        }
 	}
 }

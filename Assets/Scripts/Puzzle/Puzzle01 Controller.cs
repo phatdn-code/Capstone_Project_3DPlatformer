@@ -1,29 +1,81 @@
-using PLAYERTWO.PlatformerProject;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class Puzzle01Controller : MonoBehaviour
+namespace PLAYERTWO.PlatformerProject
 {
-    [SerializeField] private GameObject[] puzzlePieces; // Array to hold references to puzzle piece GameObjects
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class Puzzle01Controller : MonoBehaviour
     {
-        
-    }
+        [SerializeField] private GameObject[] puzzlePieces; // Array to hold references to puzzle piece GameObjects
+        [SerializeField] private List<GameObject> puzzleInput = new List<GameObject>();// List to hold references to puzzle input GameObjects
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
-    public void ResetLog()
-    {
-        for (int i = 0; i < puzzlePieces.Length; i++)
+        [SerializeField] private GameObject keyObject;
+        [SerializeField] private GameObject hintObject;
+        [SerializeField] private Transform spawnPoint;
+
+
+        [SerializeField] private bool canReset = false;
+
+        public void AddPuzzle(GameObject piece)
         {
-            puzzlePieces[i].TryGetComponent<Mover>(out var mover);
-            mover.ResetMover();
+            puzzleInput.Add(piece);
+            canReset = true;
+        }
+
+
+        public void ButtonPress()
+        {
+            if (puzzleInput.Count >= puzzlePieces.Length)
+            {
+                Debug.Log($"puzzleInput ={puzzleInput.Count}, puzzlePieces length = {puzzlePieces.Length} ");
+                if (InCorrectOrder())
+                {
+                    Debug.Log("Puzzle completed in correct order!");
+                    SpawnTreasure();
+                    return;
+                }
+            }
+            ResetLog();
+        }
+        private bool InCorrectOrder()
+        {
+            return puzzlePieces.SequenceEqual(puzzleInput);
+        }
+
+        private void SpawnTreasure()
+        {
+            if (keyObject != null)
+            {
+                Instantiate(keyObject, spawnPoint.position, Quaternion.identity);
+            }
+            hintObject.SetActive(false);
+        }
+
+        public void ResetLog()
+        {
+            if (!canReset)
+            {
+                Debug.Log("Reset is locked ¡ª skipping reset.");
+                return;
+            }
+
+            foreach (var piece in puzzlePieces)
+            {
+                if (piece == null) continue;
+
+                if (piece.TryGetComponent(out Mover mover))
+                    mover.ResetMover();
+
+                if (piece.TryGetComponent(out Panel panel))
+                    panel.SetActivatedFalse();
+            }
+
+            puzzleInput.Clear();
+            canReset = false;
         }
     }
+
 }
