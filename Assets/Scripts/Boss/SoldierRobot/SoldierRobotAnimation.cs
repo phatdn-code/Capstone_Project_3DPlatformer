@@ -22,6 +22,11 @@ namespace PLAYERTWO.PlatformerProject
             animator?.SetTrigger("Shoot");
         }
 
+        public override void SetHealing(bool isRecharging)
+        {
+            animator?.SetBool("Recharging", isRecharging);
+        }
+
         // Ranged cụ thể: ném bom từ tay trái/phải
         public void PlayShootBomb(bool useRightHand)
         {

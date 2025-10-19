@@ -6,40 +6,36 @@ using DG.Tweening;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Điều khiển hành vi của boss SoldierRobot:
-    /// - Tấn công cận chiến khi ở gần.
-    /// - Ném bom (tay trái/phải).
-    /// - Bắn cầu lửa.
-    /// - Di chuyển ngẫu nhiên sau mỗi chu kỳ tấn công.
+    /// Controls the behavior of the SoldierRobot boss:
+    /// - Melee attacks when close to the player.
+    /// - Throws bombs (left/right hand).
+    /// - Shoots fireballs.
+    /// - Wanders around between attack sequences.
     /// </summary>
     [DisallowMultipleComponent]
     public class SoldierRobot : BossCore
     {
         //─────────────────────────────────────────────
-        #region === CÀI ĐẶT BOM ===
+        #region === INSPECTOR FIELDS ===
+
+        [Header("Player Reference")]
+        [SerializeField] private new Player player;
+        [SerializeField] private bool autoFindPlayer = true;
+
         [Header("Bomb Settings")]
         [SerializeField] private BossBomb bombPrefab;
         [SerializeField] private Transform rightHandSpawnPoint;
         [SerializeField] private Transform leftHandSpawnPoint;
-        #endregion
 
-        //─────────────────────────────────────────────
-        #region === CÀI ĐẶT CẦU LỬA ===
         [Header("Fireball Settings")]
         [SerializeField] private BossFireball fireballPrefab;
         [SerializeField] private Transform fireballSpawnPoint;
-        #endregion
 
-        //─────────────────────────────────────────────
-        #region === CẬN CHIẾN ===
         [Header("Melee Attack Settings")]
         [SerializeField] private float meleeRange = 3f;
         [SerializeField] private float meleeCooldown = 2f;
         [SerializeField] private int meleeDamage = 10;
-        #endregion
 
-        //─────────────────────────────────────────────
-        #region === DI CHUYỂN ===
         [Header("Movement Settings")]
         [SerializeField] private Transform centerPoint;
         [SerializeField] private float wanderRadius = 10f;
@@ -47,38 +43,35 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float movementSpeedMultiplier = 1.5f;
 
         [Header("Rotation Settings")]
+        [SerializeField] private Transform model;
         [SerializeField] private float rotationSpeed = 5f;
-        [SerializeField] private float rotationThreshold = 5f;
-        #endregion
 
-        //─────────────────────────────────────────────
-        #region === HIỆU ỨNG ===
-        [Header("Effects")]
-        [SerializeField] private GameObject[] flashBombEffects; // [0] = tay trái, [1] = tay phải
+        [Header("Visual Effects")]
+        [SerializeField] private GameObject[] flashBombEffects; // [0] = left, [1] = right
         [SerializeField] private GameObject flashFireballEffect;
+
         #endregion
 
         //─────────────────────────────────────────────
-        #region === NGƯỜI CHƠI ===
-        [Header("Player")]
-        [SerializeField] private new Player player;
-        [SerializeField] private bool autoFindPlayer = true;
-        #endregion
+        #region === RUNTIME VARIABLES ===
 
-        //─────────────────────────────────────────────
-        #region === BIẾN TRẠNG THÁI ===
         private NavMeshAgent agent;
-        private BossAnimationBase anim;                
         private SoldierRobotAnimation soldierAnim;
+        private Coroutine speedRoutine;
+
+        private bool isPaused;
+        private bool isMeleeAttacking;
         private bool m_isInAttackSequence;
         private bool m_isMoving;
-        private float m_originalSpeed;
-        private bool isMeleeAttacking;
+
         private float nextMeleeTime;
+        private float m_originalSpeed;
+
         #endregion
 
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
+
         protected override void Start()
         {
             base.Start();
@@ -92,21 +85,24 @@ namespace PLAYERTWO.PlatformerProject
         {
             base.Update();
 
-            if (player == null) return;
+            if (isPaused || player == null) return;
+
+            RotateTowardsMovementDirection();
 
             float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
             if (distanceToPlayer <= meleeRange && Time.time >= nextMeleeTime && !isMeleeAttacking)
                 StartCoroutine(PerformMeleeAttack());
         }
+
         #endregion
 
         //─────────────────────────────────────────────
-        #region === KHỞI TẠO ===
+        #region === INITIALIZATION ===
+
         private void InitializeComponents()
         {
-            anim = GetComponent<BossAnimationBase>();
             agent = GetComponent<NavMeshAgent>();
-            soldierAnim = anim as SoldierRobotAnimation;
+            soldierAnim = base.bossAnim as SoldierRobotAnimation;
 
             if (agent != null)
                 m_originalSpeed = agent.speed;
@@ -129,10 +125,31 @@ namespace PLAYERTWO.PlatformerProject
             if (flashFireballEffect != null)
                 flashFireballEffect.SetActive(false);
         }
+
         #endregion
 
         //─────────────────────────────────────────────
-        #region === CẬN CHIẾN ===
+        #region === PAUSE CONTROL ===
+
+        /// <summary>Pause or resume all boss activity (used during phase transitions).</summary>
+        public void SetPaused(bool pause)
+        {
+            isPaused = pause;
+
+            if (agent != null)
+                agent.isStopped = pause;
+
+            if (bossAnim != null)
+                bossAnim.SetMoving(false);
+        }
+
+        public bool IsPaused => isPaused;
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === MELEE ATTACK ===
+
         private IEnumerator PerformMeleeAttack()
         {
             isMeleeAttacking = true;
@@ -141,7 +158,7 @@ namespace PLAYERTWO.PlatformerProject
             if (agent != null)
                 agent.isStopped = true;
 
-            yield return RotateTowardsPlayer(() => anim?.PlayMeleeAttack());
+            yield return RotateTowardsPlayer(() => bossAnim?.PlayMeleeAttack());
             yield return new WaitForSeconds(1f);
 
             if (agent != null)
@@ -161,10 +178,12 @@ namespace PLAYERTWO.PlatformerProject
                 Debug.Log($"💥 Melee hit player for {meleeDamage} damage!");
             }
         }
+
         #endregion
 
         //─────────────────────────────────────────────
-        #region === TRÌNH TỰ TẤN CÔNG ===
+        #region === ATTACK SEQUENCE ===
+
         private void StartAttackSequence()
         {
             if (m_isInAttackSequence) return;
@@ -176,6 +195,12 @@ namespace PLAYERTWO.PlatformerProject
         {
             while (true)
             {
+                if (isPaused)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 if (!isMeleeAttacking)
                 {
                     ShootBomb(true);
@@ -197,13 +222,15 @@ namespace PLAYERTWO.PlatformerProject
                 yield return StartCoroutine(MoveToNewPosition());
             }
         }
+
         #endregion
 
         //─────────────────────────────────────────────
-        #region === TẦM XA ===
+        #region === RANGE ATTACKS ===
+
         private void ShootBomb(bool useRightHand)
         {
-            if (m_isMoving || isMeleeAttacking) return;
+            if (m_isMoving || isMeleeAttacking || isPaused) return;
 
             Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null) return;
@@ -216,7 +243,7 @@ namespace PLAYERTWO.PlatformerProject
 
         public void ShootBombFromAnimation(bool useRightHand)
         {
-            if (m_isMoving) return;
+            if (m_isMoving || isPaused) return;
 
             Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null || bombPrefab == null) return;
@@ -226,7 +253,8 @@ namespace PLAYERTWO.PlatformerProject
                 flashBombEffects[index].SetActive(true);
 
             BossBomb bomb = PoolManager.Instance.ReuseComponent(
-                bombPrefab.gameObject, spawnPoint.position, bombPrefab.transform.rotation)?.GetComponent<BossBomb>();
+                bombPrefab.gameObject, spawnPoint.position, bombPrefab.transform.rotation)
+                ?.GetComponent<BossBomb>();
 
             if (bomb != null && player != null)
                 bomb.SetupFromPool(player, this);
@@ -234,13 +262,13 @@ namespace PLAYERTWO.PlatformerProject
 
         private void ShootFireball()
         {
-            if (m_isMoving || isMeleeAttacking) return;
+            if (m_isMoving || isMeleeAttacking || isPaused) return;
             StartCoroutine(RotateTowardsPlayer(() => soldierAnim?.PlayFireballShoot()));
         }
 
         public void CreateFireballFromAnimation()
         {
-            if (m_isMoving || fireballPrefab == null || fireballSpawnPoint == null) return;
+            if (m_isMoving || fireballPrefab == null || fireballSpawnPoint == null || isPaused) return;
 
             flashFireballEffect.SetActive(true);
             DOVirtual.DelayedCall(0.15f, () =>
@@ -254,33 +282,67 @@ namespace PLAYERTWO.PlatformerProject
                 ?.GetComponent<BossFireball>();
 
             if (fireball != null && player != null)
-                fireball.SetupFromPool(player);
+                fireball.SetupFromPool(player, this);
         }
+
+        #endregion
+
+        #region === ANIMATION CONTROL ===
+
+        /// <summary>
+        /// Bật/tắt animation sạc năng lượng (SetBool "IsRecharging").
+        /// </summary>
+        public void PlayRechargeAnimation(bool isRecharging)
+        {
+            soldierAnim?.SetHealing(isRecharging);
+        }
+
         #endregion
 
         //─────────────────────────────────────────────
-        #region === DI CHUYỂN ===
+        #region === MOVEMENT ===
+
+        private IEnumerator MoveAndRotateToPosition(Vector3 destination, bool restoreSpeed = true)
+        {
+            if (agent == null) yield break;
+
+            m_isMoving = true;
+            bossAnim?.SetMoving(true);
+            agent.isStopped = false;
+            agent.SetDestination(destination);
+
+            while (agent.pathPending || agent.remainingDistance > 0.3f)
+            {
+                if (agent.desiredVelocity.sqrMagnitude > 0.1f)
+                    yield return RotateTowards(agent.desiredVelocity);
+
+                yield return null;
+            }
+
+            bossAnim?.SetMoving(false);
+            agent.isStopped = true;
+            if (restoreSpeed) agent.speed = m_originalSpeed;
+            m_isMoving = false;
+
+            yield return RotateTowards(destination - model.position);
+        }
+
+        public IEnumerator MoveToTarget(Transform target)
+        {
+            if (target == null) yield break;
+            yield return MoveAndRotateToPosition(target.position);
+        }
+
         private IEnumerator MoveToNewPosition()
         {
-            if (m_isMoving) yield break;
-            m_isMoving = true;
+            if (m_isMoving || isPaused) yield break;
 
             if (agent != null)
                 agent.speed = m_originalSpeed * movementSpeedMultiplier;
 
             Vector3 newPosition = GetNewPosition();
-            agent.SetDestination(newPosition);
-            anim?.SetMoving(true);
-
-            while (agent.pathPending || agent.remainingDistance > 0.2f)
-                yield return null;
-
-            anim?.SetMoving(false);
-            if (agent != null)
-                agent.speed = m_originalSpeed;
-
+            yield return MoveAndRotateToPosition(newPosition);
             yield return new WaitForSeconds(movementRestTime);
-            m_isMoving = false;
         }
 
         private Vector3 GetNewPosition()
@@ -293,7 +355,76 @@ namespace PLAYERTWO.PlatformerProject
                 : transform.position;
         }
 
-        private IEnumerator RotateTowardsPlayer(System.Action onComplete = null)
+        #endregion
+
+        #region === SPEED CONTROL ===
+
+        public void SetSpeedMultiplier(float multiplier, float duration = 0f)
+        {
+            if (agent == null) return;
+
+            // Nếu đang có coroutine thay đổi tốc độ, hủy nó để tránh chồng lặp
+            if (speedRoutine != null)
+                StopCoroutine(speedRoutine);
+
+            speedRoutine = StartCoroutine(SpeedModifierRoutine(multiplier, duration));
+        }
+
+        private IEnumerator SpeedModifierRoutine(float multiplier, float duration)
+        {
+            float originalSpeed = agent.speed;
+            agent.speed = m_originalSpeed * multiplier;
+
+            if (duration > 0f)
+            {
+                yield return new WaitForSeconds(duration);
+                agent.speed = originalSpeed;
+            }
+
+            speedRoutine = null;
+        }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === ROTATION (REFACTORED) ===
+
+        /// <summary>
+        /// Xoay model về hướng chỉ định (đã loại bỏ Y).
+        /// </summary>
+        private IEnumerator RotateTowards(Vector3 direction)
+        {
+            if (model == null) yield break;
+
+            direction.y = 0;
+            if (direction.sqrMagnitude < 0.001f)
+                yield break;
+
+            Quaternion startRot = model.rotation;
+            Quaternion targetRot = Quaternion.LookRotation(direction.normalized);
+
+            float elapsed = 0f;
+            float duration = 0.25f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime * rotationSpeed;
+                model.rotation = Quaternion.Slerp(startRot, targetRot, elapsed / duration);
+                yield return null;
+            }
+
+            model.rotation = targetRot;
+        }
+
+        public IEnumerator RotateTowardsTarget(Transform target)
+        {
+            if (target == null) yield break;
+
+            Vector3 direction = target.forward;
+            yield return RotateTowards(direction);
+        }
+
+        public IEnumerator RotateTowardsPlayer(System.Action onComplete = null)
         {
             if (player == null)
             {
@@ -301,40 +432,25 @@ namespace PLAYERTWO.PlatformerProject
                 yield break;
             }
 
-            Vector3 direction = (player.transform.position - transform.position).normalized;
-            direction.y = 0;
-
-            if (direction.magnitude < 0.1f)
-            {
-                onComplete?.Invoke();
-                yield break;
-            }
-
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            float angleDifference = Quaternion.Angle(transform.rotation, targetRotation);
-
-            if (angleDifference > rotationThreshold)
-            {
-                float rotationTime = angleDifference / (rotationSpeed * 90f);
-                Quaternion startRotation = transform.rotation;
-                float elapsedTime = 0f;
-
-                while (elapsedTime < rotationTime)
-                {
-                    elapsedTime += Time.deltaTime;
-                    float progress = elapsedTime / rotationTime;
-                    transform.rotation = Quaternion.Slerp(startRotation, targetRotation, progress);
-                    yield return null;
-                }
-
-                transform.rotation = targetRotation;
-            }
-
+            yield return RotateTowards(player.transform.position - model.position);
             onComplete?.Invoke();
         }
+
+        private void RotateTowardsMovementDirection()
+        {
+            if (agent == null || !agent.hasPath) return;
+            if (agent.desiredVelocity.sqrMagnitude < 0.1f) return;
+
+            StartCoroutine(RotateTowards(agent.desiredVelocity));
+        }
+
         #endregion
 
         //─────────────────────────────────────────────
+        #region === OVERRIDE ===
+
         protected override void UpdateBossBehavior() { }
+
+        #endregion
     }
 }

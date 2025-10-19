@@ -5,14 +5,12 @@ namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
     /// BossFireball — điều khiển cầu lửa của boss (dùng pooling).
-    /// Tự chứa toàn bộ thiết lập damage/speed/lifetime.
     /// Gây sát thương lan & hiệu ứng khi trúng Player hoặc tường.
+    /// Không gây damage nếu boss đã chết.
     /// </summary>
     [RequireComponent(typeof(Rigidbody), typeof(Collider))]
     public class BossFireball : MonoBehaviour
     {
-        //─────────────────────────────────────────────
-        // INSPECTOR FIELDS
         //─────────────────────────────────────────────
         [Header("Fireball Settings")]
         [SerializeField] private int damage = 25;
@@ -21,24 +19,18 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float collisionRadius = 0.1f;
 
         [Header("Explosion Settings")]
-        [Tooltip("Bán kính gây sát thương lan")]
         [SerializeField] private float explosionRadius = 3f;
-        [Tooltip("Lực đẩy lên Player trong vùng nổ")]
         [SerializeField] private float explosionForce = 8f;
 
         [Header("Hit Effect (Particle)")]
-        [Tooltip("Hiệu ứng khi cầu lửa trúng Player hoặc tường")]
         [SerializeField] private GameObject hitEffect;
 
-        //─────────────────────────────────────────────
-        // RUNTIME FIELDS
         //─────────────────────────────────────────────
         private Rigidbody rb;
         private bool hasHit;
         private Player target;
+        private SoldierRobot ownerBoss;
 
-        //─────────────────────────────────────────────
-        // UNITY LIFECYCLE
         //─────────────────────────────────────────────
         private void Awake()
         {
@@ -66,15 +58,13 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // PUBLIC API
-        //─────────────────────────────────────────────
         /// <summary>
-        /// Setup từ Pool — chỉ cần truyền Player target.
-        /// Các thông số khác giữ nguyên trong prefab.
+        /// Setup từ Pool — truyền Player target & boss sở hữu.
         /// </summary>
-        public void SetupFromPool(Player newTarget)
+        public void SetupFromPool(Player newTarget, SoldierRobot boss)
         {
             target = newTarget;
+            ownerBoss = boss;
             hasHit = false;
             ResetPhysics();
 
@@ -86,8 +76,6 @@ namespace PLAYERTWO.PlatformerProject
             gameObject.SetActive(true);
         }
 
-        //─────────────────────────────────────────────
-        // INTERNAL HELPERS
         //─────────────────────────────────────────────
         private Vector3 GetLaunchDirection()
         {
@@ -111,8 +99,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // COLLISION
-        //─────────────────────────────────────────────
         private void CheckCollision()
         {
             Collider[] colliders = Physics.OverlapSphere(transform.position, collisionRadius);
@@ -122,7 +108,13 @@ namespace PLAYERTWO.PlatformerProject
                 if (col.CompareTag(GameTags.Player))
                 {
                     if (col.TryGetComponent<Player>(out var player))
+                    {
+                        // ⚠️ Boss đã chết thì không gây damage
+                        if (ownerBoss == null || !ownerBoss.IsAlive)
+                            break;
+
                         player.ApplyDamage(damage, transform.position);
+                    }
 
                     OnHit();
                     return;
@@ -149,8 +141,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // EFFECTS
-        //─────────────────────────────────────────────
         private void SpawnHitEffect()
         {
             if (hitEffect == null) return;
@@ -163,10 +153,10 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // EXPLOSION LOGIC
-        //─────────────────────────────────────────────
         private void DealExplosionDamage()
         {
+            if (ownerBoss != null && !ownerBoss.IsAlive) return; // 🔒 Boss đã chết => không gây damage
+
             ForEachPlayerInRange((player, distance, col) =>
             {
                 float multiplier = Mathf.Clamp01(1f - (distance / explosionRadius));
@@ -179,6 +169,8 @@ namespace PLAYERTWO.PlatformerProject
 
         private void ApplyExplosionForce()
         {
+            if (ownerBoss != null && !ownerBoss.IsAlive) return;
+
             ForEachPlayerInRange((player, distance, col) =>
             {
                 if (col.TryGetComponent<Rigidbody>(out var prb))
@@ -205,8 +197,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // CLEANUP
-        //─────────────────────────────────────────────
         private void ResetForPool()
         {
             hasHit = false;
@@ -227,6 +217,20 @@ namespace PLAYERTWO.PlatformerProject
                 ResetForPool();
                 gameObject.SetActive(false);
             }
+        }
+
+        //─────────────────────────────────────────────
+        /// <summary>
+        /// Gọi từ Boss khi boss chết để xoá cầu lửa này.
+        /// </summary>
+        public void ForceDisableFromBossDeath()
+        {
+            if (!gameObject.activeInHierarchy) return;
+            hasHit = true;
+            StopAllCoroutines();
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            gameObject.SetActive(false);
         }
     }
 }

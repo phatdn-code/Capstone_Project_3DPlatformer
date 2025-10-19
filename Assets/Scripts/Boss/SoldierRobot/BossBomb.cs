@@ -8,11 +8,9 @@ namespace PLAYERTWO.PlatformerProject
     [RequireComponent(typeof(Animator))]
     public class BossBomb : MonoBehaviour
     {
-        //─────────────────────────────────────────────
-        // INSPECTOR FIELDS
         [Header("Bomb Settings")]
-        [SerializeField] private int playerDamage = 1;      // Damage gây cho Player
-        [SerializeField] private int bossDamage = 10;       // Damage gây cho Boss khi bị phản
+        [SerializeField] private int playerDamage = 1;
+        [SerializeField] private int bossDamage = 10;
         [SerializeField] private float throwForce = 12f;
         [SerializeField] private float speedMultiplier = 1.5f;
         [SerializeField] private float gravityDelay = 0.7f;
@@ -42,7 +40,6 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float flashSpeed = 0.2f;
 
         //─────────────────────────────────────────────
-        // RUNTIME
         private bool hasExploded;
         private bool hasLanded;
         private bool fuseStarted;
@@ -60,7 +57,6 @@ namespace PLAYERTWO.PlatformerProject
         private Tween flashTween;
 
         //─────────────────────────────────────────────
-        // UNITY LIFECYCLE
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
@@ -94,7 +90,6 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (hasLanded || hasExploded) return;
 
-            // 🔹 Khi bomb rơi xuống đất
             if (collision.gameObject.CompareTag("Ground"))
             {
                 hasLanded = true;
@@ -103,13 +98,11 @@ namespace PLAYERTWO.PlatformerProject
                 DoSquashAndStartFuse();
             }
 
-            // 🔹 Nếu bomb đụng boss -> nổ ngay
             if (collision.gameObject.TryGetComponent<SoldierRobot>(out var boss))
                 OnHitBoss(boss);
         }
 
         //─────────────────────────────────────────────
-        // SETUP
         public void SetupFromPool(Player newTarget, SoldierRobot boss)
         {
             isFromPool = true;
@@ -157,7 +150,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // FUSE & WARNING LOGIC
         private void DoSquashAndStartFuse()
         {
             transform.DOScale(new Vector3(1.4f, 0.8f, 1.4f), 0.15f)
@@ -208,14 +200,11 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // REFLECT (PHẢN BOMB)
         public void OnPlayerHitBomb()
         {
             if (hasExploded || !hasLanded) return;
 
-            Debug.Log("💥 Bomb bị player đánh trúng! Phản về boss!");
             isReflected = true;
-
             CancelInvoke(nameof(Explode));
             fuseStarted = false;
 
@@ -230,14 +219,8 @@ namespace PLAYERTWO.PlatformerProject
                 stunEffect.SetActive(true);
 
             var boss = ownerBoss;
+            if (boss == null) return;
 
-            if (boss == null)
-            {
-                Debug.LogWarning("⚠️ Không tìm thấy SoldierRobot để phản bomb!");
-                return;
-            }
-
-            // Quỹ đạo bay cong về boss
             Vector3 start = transform.position;
             Vector3 end = boss.transform.position + Vector3.up * 1.5f;
             Vector3 mid = (start + end) / 2f + Vector3.up * reflectArcHeight;
@@ -245,10 +228,7 @@ namespace PLAYERTWO.PlatformerProject
             Sequence seq = DOTween.Sequence();
             seq.Append(transform.DOPath(new Vector3[] { start, mid, end }, reflectDuration, PathType.CatmullRom)
                 .SetEase(Ease.InOutSine))
-                .OnComplete(() =>
-                {
-                    OnHitBoss(boss);
-                });
+                .OnComplete(() => { OnHitBoss(boss); });
         }
 
         private void OnHitBoss(SoldierRobot boss)
@@ -258,7 +238,6 @@ namespace PLAYERTWO.PlatformerProject
             if (boss.TryGetComponent<BossHealth>(out var bossHealth))
             {
                 bossHealth.TakeDamage(bossDamage);
-                Debug.Log($"💥 Bomb phản trúng Boss, gây {bossDamage} sát thương!");
             }
 
             if (explosionBossEffect != null)
@@ -268,7 +247,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // EXPLOSION LOGIC
         public void Explode()
         {
             if (hasExploded) return;
@@ -297,6 +275,7 @@ namespace PLAYERTWO.PlatformerProject
         private void DealExplosionDamage()
         {
             if (isReflected) return;
+            if (ownerBoss != null && !ownerBoss.IsAlive) return; // 🔒 Boss chết => bomb không gây damage
 
             HashSet<Player> damagedPlayers = new HashSet<Player>();
             Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
@@ -315,6 +294,7 @@ namespace PLAYERTWO.PlatformerProject
         private void ApplyExplosionForce()
         {
             if (isReflected) return;
+            if (ownerBoss != null && !ownerBoss.IsAlive) return;
 
             Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
             foreach (var c in colliders)
@@ -331,7 +311,17 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         //─────────────────────────────────────────────
-        // PHYSICS & LAUNCH HELPERS
+        public void ForceDisableFromBossDeath()
+        {
+            if (!gameObject.activeInHierarchy) return;
+            hasExploded = true;
+            CancelInvoke();
+            pulseTween?.Kill();
+            flashTween?.Kill();
+            gameObject.SetActive(false);
+        }
+
+        //─────────────────────────────────────────────
         private Vector3 GetLaunchDirection()
         {
             if (target != null)
@@ -362,13 +352,9 @@ namespace PLAYERTWO.PlatformerProject
             LaunchBomb(direction + Vector3.up * 0.6f);
         }
 
-        //─────────────────────────────────────────────
-        // GIZMOS DEBUG VISUALIZATION
-        //─────────────────────────────────────────────
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            // Vẽ phạm vi nổ (vàng)
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }

@@ -28,6 +28,8 @@ namespace PLAYERTWO.PlatformerProject
         #region === RUNTIME REFERENCES ===
 
         protected BossHealth m_bossHealth;
+        protected BossAnimationBase m_bossAnim;
+        protected BossPhaseTransitionBase m_phaseTransition;
 
         #endregion
 
@@ -43,7 +45,9 @@ namespace PLAYERTWO.PlatformerProject
         #region === PROPERTIES ===
 
         public BossHealth bossHealth => m_bossHealth;
+        public BossAnimationBase bossAnim => m_bossAnim;
         public BossPhase[] phases { get => m_phases; set => m_phases = value; }
+        public bool IsAlive => bossHealth != null && bossHealth.CurrentHealth > 0;
 
         public UnityEvent<int> OnBossPhaseStartEvent => OnBossPhaseStart;
         public UnityEvent<string> OnSpecialAbilityUsedEvent => OnSpecialAbilityUsed;
@@ -60,7 +64,7 @@ namespace PLAYERTWO.PlatformerProject
 
         protected virtual void Start()
         {
-            InitializeBossHealth();
+            InitializeBoss();
             InitializeDefaultPhasesIfNeeded();
             HookHealthEvents();
 
@@ -86,18 +90,16 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === INITIALIZATION ===
 
-        private void InitializeBossHealth()
+        private void InitializeBoss()
         {
             var linker = GetComponent<BossLinker>();
 
-            if (linker != null && linker.bossHealth != null)
-                m_bossHealth = linker.bossHealth;
+            if (linker == null) return;
 
-            // Fallback an toàn (chỉ khi prefab chưa có BossLinker)
-            else m_bossHealth = GetComponent<BossHealth>();
-
+            m_bossHealth = linker.bossHealth;
+            m_bossAnim = linker.bossAnim;
+            m_phaseTransition = linker.bossTransition;
         }
-
 
         private void InitializeDefaultPhasesIfNeeded()
         {
@@ -140,17 +142,30 @@ namespace PLAYERTWO.PlatformerProject
 
             if (m_phases != null && nextPhase < m_phases.Length)
             {
-                // Sang phase tiếp theo
-                ApplyPhaseVisual(nextPhase, instant: false);
-                m_bossHealth.InitializePhase(nextPhase, m_phases[nextPhase].maxHealth);
-                OnBossPhaseStart.Invoke(nextPhase);
-            }
+                if (m_phaseTransition != null)
+                    StartCoroutine(m_phaseTransition.ExecuteTransition(this, nextPhase));
 
-            // Hết phase → boss thua
+                // fallback logic nếu không có transition script
+                else DefaultPhaseTransition(nextPhase);
+            }
             else OnBossDefeated();
         }
 
-        private void ApplyPhaseVisual(int phaseIndex, bool instant)
+        /// <summary>
+        /// Default fallback phase transition if no custom transition script is attached.
+        /// </summary>
+        private void DefaultPhaseTransition(int nextPhase)
+        {
+            // Chuyển phase ngay lập tức, không hoạt cảnh
+            m_bossHealth.InitializePhase(nextPhase, m_phases[nextPhase].maxHealth);
+            ApplyPhaseVisual(nextPhase, instant: true);
+            OnBossPhaseStart.Invoke(nextPhase);
+
+            Debug.LogWarning($"[BossCore] {name} is using DefaultPhaseTransition (no custom transition script found).");
+        }
+
+
+        public void ApplyPhaseVisual(int phaseIndex, bool instant)
         {
             var phase = m_phases[phaseIndex];
 

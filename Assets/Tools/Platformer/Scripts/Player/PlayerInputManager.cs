@@ -34,7 +34,10 @@ namespace PLAYERTWO.PlatformerProject
 		protected const string k_mouseDeviceName = "Mouse";
 		protected const float k_jumpBuffer = 0.15f;
 
-		protected virtual void CacheActions()
+        private bool m_isLocked = false;
+        public bool IsLocked => m_isLocked;
+
+        protected virtual void CacheActions()
 		{
 			m_movement = actions["Movement"];
 			m_run = actions["Run"];
@@ -208,12 +211,25 @@ namespace PLAYERTWO.PlatformerProject
 #endif
 		}
 
-		/// <summary>
-		/// Remaps a value to a 0-1 range considering a given deadzone.
-		/// </summary>
-		/// <param name="value">The value you wants to remap.</param>
-		/// <param name="deadzone">The minimum deadzone value.</param>
-		protected float RemapToDeadzone(float value, float deadzone) =>
+        /// <summary>
+        /// Completely disables all player inputs.
+        /// </summary>
+        public void LockAllInputs(bool locked)
+        {
+            m_isLocked = locked;
+
+            if (locked)
+                actions.Disable();
+            else
+                actions.Enable();
+        }
+
+        /// <summary>
+        /// Remaps a value to a 0-1 range considering a given deadzone.
+        /// </summary>
+        /// <param name="value">The value you wants to remap.</param>
+        /// <param name="deadzone">The minimum deadzone value.</param>
+        protected float RemapToDeadzone(float value, float deadzone) =>
 			Mathf.Sign(value) * ((Mathf.Abs(value) - deadzone) / (1 - deadzone));
 
 		/// <summary>

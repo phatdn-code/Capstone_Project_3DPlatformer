@@ -14,6 +14,7 @@ namespace PLAYERTWO.PlatformerProject
         public BossHealth bossHealth;
         public BossUI bossUI;
         public BossAnimationBase bossAnim;
+        public BossPhaseTransitionBase bossTransition;
 
         private void Reset() => AutoLink();
         private void Awake() => AutoLink();
@@ -26,6 +27,7 @@ namespace PLAYERTWO.PlatformerProject
             if (bossCore == null) bossCore = GetComponent<BossCore>();
             if (bossHealth == null) bossHealth = GetComponent<BossHealth>();
             if (bossAnim == null) bossAnim = GetComponent<BossAnimationBase>();
+            if (bossTransition == null) bossTransition = GetComponent<BossPhaseTransitionBase>();
             if (bossUI == null) bossUI = GetComponent<BossUI>();
 
             if (bossUI != null && bossCore != null)

@@ -11,9 +11,6 @@ namespace PLAYERTWO.PlatformerProject
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Boss UI")]
     public class BossUI : MonoBehaviour
     {
-        //─────────────────────────────────────────────
-        #region === INSPECTOR FIELDS ===
-
         [Header("UI References")]
         [SerializeField] private Slider bossHealthBar;
         [SerializeField] private TextMeshProUGUI phaseNameText;
@@ -24,19 +21,9 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private Ease barEase = Ease.OutCubic;
         [SerializeField] private float fadeDuration = 0.35f;
 
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region === RUNTIME REFERENCES ===
-
         private BossCore boss;
         private BossHealth health;
         private Tween barTween;
-
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region === UNITY LIFECYCLE ===
 
         private void OnDestroy()
         {
@@ -44,12 +31,6 @@ namespace PLAYERTWO.PlatformerProject
             Unbind();
         }
 
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region === INITIALIZATION ===
-
-        /// <summary>Gắn UI này với một BossCore cụ thể.</summary>
         public void Bind(BossCore newBoss)
         {
             Unbind();
@@ -57,9 +38,7 @@ namespace PLAYERTWO.PlatformerProject
             boss = newBoss;
             if (boss == null) return;
 
-            // 🔹 Ưu tiên lấy từ BossLinker nếu có
             var linker = boss.GetComponent<BossLinker>();
-
             if (linker != null && linker.bossHealth != null)
                 health = linker.bossHealth;
 
@@ -67,38 +46,28 @@ namespace PLAYERTWO.PlatformerProject
 
             if (health == null) return;
 
-            // Đăng ký event
             boss.OnBossPhaseStartEvent.AddListener(OnBossPhaseStart);
             health.OnHealthChanged += OnHealthChanged;
-            health.OnBossDefeated.AddListener(Hide);
+            health.OnBossDefeated.AddListener(OnBossDefeated);
 
-            // Hiển thị ngay
             Show();
             OnHealthChanged(health.HealthPercentage);
             OnBossPhaseStart(health.currentPhase);
         }
 
-
-        /// <summary>Gỡ liên kết UI khỏi boss hiện tại (ngắt sự kiện).</summary>
         public void Unbind()
         {
             if (boss != null && health != null)
             {
                 boss.OnBossPhaseStartEvent.RemoveListener(OnBossPhaseStart);
                 health.OnHealthChanged -= OnHealthChanged;
-                health.OnBossDefeated.RemoveListener(Hide);
+                health.OnBossDefeated.RemoveListener(OnBossDefeated);
             }
 
             boss = null;
             health = null;
         }
 
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region === EVENT HANDLERS ===
-
-        /// <summary>Cập nhật giá trị thanh máu theo phần trăm hiện tại.</summary>
         private void OnHealthChanged(float normalized)
         {
             if (bossHealthBar == null) return;
@@ -108,7 +77,6 @@ namespace PLAYERTWO.PlatformerProject
                 .SetEase(barEase);
         }
 
-        /// <summary>Hiển thị tên phase và hiệu ứng khi chuyển phase.</summary>
         private void OnBossPhaseStart(int phaseIndex)
         {
             if (phaseNameText == null || boss == null) return;
@@ -119,29 +87,38 @@ namespace PLAYERTWO.PlatformerProject
 
             phaseNameText.text = phaseName;
             phaseNameText.transform.DOPunchScale(Vector3.one * 0.25f, 0.25f);
+
+            // Đảm bảo UI vẫn hiển thị khi sang phase mới
+            Show();
         }
 
-        #endregion
+        private void OnBossDefeated()
+        {
+            if (boss == null || health == null)
+                return;
 
-        //─────────────────────────────────────────────
-        #region === UI VISIBILITY ===
+            bool isLastPhase = health.currentPhase >= boss.phases.Length - 1;
 
-        /// <summary>Hiển thị UI boss bằng hiệu ứng fade.</summary>
+            if (isLastPhase)
+                HideCompletely();
+        }
+
         private void Show()
         {
             if (panelGroup == null) return;
-            panelGroup.alpha = 0f;
+
+            panelGroup.DOKill();
             panelGroup.DOFade(1f, fadeDuration);
         }
 
-        /// <summary>Ẩn UI boss bằng fade-out.</summary>
-        private void Hide()
+        /// <summary>Ẩn hoàn toàn khi boss thật sự chết.</summary>
+        private void HideCompletely()
         {
             if (panelGroup == null) return;
+
+            panelGroup.DOKill();
             panelGroup.DOFade(0f, fadeDuration)
                 .OnComplete(() => gameObject.SetActive(false));
         }
-
-        #endregion
     }
 }

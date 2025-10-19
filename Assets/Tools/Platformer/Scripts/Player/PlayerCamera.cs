@@ -143,7 +143,12 @@ namespace PLAYERTWO.PlatformerProject
 		/// </summary>
 		public bool freeze { get; set; }
 
-		protected virtual void InitializeComponents()
+        public void SetFreeze(bool value)
+        {
+            freeze = value;
+        }
+
+        protected virtual void InitializeComponents()
 		{
 			m_camera = Camera.main;
 			m_virtualCamera = GetComponent<CinemachineCamera>();

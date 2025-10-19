@@ -12,9 +12,9 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Animator Reference")]
         [SerializeField] protected Animator animator;
 
-        // ─────────────────────────────────────────────────────
+        //─────────────────────────────────────────────
         // COMMON / OPTIONAL
-        // ─────────────────────────────────────────────────────
+        //─────────────────────────────────────────────
 
         public virtual Animator GetAnimator() => animator;
 
@@ -37,9 +37,24 @@ namespace PLAYERTWO.PlatformerProject
             animator?.SetTrigger("Death");
         }
 
-        // ─────────────────────────────────────────────────────
+        /// <summary>Called when the boss takes damage.</summary>
+        public virtual void PlayTakeDamage()
+        {
+            animator?.SetTrigger("TakeDamage");
+        }
+
+        //─────────────────────────────────────────────
+        // EXTENDED ANIMATION CONTROL
+        //─────────────────────────────────────────────
+
+        /// <summary>
+        /// Enable/disable the "recharging" animation state (for bosses that can restore energy).
+        /// </summary>
+        public virtual void SetHealing(bool isRecharging) { }
+
+        //─────────────────────────────────────────────
         // OVERRIDABLE HOOKS (chỉ boss có hành vi này mới override)
-        // ─────────────────────────────────────────────────────
+        //─────────────────────────────────────────────
 
         /// <summary>For melee-capable bosses.</summary>
         public virtual void PlayMeleeAttack() { /* optional */ }
