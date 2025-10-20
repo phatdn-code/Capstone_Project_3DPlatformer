@@ -113,14 +113,8 @@ namespace PLAYERTWO.PlatformerProject
                     phaseName = $"Phase {i + 1}",
                     maxHealth = 150 + i * 100,
                     moveSpeed = 4 + i,
-                    attackSpeed = Mathf.Max(0.5f, 1.5f - i * 0.2f),
-                    damage = 10 + i * 5,
-                    sightRange = 10 + i * 5,
-                    phaseColor = (i == 2) ? Color.red : Color.white,
+                    phaseColor = (i != 0) ? Color.red : Color.white,
                     scale = Vector3.one * (1f + i * 0.15f),
-                    canUseSpecialAbility = (i == 2),
-                    specialAbilityName = (i == 2) ? "Rage Mode" : "",
-                    specialAbilityCooldown = (i == 2) ? 5f : 0f
                 };
             }
         }
