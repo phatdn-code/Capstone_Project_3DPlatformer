@@ -20,6 +20,7 @@ namespace PLAYERTWO.PlatformerProject
         public void OnRightHandShoot() => soldierRobot?.ShootBombFromAnimation(true);
         public void OnLeftHandShoot() => soldierRobot?.ShootBombFromAnimation(false);
         public void OnFireballShoot() => soldierRobot?.CreateFireballFromAnimation();
+        public void OnSpecialAttack() => soldierRobot?.CreateSpecialEffectFromAnimation();
         public void OnMeleeHit() => soldierRobot?.ApplyMeleeDamageToPlayer();
 
         public void OnDamageTaken() => PlayDamageSound();

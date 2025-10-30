@@ -15,6 +15,11 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === INSPECTOR FIELDS ===
 
+        [Header("Encounter")]
+        [SerializeField] private bool startInactive = true;   // ← CHỌN true cho boss cinematic
+        private bool isEncounterActive = false;
+        public bool IsEncounterActive => isEncounterActive;
+
         [Header("Phases")]
         [SerializeField] protected BossPhase[] m_phases = new BossPhase[3];
 
@@ -68,20 +73,21 @@ namespace PLAYERTWO.PlatformerProject
             InitializeDefaultPhasesIfNeeded();
             HookHealthEvents();
 
-            // Khởi tạo phase đầu tiên
-            ApplyPhaseVisual(0, instant: true);
-            m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
-            OnBossPhaseStart.Invoke(0);
+            if (!startInactive)
+            {
+                // Khởi động như cũ
+                ApplyPhaseVisual(0, instant: true);
+                m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
+                OnBossPhaseStart.Invoke(0);
+                isEncounterActive = true;
+            }
         }
 
         protected override void OnUpdate()
         {
             base.OnUpdate();
-
-            if (m_bossHealth == null || m_bossHealth.isDead || m_bossHealth.isTransitioning)
-                return;
-
-            // Cho lớp con (vd: SoldierRobot) xử lý hành vi
+            if (!isEncounterActive) return;
+            if (m_bossHealth == null || m_bossHealth.isDead || m_bossHealth.isTransitioning) return;
             UpdateBossBehavior();
         }
 
@@ -158,7 +164,6 @@ namespace PLAYERTWO.PlatformerProject
             Debug.LogWarning($"[BossCore] {name} is using DefaultPhaseTransition (no custom transition script found).");
         }
 
-
         public void ApplyPhaseVisual(int phaseIndex, bool instant)
         {
             var phase = m_phases[phaseIndex];
@@ -173,8 +178,8 @@ namespace PLAYERTWO.PlatformerProject
             // Scale
             if (instant)
                 transform.localScale = phase.scale;
-
-            else transform.DOScale(phase.scale, 0.35f).SetEase(Ease.OutBack);
+            else
+                transform.DOScale(phase.scale, 0.35f).SetEase(Ease.OutBack);
         }
 
         protected virtual void OnBossDefeated()
@@ -183,6 +188,26 @@ namespace PLAYERTWO.PlatformerProject
             transform.DOScale(0f, 0.5f).SetEase(Ease.InBack)
                 .OnComplete(() => gameObject.SetActive(false));
         }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === ENCOUNTER CONTROL ===
+
+        // Gọi khi bắt đầu trận (từ trigger/cutscene)
+        public void StartBattle()
+        {
+            if (isEncounterActive) return;
+
+            ApplyPhaseVisual(0, instant: true);
+            m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
+            OnBossPhaseStart.Invoke(0);
+            isEncounterActive = true;
+            OnBattleStarted();
+        }
+
+        // Cho boss con override để kick loop tấn công
+        protected virtual void OnBattleStarted() { }
 
         #endregion
 

@@ -22,6 +22,11 @@ namespace PLAYERTWO.PlatformerProject
             animator?.SetTrigger("Shoot");
         }
 
+        public override void PlaySpecialSkill()
+        {
+            animator?.SetTrigger("SmashAttack");
+        }
+
         public override void SetHealing(bool isRecharging)
         {
             animator?.SetBool("Recharging", isRecharging);

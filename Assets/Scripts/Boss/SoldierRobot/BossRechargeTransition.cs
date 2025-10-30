@@ -28,7 +28,7 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float rechargeDuration = 10f;
 
         [Header("Speed Boost Settings")]
-        [SerializeField] private float speedBoostMultiplier = 1.4f;   // Boss chạy nhanh hơn 40%
+        [SerializeField] private float speedBoostMultiplier = 2f;   // Boss chạy nhanh hơn 40%
         [SerializeField] private float speedRestoreDelay = 0.3f;      // Trễ 1 chút trước khi trả về tốc độ bình thường
 
         #endregion
@@ -126,15 +126,6 @@ namespace PLAYERTWO.PlatformerProject
             soldierBoss.PlayRechargeAnimation(false);
         }
 
-        private void StartPumpAndRechargeEffect()
-        {
-            foreach (var morph in energyPumps)
-                morph?.PlayMorph();
-
-            if (rechargeEffectPrefab != null)
-                rechargeEffectPrefab.SetActive(true);
-        }
-
         private IEnumerator RechargeBossOverTime(int nextPhase, SoldierRobot soldierBoss)
         {
             float elapsed = 0f;
@@ -153,6 +144,15 @@ namespace PLAYERTWO.PlatformerProject
 
                 yield return null;
             }
+        }
+
+        private void StartPumpAndRechargeEffect()
+        {
+            foreach (var morph in energyPumps)
+                morph?.PlayMorph();
+
+            if (rechargeEffectPrefab != null)
+                rechargeEffectPrefab.SetActive(true);
         }
 
         private void EndPumpAndRechargeEffect()

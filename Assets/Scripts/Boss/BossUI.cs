@@ -11,6 +11,9 @@ namespace PLAYERTWO.PlatformerProject
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Boss UI")]
     public class BossUI : MonoBehaviour
     {
+        //─────────────────────────────────────────────
+        #region === INSPECTOR FIELDS ===
+
         [Header("UI References")]
         [SerializeField] private Slider bossHealthBar;
         [SerializeField] private TextMeshProUGUI phaseNameText;
@@ -21,15 +24,30 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private Ease barEase = Ease.OutCubic;
         [SerializeField] private float fadeDuration = 0.35f;
 
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === RUNTIME REFERENCES ===
+
         private BossCore boss;
         private BossHealth health;
         private Tween barTween;
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === UNITY LIFECYCLE ===
 
         private void OnDestroy()
         {
             barTween?.Kill();
             Unbind();
         }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === BINDING ===
 
         public void Bind(BossCore newBoss)
         {
@@ -41,8 +59,8 @@ namespace PLAYERTWO.PlatformerProject
             var linker = boss.GetComponent<BossLinker>();
             if (linker != null && linker.bossHealth != null)
                 health = linker.bossHealth;
-
-            else health = boss.GetComponent<BossHealth>();
+            else
+                health = boss.GetComponent<BossHealth>();
 
             if (health == null) return;
 
@@ -67,6 +85,11 @@ namespace PLAYERTWO.PlatformerProject
             boss = null;
             health = null;
         }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === EVENT HANDLERS ===
 
         private void OnHealthChanged(float normalized)
         {
@@ -103,6 +126,11 @@ namespace PLAYERTWO.PlatformerProject
                 HideCompletely();
         }
 
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === UI CONTROL ===
+
         private void Show()
         {
             if (panelGroup == null) return;
@@ -120,5 +148,23 @@ namespace PLAYERTWO.PlatformerProject
             panelGroup.DOFade(0f, fadeDuration)
                 .OnComplete(() => gameObject.SetActive(false));
         }
+
+        public void ShowBossIntro(string bossName)
+        {
+            if (panelGroup != null)
+            {
+                panelGroup.gameObject.SetActive(true);
+                panelGroup.alpha = 0f;
+                panelGroup.DOFade(1f, 0.35f);
+            }
+
+            if (phaseNameText != null)
+            {
+                phaseNameText.text = bossName;
+                phaseNameText.transform.DOPunchScale(Vector3.one * 0.25f, 0.25f);
+            }
+        }
+
+        #endregion
     }
 }

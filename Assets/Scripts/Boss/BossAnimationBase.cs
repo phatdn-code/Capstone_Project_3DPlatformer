@@ -9,14 +9,23 @@ namespace PLAYERTWO.PlatformerProject
     [DisallowMultipleComponent]
     public abstract class BossAnimationBase : MonoBehaviour
     {
+        //─────────────────────────────────────────────
+        #region === INSPECTOR FIELDS ===
+
         [Header("Animator Reference")]
         [SerializeField] protected Animator animator;
 
+        #endregion
+
         //─────────────────────────────────────────────
-        // COMMON / OPTIONAL
-        //─────────────────────────────────────────────
+        #region === COMMON / OPTIONAL ===
 
         public virtual Animator GetAnimator() => animator;
+
+        public virtual void PlayBattleStart()
+        {
+            animator?.SetTrigger("BattleStart");
+        }
 
         /// <summary>Called when the boss starts/stops moving (if that boss can move).</summary>
         public virtual void SetMoving(bool isMoving)
@@ -43,18 +52,21 @@ namespace PLAYERTWO.PlatformerProject
             animator?.SetTrigger("TakeDamage");
         }
 
+        #endregion
+
         //─────────────────────────────────────────────
-        // EXTENDED ANIMATION CONTROL
-        //─────────────────────────────────────────────
+        #region === EXTENDED ANIMATION CONTROL ===
 
         /// <summary>
         /// Enable/disable the "recharging" animation state (for bosses that can restore energy).
         /// </summary>
         public virtual void SetHealing(bool isRecharging) { }
 
+        #endregion
+
         //─────────────────────────────────────────────
-        // OVERRIDABLE HOOKS (chỉ boss có hành vi này mới override)
-        //─────────────────────────────────────────────
+        #region === OVERRIDABLE HOOKS ===
+        // (chỉ boss có hành vi này mới override)
 
         /// <summary>For melee-capable bosses.</summary>
         public virtual void PlayMeleeAttack() { /* optional */ }
@@ -64,5 +76,7 @@ namespace PLAYERTWO.PlatformerProject
 
         /// <summary>For bosses with a unique special skill.</summary>
         public virtual void PlaySpecialSkill() { /* optional */ }
+
+        #endregion
     }
 }

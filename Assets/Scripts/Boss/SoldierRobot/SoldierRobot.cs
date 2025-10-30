@@ -49,6 +49,7 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Visual Effects")]
         [SerializeField] private GameObject[] flashBombEffects; // [0] = left, [1] = right
         [SerializeField] private GameObject flashFireballEffect;
+        [SerializeField] private GameObject specialSkillEffect;
 
         #endregion
 
@@ -64,6 +65,9 @@ namespace PLAYERTWO.PlatformerProject
         private bool m_isInAttackSequence;
         private bool m_isMoving;
 
+        private bool unlockedPhase2Attack;
+        private bool hasUsedPhase2Once;
+
         private float nextMeleeTime;
         private float m_originalSpeed;
 
@@ -72,19 +76,26 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
 
+        // SoldierRobot.cs
         protected override void Start()
         {
             base.Start();
             InitializeComponents();
             InitializePlayer();
             DisableAllEffects();
+
+            OnBossPhaseStartEvent.AddListener(OnPhaseChanged);
+        }
+
+        protected override void OnBattleStarted()
+        {
+            // Được gọi từ BossCore.StartBattle()
             StartAttackSequence();
         }
 
         protected override void Update()
         {
             base.Update();
-
             if (isPaused || player == null) return;
 
             RotateTowardsMovementDirection();
@@ -124,6 +135,11 @@ namespace PLAYERTWO.PlatformerProject
 
             if (flashFireballEffect != null)
                 flashFireballEffect.SetActive(false);
+        }
+
+        private void OnPhaseChanged(int phaseIndex)
+        {
+            if (phaseIndex == 1) unlockedPhase2Attack = true;
         }
 
         #endregion
@@ -203,21 +219,46 @@ namespace PLAYERTWO.PlatformerProject
 
                 if (!isMeleeAttacking)
                 {
+                    // 🔹 Bước 1: ném bomb như cũ
                     ShootBomb(true);
                     yield return new WaitForSeconds(1f);
 
                     ShootBomb(false);
                     yield return new WaitForSeconds(3f);
 
-                    int fireballCount = Random.Range(1, 3);
-                    for (int i = 0; i < fireballCount; i++)
+                    // 🔹 Bước 2: nếu vừa sang phase 2 và chưa dùng chiêu mới lần nào → dùng ngay
+                    if (unlockedPhase2Attack && !hasUsedPhase2Once)
                     {
-                        ShootFireball();
-                        if (i < fireballCount - 1)
-                            yield return new WaitForSeconds(2f);
+                        yield return PerformMultipleSpecialSkills();
+                        hasUsedPhase2Once = true;
+                    }
+
+                    else
+                    {
+                        // 🔹 Bước 3: nếu đã từng dùng, 60% khả năng dùng lại chiêu mới
+                        bool usedSpecialSkill = false;
+
+                        if (unlockedPhase2Attack && Random.value < 0.6f)
+                        {
+                            yield return PerformMultipleSpecialSkills();
+                            usedSpecialSkill = true;
+                        }
+
+                        // 🔹 Bước 4: chỉ bắn fireball nếu KHÔNG dùng chiêu mới
+                        if (!usedSpecialSkill)
+                        {
+                            int fireballCount = Random.Range(1, 3);
+                            for (int i = 0; i < fireballCount; i++)
+                            {
+                                ShootFireball();
+                                if (i < fireballCount - 1)
+                                    yield return new WaitForSeconds(2f);
+                            }
+                        }
                     }
                 }
 
+                // 🔹 Bước 5: nghỉ và di chuyển
                 yield return new WaitForSeconds(5f);
                 yield return StartCoroutine(MoveToNewPosition());
             }
@@ -285,8 +326,32 @@ namespace PLAYERTWO.PlatformerProject
                 fireball.SetupFromPool(player, this);
         }
 
+        private IEnumerator PerformMultipleSpecialSkills()
+        {
+            int specialSkillCount = Random.Range(1, 3);
+
+            for (int i = 0; i < specialSkillCount; i++)
+                yield return PerformSpecialSkill();
+
+            yield return new WaitForSeconds(2f);
+        }
+
+        private IEnumerator PerformSpecialSkill()
+        {
+            Debug.Log("🔥 Boss performs new Phase 2 attack!");
+            if (soldierAnim != null)
+                soldierAnim.PlaySpecialSkill();
+            yield return new WaitForSeconds(1f);
+        }
+
+        public void CreateSpecialEffectFromAnimation()
+        {
+            if (specialSkillEffect != null) specialSkillEffect.SetActive(true);
+        }
+
         #endregion
 
+        //─────────────────────────────────────────────
         #region === ANIMATION CONTROL ===
 
         /// <summary>
@@ -301,6 +366,12 @@ namespace PLAYERTWO.PlatformerProject
 
         //─────────────────────────────────────────────
         #region === MOVEMENT ===
+
+        public Coroutine MoveToCombatPoint(Transform combatPoint)
+        {
+            if (combatPoint == null) return null;
+            return StartCoroutine(MoveAndRotateToPosition(combatPoint.position));
+        }
 
         private IEnumerator MoveAndRotateToPosition(Vector3 destination, bool restoreSpeed = true)
         {
@@ -357,13 +428,13 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+        //─────────────────────────────────────────────
         #region === SPEED CONTROL ===
 
         public void SetSpeedMultiplier(float multiplier, float duration = 0f)
         {
             if (agent == null) return;
 
-            // Nếu đang có coroutine thay đổi tốc độ, hủy nó để tránh chồng lặp
             if (speedRoutine != null)
                 StopCoroutine(speedRoutine);
 
@@ -419,7 +490,6 @@ namespace PLAYERTWO.PlatformerProject
         public IEnumerator RotateTowardsTarget(Transform target)
         {
             if (target == null) yield break;
-
             Vector3 direction = target.forward;
             yield return RotateTowards(direction);
         }
@@ -452,5 +522,11 @@ namespace PLAYERTWO.PlatformerProject
         protected override void UpdateBossBehavior() { }
 
         #endregion
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(centerPoint.position, wanderRadius);
+        }
     }
 }
