@@ -114,11 +114,9 @@ namespace PLAYERTWO.PlatformerProject
                 hasLanded = true;
                 rb.linearVelocity = Vector3.zero;
                 rb.isKinematic = false;
-                rb.useGravity = false;
 
                 // Nếu boss ở Phase 2 -> rượt + đếm fuse
-                if (ownerBoss != null && ownerBoss.bossHealth != null &&
-                    ownerBoss.bossHealth.currentPhase >= 1)
+                if (ownerBoss != null && ownerBoss.bossHealth.currentPhase >= 1)
                     StartChasingPlayer();
 
                 DoSquashAndStartFuse();
@@ -168,8 +166,10 @@ namespace PLAYERTWO.PlatformerProject
             fuseStarted = false;
             isReflected = false;
 
+            if (ownerBoss != null && ownerBoss.bossHealth.currentPhase < 2)
+                rb.useGravity = false;
+
             rb.isKinematic = false;
-            rb.useGravity = false;
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             transform.localScale = Vector3.one;
@@ -201,7 +201,9 @@ namespace PLAYERTWO.PlatformerProject
         {
             while (isChasingPlayer && target != null && !hasExploded)
             {
-                Vector3 dir = (target.transform.position - transform.position).normalized;
+                Vector3 dir = (target.transform.position - transform.position);
+                dir.y = 0f;
+                dir.Normalize();
                 rb.linearVelocity = dir * chaseSpeed;
 
                 // hướng mặt về phía player
@@ -224,7 +226,7 @@ namespace PLAYERTWO.PlatformerProject
             isChasingPlayer = false;
             rb.linearVelocity = Vector3.zero;
             rb.isKinematic = true;
-            rb.useGravity = true;
+
             animator?.SetBool("IsRunning", false);
             StopCoroutine(ChasePlayerRoutine());
         }
