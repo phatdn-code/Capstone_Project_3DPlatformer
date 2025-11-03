@@ -137,6 +137,12 @@ namespace PLAYERTWO.PlatformerProject
             ApplyExplosionForce();
 
             ResetForPool();
+            StartCoroutine(DisableAfterDelay(0.2f));
+        }
+
+        private IEnumerator DisableAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
             gameObject.SetActive(false);
         }
 

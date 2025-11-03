@@ -39293,7 +39293,7 @@ GameObject:
   - component: {fileID: 6142399839373313736}
   - component: {fileID: 4814641552676924128}
   m_Layer: 0
-  m_Name: Hit 17 nova violet
+  m_Name: HitNovaViolet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

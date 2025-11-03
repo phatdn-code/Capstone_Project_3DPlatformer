@@ -43,6 +43,7 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>Play death animation (if the boss supports it).</summary>
         public virtual void PlayDeath()
         {
+            animator?.ResetTrigger("TakeDamage");
             animator?.SetTrigger("Death");
         }
 

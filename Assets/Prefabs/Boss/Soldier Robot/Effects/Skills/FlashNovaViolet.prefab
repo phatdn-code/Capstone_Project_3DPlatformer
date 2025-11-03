@@ -4915,7 +4915,7 @@ GameObject:
   - component: {fileID: 687689359262882266}
   - component: {fileID: 1964119135357614140}
   m_Layer: 0
-  m_Name: Flash 17 nova violet
+  m_Name: FlashNovaViolet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

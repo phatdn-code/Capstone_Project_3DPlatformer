@@ -12,18 +12,20 @@ namespace PLAYERTWO.PlatformerProject
         // Melee
         public override void PlayMeleeAttack()
         {
+            animator?.ResetTrigger("TakeDamage");
             animator?.SetTrigger("MeleeAttack");
         }
 
         // Ranged (generic fallback)
         public override void PlayShoot()
         {
-            // Nếu cần fallback generic (không phân tay), bạn có thể map sang 1 trigger chung.
+            animator?.ResetTrigger("TakeDamage");
             animator?.SetTrigger("Shoot");
         }
 
         public override void PlaySpecialSkill()
         {
+            animator?.ResetTrigger("TakeDamage");
             animator?.SetTrigger("SmashAttack");
         }
 

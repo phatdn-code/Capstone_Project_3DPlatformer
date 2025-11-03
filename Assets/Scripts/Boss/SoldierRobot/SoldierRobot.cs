@@ -6,11 +6,9 @@ using DG.Tweening;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Controls the behavior of the SoldierRobot boss:
-    /// - Melee attacks when close to the player.
-    /// - Throws bombs (left/right hand).
-    /// - Shoots fireballs.
-    /// - Wanders around between attack sequences.
+    /// SoldierRobot Boss Controller:
+    /// - Melee attack, Bomb throw, Fireball, Phase 2/3 AOE skills
+    /// - Movement, rotation, and attack sequence handling
     /// </summary>
     [DisallowMultipleComponent]
     public class SoldierRobot : BossCore
@@ -49,10 +47,26 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Visual Effects")]
         [SerializeField] private GameObject[] flashBombEffects; // [0] = left, [1] = right
         [SerializeField] private GameObject flashFireballEffect;
-        [SerializeField] private GameObject specialSkillEffect;
+        [SerializeField] private GameObject electricSmashEffect;
+
+        [Header("AOE Skill (Phase 2)")]
+        [SerializeField] private GameObject aoeWarningPrefab;   // Prefab vòng cảnh báo (AOEWarningUnified)
+        [SerializeField] private int aoeCount = 5;
+        [SerializeField] private float aoeRadiusRange = 8f;
+        [SerializeField] private float aoeSpawnDelay = 0.15f;
+
+        [Header("AOE Skill (Phase 3)")]
+        [SerializeField] private int innerRingCount = 4;
+        [SerializeField] private int outerRingCount = 6;
+        [SerializeField] private float innerRadius = 4f;
+        [SerializeField] private float outerRadius = 8f;
+        [SerializeField] private float aoeDelayBetweenRings = 1.2f;
+        [SerializeField] private float innerWarnDuration = 1.0f;
+        [SerializeField] private float outerWarnDuration = 1.8f;
+        [SerializeField] private int innerDamage = 20;
+        [SerializeField] private int outerDamage = 26;
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === RUNTIME VARIABLES ===
 
@@ -66,31 +80,27 @@ namespace PLAYERTWO.PlatformerProject
         private bool m_isMoving;
 
         private bool unlockedPhase2Attack;
-        private bool hasUsedPhase2Once;
+        private bool unlockedPhase3Attack;
 
         private float nextMeleeTime;
         private float m_originalSpeed;
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
 
-        // SoldierRobot.cs
         protected override void Start()
         {
             base.Start();
             InitializeComponents();
             InitializePlayer();
             DisableAllEffects();
-
             OnBossPhaseStartEvent.AddListener(OnPhaseChanged);
         }
 
         protected override void OnBattleStarted()
         {
-            // Được gọi từ BossCore.StartBattle()
-            StartAttackSequence();
+            StartAttackSequence(); // Bắt đầu vòng tấn công
         }
 
         protected override void Update()
@@ -98,15 +108,14 @@ namespace PLAYERTWO.PlatformerProject
             base.Update();
             if (isPaused || player == null) return;
 
-            RotateTowardsMovementDirection();
+            RotateTowardsMovementDirection(); // Xoay theo hướng di chuyển
 
             float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
             if (distanceToPlayer <= meleeRange && Time.time >= nextMeleeTime && !isMeleeAttacking)
-                StartCoroutine(PerformMeleeAttack());
+                StartCoroutine(PerformMeleeAttack()); // Tấn công cận chiến nếu gần
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === INITIALIZATION ===
 
@@ -114,9 +123,7 @@ namespace PLAYERTWO.PlatformerProject
         {
             agent = GetComponent<NavMeshAgent>();
             soldierAnim = base.bossAnim as SoldierRobotAnimation;
-
-            if (agent != null)
-                m_originalSpeed = agent.speed;
+            if (agent != null) m_originalSpeed = agent.speed;
         }
 
         private void InitializePlayer()
@@ -128,10 +135,8 @@ namespace PLAYERTWO.PlatformerProject
         private void DisableAllEffects()
         {
             if (flashBombEffects != null)
-            {
                 foreach (var fx in flashBombEffects)
                     if (fx != null) fx.SetActive(false);
-            }
 
             if (flashFireballEffect != null)
                 flashFireballEffect.SetActive(false);
@@ -140,29 +145,23 @@ namespace PLAYERTWO.PlatformerProject
         private void OnPhaseChanged(int phaseIndex)
         {
             if (phaseIndex == 1) unlockedPhase2Attack = true;
+            if (phaseIndex == 2) unlockedPhase3Attack = true;
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === PAUSE CONTROL ===
 
-        /// <summary>Pause or resume all boss activity (used during phase transitions).</summary>
         public void SetPaused(bool pause)
         {
             isPaused = pause;
-
-            if (agent != null)
-                agent.isStopped = pause;
-
-            if (bossAnim != null)
-                bossAnim.SetMoving(false);
+            if (agent != null) agent.isStopped = pause;
+            if (bossAnim != null) bossAnim.SetMoving(false);
         }
 
         public bool IsPaused => isPaused;
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === MELEE ATTACK ===
 
@@ -171,22 +170,18 @@ namespace PLAYERTWO.PlatformerProject
             isMeleeAttacking = true;
             nextMeleeTime = Time.time + meleeCooldown;
 
-            if (agent != null)
-                agent.isStopped = true;
+            if (agent != null) agent.isStopped = true;
 
             yield return RotateTowardsPlayer(() => bossAnim?.PlayMeleeAttack());
             yield return new WaitForSeconds(1f);
 
-            if (agent != null)
-                agent.isStopped = false;
-
+            if (agent != null) agent.isStopped = false;
             isMeleeAttacking = false;
         }
 
         public void ApplyMeleeDamageToPlayer()
         {
             if (player == null) return;
-
             float distance = Vector3.Distance(transform.position, player.transform.position);
             if (distance <= meleeRange)
             {
@@ -196,7 +191,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === ATTACK SEQUENCE ===
 
@@ -219,73 +213,63 @@ namespace PLAYERTWO.PlatformerProject
 
                 if (!isMeleeAttacking)
                 {
-                    // 🔹 Bước 1: ném bomb như cũ
+                    // 🔹 Bước 1: Ném bomb
                     ShootBomb(true);
                     yield return new WaitForSeconds(1f);
-
                     ShootBomb(false);
                     yield return new WaitForSeconds(3f);
 
-                    // 🔹 Bước 2: nếu vừa sang phase 2 và chưa dùng chiêu mới lần nào → dùng ngay
-                    if (unlockedPhase2Attack && !hasUsedPhase2Once)
+                    // 🔹 Bước 2: Skill đặc biệt Phase 2 / Phase 3
+                    bool usedSpecialSkill = false;
+
+                    if (unlockedPhase3Attack && Random.value < 0.7f)
                     {
-                        yield return PerformMultipleSpecialSkills();
-                        hasUsedPhase2Once = true;
+                        yield return PerformAdvancedAOESkill(); // Phase 3 AOE
+                        usedSpecialSkill = true;
+                    }
+                    else if (unlockedPhase2Attack && Random.value < 0.6f)
+                    {
+                        yield return PerformSpecialSkill(); // Phase 2 AOE
+                        usedSpecialSkill = true;
                     }
 
-                    else
-                    {
-                        // 🔹 Bước 3: nếu đã từng dùng, 60% khả năng dùng lại chiêu mới
-                        bool usedSpecialSkill = false;
-
-                        if (unlockedPhase2Attack && Random.value < 0.6f)
-                        {
-                            yield return PerformMultipleSpecialSkills();
-                            usedSpecialSkill = true;
-                        }
-
-                        // 🔹 Bước 4: chỉ bắn fireball nếu KHÔNG dùng chiêu mới
-                        if (!usedSpecialSkill)
-                        {
-                            int fireballCount = Random.Range(1, 3);
-                            for (int i = 0; i < fireballCount; i++)
-                            {
-                                ShootFireball();
-                                if (i < fireballCount - 1)
-                                    yield return new WaitForSeconds(2f);
-                            }
-                        }
-                    }
+                    if (!usedSpecialSkill)
+                        yield return FireballSequence();
                 }
 
-                // 🔹 Bước 5: nghỉ và di chuyển
+                // 🔹 Bước 3: Nghỉ và di chuyển
                 yield return new WaitForSeconds(5f);
                 yield return StartCoroutine(MoveToNewPosition());
             }
         }
 
         #endregion
-
         //─────────────────────────────────────────────
-        #region === RANGE ATTACKS ===
+        #region === RANGE ATTACKS (Bomb, Fireball, AOE) ===
+
+        private IEnumerator FireballSequence()
+        {
+            int fireballCount = Random.Range(1, 3);
+            for (int i = 0; i < fireballCount; i++)
+            {
+                ShootFireball();
+                if (i < fireballCount - 1)
+                    yield return new WaitForSeconds(2f);
+            }
+        }
 
         private void ShootBomb(bool useRightHand)
         {
             if (m_isMoving || isMeleeAttacking || isPaused) return;
-
             Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null) return;
 
-            StartCoroutine(RotateTowardsPlayer(() =>
-            {
-                soldierAnim?.PlayShootBomb(useRightHand);
-            }));
+            StartCoroutine(RotateTowardsPlayer(() => soldierAnim?.PlayShootBomb(useRightHand)));
         }
 
         public void ShootBombFromAnimation(bool useRightHand)
         {
             if (m_isMoving || isPaused) return;
-
             Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null || bombPrefab == null) return;
 
@@ -326,44 +310,97 @@ namespace PLAYERTWO.PlatformerProject
                 fireball.SetupFromPool(player, this);
         }
 
-        private IEnumerator PerformMultipleSpecialSkills()
-        {
-            int specialSkillCount = Random.Range(1, 3);
-
-            for (int i = 0; i < specialSkillCount; i++)
-                yield return PerformSpecialSkill();
-
-            yield return new WaitForSeconds(2f);
-        }
-
         private IEnumerator PerformSpecialSkill()
         {
-            Debug.Log("🔥 Boss performs new Phase 2 attack!");
-            if (soldierAnim != null)
-                soldierAnim.PlaySpecialSkill();
-            yield return new WaitForSeconds(1f);
+            Debug.Log("🔥 Boss performs Phase 2 AOE skill!");
+            soldierAnim?.PlaySpecialSkill();
+
+            yield return new WaitForSeconds(0.5f);
+            electricSmashEffect.SetActive(true);
+            yield return new WaitForSeconds(0.3f);
+
+            yield return StartCoroutine(SpawnAOEWarnings());
         }
 
-        public void CreateSpecialEffectFromAnimation()
+        private IEnumerator PerformAdvancedAOESkill()
         {
-            if (specialSkillEffect != null) specialSkillEffect.SetActive(true);
+            Debug.Log("💢 Boss performs Phase 3 dual-ring AOE!");
+            soldierAnim?.PlaySpecialSkill();
+
+            yield return new WaitForSeconds(0.5f);
+            electricSmashEffect.SetActive(true);
+            yield return new WaitForSeconds(0.3f);
+            yield return StartCoroutine(SpawnRingAOE(innerRingCount, innerRadius, innerWarnDuration, innerDamage, AOEMode.Phase3_Inner));
+            yield return new WaitForSeconds(aoeDelayBetweenRings);
+            yield return StartCoroutine(SpawnRingAOE(outerRingCount, outerRadius, outerWarnDuration, outerDamage, AOEMode.Phase3_Outer));
+        }
+
+        private IEnumerator SpawnRingAOE(int count, float radius, float warnDuration, int dmg, AOEMode mode)
+        {
+            if (aoeWarningPrefab == null)
+            {
+                Debug.LogWarning("⚠️ Missing aoeWarningPrefab (Phase 3)");
+                yield break;
+            }
+
+            float step = 360f / Mathf.Max(1, count);
+
+            for (int i = 0; i < count; i++)
+            {
+                float angle = step * i * Mathf.Deg2Rad;
+                Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+                Vector3 spawnPos = transform.position + offset + Vector3.up * 0.1f;
+
+                var aoe = PoolManager.Instance.ReuseComponent(
+                    aoeWarningPrefab, spawnPos, Quaternion.identity)
+                    ?.GetComponent<AOEWarningUnified>();
+
+                if (aoe != null)
+                    aoe.Configure(mode, radius, warnDuration, dmg);
+
+                yield return new WaitForSeconds(0.06f);
+            }
+        }
+
+        private IEnumerator SpawnAOEWarnings()
+        {
+            if (aoeWarningPrefab == null)
+            {
+                Debug.LogWarning("⚠️ Missing aoeWarningPrefab (Phase 2)");
+                yield break;
+            }
+
+            for (int i = 0; i < aoeCount; i++)
+            {
+                Vector3 offset = new Vector3(
+                    Random.Range(-aoeRadiusRange, aoeRadiusRange),
+                    0f,
+                    Random.Range(-aoeRadiusRange, aoeRadiusRange)
+                );
+
+                Vector3 spawnPos = centerPoint.position + offset + Vector3.up * 0.1f;
+
+                var aoe = PoolManager.Instance.ReuseComponent(
+                    aoeWarningPrefab, spawnPos, Quaternion.identity)
+                    ?.GetComponent<AOEWarningUnified>();
+
+                if (aoe != null)
+                    aoe.Configure(AOEMode.Phase2, 3f, 1.5f, 20);
+
+                yield return new WaitForSeconds(aoeSpawnDelay);
+            }
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === ANIMATION CONTROL ===
 
-        /// <summary>
-        /// Bật/tắt animation sạc năng lượng (SetBool "IsRecharging").
-        /// </summary>
         public void PlayRechargeAnimation(bool isRecharging)
         {
             soldierAnim?.SetHealing(isRecharging);
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === MOVEMENT ===
 
@@ -386,7 +423,6 @@ namespace PLAYERTWO.PlatformerProject
             {
                 if (agent.desiredVelocity.sqrMagnitude > 0.1f)
                     yield return RotateTowards(agent.desiredVelocity);
-
                 yield return null;
             }
 
@@ -427,7 +463,6 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === SPEED CONTROL ===
 
@@ -456,13 +491,9 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === ROTATION (REFACTORED) ===
 
-        /// <summary>
-        /// Xoay model về hướng chỉ định (đã loại bỏ Y).
-        /// </summary>
         private IEnumerator RotateTowards(Vector3 direction)
         {
             if (model == null) yield break;
@@ -515,13 +546,13 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
-
         //─────────────────────────────────────────────
         #region === OVERRIDE ===
 
         protected override void UpdateBossBehavior() { }
 
         #endregion
+        //─────────────────────────────────────────────
 
         private void OnDrawGizmos()
         {

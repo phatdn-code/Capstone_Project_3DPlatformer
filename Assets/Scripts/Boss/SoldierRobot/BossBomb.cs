@@ -370,7 +370,13 @@ namespace PLAYERTWO.PlatformerProject
                 PoolManager.Instance.ReuseComponent(explosionEffect, transform.position, Quaternion.identity);
 
             if (isFromPool)
-                gameObject.SetActive(false);
+                StartCoroutine(DisableAfterDelay(0.2f));
+        }
+
+        private IEnumerator DisableAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            gameObject.SetActive(false);
         }
 
         /// <summary>Gây sát thương quanh bomb</summary>
