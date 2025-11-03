@@ -47,7 +47,7 @@ namespace PLAYERTWO.PlatformerProject
             soldierBoss.SetPaused(true);
 
             // 🔒 Khóa player
-            PlayerLockController.Instance.LockPlayer(true);
+            PlayerHub.Instance.LockPlayer(true);
 
             // 🎥 Focus camera sang boss
             yield return FocusCameraOnBoss(true);
@@ -71,7 +71,7 @@ namespace PLAYERTWO.PlatformerProject
             yield return FocusCameraOnBoss(false);
 
             // 🔓 Mở lại player và boss
-            PlayerLockController.Instance.LockPlayer(false);
+            PlayerHub.Instance.LockPlayer(false);
             soldierBoss.SetPaused(false);
         }
 

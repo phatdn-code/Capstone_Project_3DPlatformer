@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -37,7 +38,10 @@ namespace PLAYERTWO.PlatformerProject
         private bool m_isLocked = false;
         public bool IsLocked => m_isLocked;
 
-        protected virtual void CacheActions()
+		private bool m_canMove = true;
+		public bool CanMove => m_canMove;
+
+		protected virtual void CacheActions()
 		{
 			m_movement = actions["Movement"];
 			m_run = actions["Run"];
@@ -264,5 +268,17 @@ namespace PLAYERTWO.PlatformerProject
 		protected virtual void OnEnable() => actions?.Enable();
 
 		protected virtual void OnDisable() => actions?.Disable();
+
+		public void DisableMovementTemporarily(float duration)
+		{
+			StartCoroutine(DisableMovementRoutine(duration));
+		}
+
+		private IEnumerator DisableMovementRoutine(float duration)
+		{
+			m_canMove = false;
+			yield return new WaitForSeconds(duration);
+			m_canMove = true;
+		}
 	}
 }

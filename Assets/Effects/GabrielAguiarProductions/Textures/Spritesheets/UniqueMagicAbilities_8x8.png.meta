@@ -3,10 +3,10 @@ guid: df3403d5d53a9ca4fb57432b23bc1f72
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
+    enableMipMap: 1
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -20,10 +20,12 @@ TextureImporter:
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
+    flipGreenChannel: 0
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMipmapLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -38,10 +40,10 @@ TextureImporter:
     wrapU: 1
     wrapV: 1
     wrapW: 1
-  nPOTScale: 1
+  nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 0
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -62,8 +64,10 @@ TextureImporter:
   textureFormatSet: 0
   ignorePngGamma: 0
   applyGammaDecoding: 1
+  swizzle: 50462976
+  cookieLightType: 1
   platformSettings:
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 4096
     resizeAlgorithm: 0
@@ -73,9 +77,10 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Standalone
     maxTextureSize: 4096
     resizeAlgorithm: 0
@@ -85,9 +90,10 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Android
     maxTextureSize: 4096
     resizeAlgorithm: 0
@@ -97,9 +103,10 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Tizen
     maxTextureSize: 4096
     resizeAlgorithm: 0
@@ -109,24 +116,2351 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_0
+      rect:
+        serializedVersion: 2
+        x: 185
+        y: 3761
+        width: 164
+        height: 184
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bcb0b6e73f0545d41881f6fcd5d21cc3
+      internalID: 1095033332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_1
+      rect:
+        serializedVersion: 2
+        x: 691
+        y: 3739
+        width: 183
+        height: 208
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fff0dc924fc6f7f4cb0a9dbdac0c1a2f
+      internalID: -525838863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_2
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 3727
+        width: 221
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 792db9532a6891246af6dc2e4f98ce16
+      internalID: -351605309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_3
+      rect:
+        serializedVersion: 2
+        x: 1677
+        y: 3705
+        width: 265
+        height: 250
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c61f2a490fc3e684fb19b28a89b0618a
+      internalID: -1029130401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_4
+      rect:
+        serializedVersion: 2
+        x: 2185
+        y: 3693
+        width: 270
+        height: 268
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f83408b167a58944db82a62661566da5
+      internalID: 997832074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_5
+      rect:
+        serializedVersion: 2
+        x: 2697
+        y: 3681
+        width: 275
+        height: 283
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d2c1a92c71f192545a462f7cf0c0fb51
+      internalID: 1897803272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_6
+      rect:
+        serializedVersion: 2
+        x: 3207
+        y: 3667
+        width: 288
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 756e08fc0bd22fc43b20abaafb369f1b
+      internalID: 1899788547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_7
+      rect:
+        serializedVersion: 2
+        x: 3713
+        y: 3657
+        width: 295
+        height: 313
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d20cf0505445e7647bb6cb0c2a42fb04
+      internalID: 1641817741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_8
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 3134
+        width: 308
+        height: 334
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab522e12297cb8446ba6b6be24c35069
+      internalID: 1025396380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_9
+      rect:
+        serializedVersion: 2
+        x: 630
+        y: 3124
+        width: 329
+        height: 347
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e1fc98b25addea4ca023eb5352eec56
+      internalID: -199240488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_10
+      rect:
+        serializedVersion: 2
+        x: 1138
+        y: 3121
+        width: 341
+        height: 352
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a28a08d24b749244c8af68aefa149c74
+      internalID: 1061744197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_11
+      rect:
+        serializedVersion: 2
+        x: 1643
+        y: 3101
+        width: 351
+        height: 377
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f176ac329129c0444b0aa0463c3efb50
+      internalID: 2091562109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_12
+      rect:
+        serializedVersion: 2
+        x: 2143
+        y: 3088
+        width: 368
+        height: 398
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2199bb5edfa7f094b844a0e2293a3a3a
+      internalID: 906923314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_13
+      rect:
+        serializedVersion: 2
+        x: 2649
+        y: 3090
+        width: 377
+        height: 396
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61a55698d625249489361f9709d586bf
+      internalID: 1575990675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_14
+      rect:
+        serializedVersion: 2
+        x: 3147
+        y: 3460
+        width: 45
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c2e1b5da4fc47b42b95ca10d0ba8b24
+      internalID: 1825541635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_15
+      rect:
+        serializedVersion: 2
+        x: 3157
+        y: 3443
+        width: 36
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 977e126c9205ba9488c94a1a16f80c24
+      internalID: 494537701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_16
+      rect:
+        serializedVersion: 2
+        x: 3170
+        y: 3104
+        width: 356
+        height: 385
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd57e085b1d1adb41809c2b1f597f265
+      internalID: -685579360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_17
+      rect:
+        serializedVersion: 2
+        x: 3660
+        y: 3122
+        width: 362
+        height: 377
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 72c014d54dd291d468166d040eae20bf
+      internalID: -1076741439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_18
+      rect:
+        serializedVersion: 2
+        x: 3671
+        y: 3450
+        width: 8
+        height: 4
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 258165c461c397a4ab8221e77d789f5e
+      internalID: -1083602455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_19
+      rect:
+        serializedVersion: 2
+        x: 4017
+        y: 3229
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3faf02f18cb9804f81792c2189ab442
+      internalID: 377343589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_20
+      rect:
+        serializedVersion: 2
+        x: 4014
+        y: 3212
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e8825db5bf09024d9881e4d8368d3aa
+      internalID: 1554460697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_21
+      rect:
+        serializedVersion: 2
+        x: 3445
+        y: 3116
+        width: 28
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c63c45db03cc98c4a80b1e3e79ad1451
+      internalID: 2045780681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_22
+      rect:
+        serializedVersion: 2
+        x: 3956
+        y: 3131
+        width: 4
+        height: 4
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75a66ff9e9bf0bb48980122c1e8080ad
+      internalID: -1639565900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_23
+      rect:
+        serializedVersion: 2
+        x: 3396
+        y: 3117
+        width: 9
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c4023dca07db2a4c9a82e32c2229be7
+      internalID: -721676465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_24
+      rect:
+        serializedVersion: 2
+        x: 3859
+        y: 3119
+        width: 13
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90831400fa32f9d49926590d668c244b
+      internalID: -1159358359
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_25
+      rect:
+        serializedVersion: 2
+        x: 2859
+        y: 3090
+        width: 5
+        height: 4
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4b40a7f2b80a4a49a730892da6883f8
+      internalID: -1964982509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_26
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 2576
+        width: 500
+        height: 496
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c9221a4b0a15b84f8a09b8ccf501ee2
+      internalID: -1677965483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_27
+      rect:
+        serializedVersion: 2
+        x: 1039
+        y: 2576
+        width: 487
+        height: 495
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55daaff340bcf9d47b9e1aaf5284117e
+      internalID: -1729853301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_28
+      rect:
+        serializedVersion: 2
+        x: 1546
+        y: 2592
+        width: 474
+        height: 479
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cfe7ce43a263ebd4a9d2037633787474
+      internalID: -1035605865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_29
+      rect:
+        serializedVersion: 2
+        x: 1700
+        y: 3064
+        width: 17
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 820df4632c112854686266a53b932536
+      internalID: 1698719815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_30
+      rect:
+        serializedVersion: 2
+        x: 1721
+        y: 3064
+        width: 42
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd4adedd62d13b24182d1cc6e1812671
+      internalID: 112323850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_31
+      rect:
+        serializedVersion: 2
+        x: 1902
+        y: 3068
+        width: 8
+        height: 4
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1aecf04defd2dbe448ee009583e0a7a9
+      internalID: 1243020591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_32
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 2568
+        width: 494
+        height: 495
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 687585df47a62b448b33fb300deb28db
+      internalID: 230809234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_33
+      rect:
+        serializedVersion: 2
+        x: 2013
+        y: 2940
+        width: 28
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de2b7bfc396a52348bd7de05e2bde8e9
+      internalID: 311616460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_34
+      rect:
+        serializedVersion: 2
+        x: 2126
+        y: 2641
+        width: 350
+        height: 345
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d5921cf61be4b254abafa9441e1f92ff
+      internalID: 1387794379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_35
+      rect:
+        serializedVersion: 2
+        x: 2616
+        y: 2610
+        width: 433
+        height: 444
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc89bfbd17267d543839c53c2d76f515
+      internalID: -528467225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_36
+      rect:
+        serializedVersion: 2
+        x: 3010
+        y: 2953
+        width: 47
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e1582fa059063d47a6ac58fca7c4a19
+      internalID: 1214337261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_37
+      rect:
+        serializedVersion: 2
+        x: 3119
+        y: 2600
+        width: 406
+        height: 439
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 019abc5c32bd8984d8322f44b923bb25
+      internalID: -1956581879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_38
+      rect:
+        serializedVersion: 2
+        x: 3579
+        y: 2969
+        width: 5
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6cd10bd24cf55bd44b69a29a8b0a553f
+      internalID: 1550281670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_39
+      rect:
+        serializedVersion: 2
+        x: 3612
+        y: 2588
+        width: 456
+        height: 456
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6aaf686a7ec2764f91905301d874eb6
+      internalID: -525382196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_40
+      rect:
+        serializedVersion: 2
+        x: 2021
+        y: 2890
+        width: 24
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 985e07c41f593634c88223267239a396
+      internalID: -1268606465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_41
+      rect:
+        serializedVersion: 2
+        x: 3058
+        y: 2930
+        width: 14
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 303bcb0ddc1382947bfc64066d7569af
+      internalID: -1463621497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_42
+      rect:
+        serializedVersion: 2
+        x: 3561
+        y: 2938
+        width: 23
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c999ffef68c6a34ea75f51155151b2c
+      internalID: -714931751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_43
+      rect:
+        serializedVersion: 2
+        x: 3020
+        y: 2853
+        width: 39
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 415d45d2fcfc7a240885a291ff437f4c
+      internalID: 1277271932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_44
+      rect:
+        serializedVersion: 2
+        x: 3066
+        y: 2869
+        width: 6
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae02a6b2a78893c4a96b5f21b25b6803
+      internalID: 2116091537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_45
+      rect:
+        serializedVersion: 2
+        x: 3555
+        y: 2878
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88348c67db2e305409e3de0a2a538dde
+      internalID: 1562338671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_46
+      rect:
+        serializedVersion: 2
+        x: 3577
+        y: 2877
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e15b7d17ca3bb2a46bf9b65d842852d7
+      internalID: -1181999668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_47
+      rect:
+        serializedVersion: 2
+        x: 3523
+        y: 2807
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad958312b1c12cc46a5448c20edca584
+      internalID: -28145577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_48
+      rect:
+        serializedVersion: 2
+        x: 2824
+        y: 2595
+        width: 21
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa5662a5aa4f172428f1eb7f8600074a
+      internalID: -560306806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_49
+      rect:
+        serializedVersion: 2
+        x: 2864
+        y: 2599
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a74c05bd865d5a43b0a822fb7f17175
+      internalID: -177119930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_50
+      rect:
+        serializedVersion: 2
+        x: 3386
+        y: 2567
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb94c3d1fc699b34ea8745cc621350c2
+      internalID: 1915200665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_51
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 2080
+        width: 448
+        height: 448
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c7e69a740a4727438551a1a563e1d8f
+      internalID: 400272366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_52
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 2064
+        width: 480
+        height: 477
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea506bf3781e0c04c801bbab01382775
+      internalID: 622545229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_53
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 2065
+        width: 478
+        height: 479
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1f1bbef01256fb43abefdc896767d01
+      internalID: 1942056797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_54
+      rect:
+        serializedVersion: 2
+        x: 1564
+        y: 2076
+        width: 456
+        height: 456
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ff9f32cf08b67e46aac14842b6ce6fa
+      internalID: 323701490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_55
+      rect:
+        serializedVersion: 2
+        x: 2089
+        y: 2098
+        width: 426
+        height: 439
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3295d0c22963bcf4db55038ae1af082c
+      internalID: 213230050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_56
+      rect:
+        serializedVersion: 2
+        x: 2593
+        y: 2079
+        width: 448
+        height: 448
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf04512367ba3274ea3e5ef2b04ff05e
+      internalID: -1076793260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_57
+      rect:
+        serializedVersion: 2
+        x: 3075
+        y: 2048
+        width: 1018
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0dc885c1f56e6954e96080c355737ab7
+      internalID: 1508815148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_58
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 1555
+        width: 474
+        height: 474
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dff41d90ca9ea0f498e8921a18b124dc
+      internalID: -755998055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_59
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 1571
+        width: 441
+        height: 441
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85a3d60290391874b81ada7e62dab978
+      internalID: 1001281048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_60
+      rect:
+        serializedVersion: 2
+        x: 2206
+        y: 1919
+        width: 34
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5467b988525ef242b641e0196e93d35
+      internalID: -1306994249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_61
+      rect:
+        serializedVersion: 2
+        x: 2249
+        y: 1933
+        width: 28
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06e275242651a0d4fb71a67957834aef
+      internalID: -1034104812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_62
+      rect:
+        serializedVersion: 2
+        x: 2296
+        y: 1938
+        width: 25
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4da786f93d8f3df45b34a18756342db9
+      internalID: 1498961891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_63
+      rect:
+        serializedVersion: 2
+        x: 2333
+        y: 1931
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 466130a6bf7dcf2419cec0125dd539ae
+      internalID: -890389409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_64
+      rect:
+        serializedVersion: 2
+        x: 2369
+        y: 1912
+        width: 34
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e33e752aeaf86e84a9b6eebbffba4d7a
+      internalID: 522044981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_65
+      rect:
+        serializedVersion: 2
+        x: 3120
+        y: 1552
+        width: 411
+        height: 468
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a70d42026bbcd594fb258f10b051b2c9
+      internalID: -474797052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_66
+      rect:
+        serializedVersion: 2
+        x: 3584
+        y: 1024
+        width: 512
+        height: 1024
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 23213dd5bb3441f46bcc1f148ce6a0f4
+      internalID: -1634986617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_67
+      rect:
+        serializedVersion: 2
+        x: 1143
+        y: 1655
+        width: 274
+        height: 274
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eaeb1faffb1f33e4ab5b823080dff58f
+      internalID: 1657347115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_68
+      rect:
+        serializedVersion: 2
+        x: 1677
+        y: 1724
+        width: 229
+        height: 198
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c24dedc0c41e524a937fd12fe237c96
+      internalID: -1805953987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_69
+      rect:
+        serializedVersion: 2
+        x: 2170
+        y: 1893
+        width: 37
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cde59c07d1dbeb7468b2b2c5bd220749
+      internalID: 139922020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_70
+      rect:
+        serializedVersion: 2
+        x: 2403
+        y: 1890
+        width: 37
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4dbe133327b5f144a94f12054af76542
+      internalID: 1593444336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_71
+      rect:
+        serializedVersion: 2
+        x: 2150
+        y: 1864
+        width: 28
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e12a32dbd39eb94790b387987d89e58
+      internalID: 1254379477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_72
+      rect:
+        serializedVersion: 2
+        x: 2434
+        y: 1855
+        width: 32
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3845dfd793434b643baeb162d47671be
+      internalID: -456062340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_73
+      rect:
+        serializedVersion: 2
+        x: 2139
+        y: 1831
+        width: 23
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c0f6e8cffaa73e43ba7859e59c7efea
+      internalID: -1275856531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_74
+      rect:
+        serializedVersion: 2
+        x: 2447
+        y: 1817
+        width: 26
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21c08a7056e765a459aff6a6b73dc63b
+      internalID: -359915995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_75
+      rect:
+        serializedVersion: 2
+        x: 2129
+        y: 1789
+        width: 28
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70961ecd70bab464b83f3c12d1b07cc9
+      internalID: 324751334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_76
+      rect:
+        serializedVersion: 2
+        x: 2453
+        y: 1780
+        width: 29
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4a8272d739c4aa46a228bd689048629
+      internalID: -994580691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_77
+      rect:
+        serializedVersion: 2
+        x: 2130
+        y: 1748
+        width: 30
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ab98a415cdff1741851841d830bb19c
+      internalID: -582175641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_78
+      rect:
+        serializedVersion: 2
+        x: 2445
+        y: 1735
+        width: 31
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ece2f925ad48c1f4cacb71b344484a1d
+      internalID: -1499188332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_79
+      rect:
+        serializedVersion: 2
+        x: 2560
+        y: 1536
+        width: 512
+        height: 246
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef9e7116d4b95d345af986a4fba1b248
+      internalID: 393280957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_80
+      rect:
+        serializedVersion: 2
+        x: 2141
+        y: 1708
+        width: 38
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e11e3145272a00449b9092ea71cb917
+      internalID: 1198868843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_81
+      rect:
+        serializedVersion: 2
+        x: 2432
+        y: 1690
+        width: 31
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6f2c2a54a196a64a8fa330773799456
+      internalID: -1882502358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_82
+      rect:
+        serializedVersion: 2
+        x: 2166
+        y: 1667
+        width: 39
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28bc3b1ea839bd04fb93b67dd58c186e
+      internalID: -2051409282
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_83
+      rect:
+        serializedVersion: 2
+        x: 2397
+        y: 1657
+        width: 41
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb0fc018e528987488d034bd384878a2
+      internalID: 263833939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_84
+      rect:
+        serializedVersion: 2
+        x: 2208
+        y: 1639
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc10212c311d77646bda6ce650c4f8b2
+      internalID: -1807583017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_85
+      rect:
+        serializedVersion: 2
+        x: 2244
+        y: 1620
+        width: 31
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0de317bd7e8a0c342b110460c6ebacb4
+      internalID: 1633260297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_86
+      rect:
+        serializedVersion: 2
+        x: 2290
+        y: 1615
+        width: 25
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0348cfcfe178eab469b33a3e05089c11
+      internalID: 1710318672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_87
+      rect:
+        serializedVersion: 2
+        x: 2328
+        y: 1617
+        width: 29
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 226971f1f99788342bfc6dd21359ccb0
+      internalID: -1545152762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_88
+      rect:
+        serializedVersion: 2
+        x: 2370
+        y: 1634
+        width: 23
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e97920955aa4b9e42a4f6ed5d901f11b
+      internalID: 1349398076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_89
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 1037
+        width: 490
+        height: 493
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99542d97392d419449de89004110220f
+      internalID: -1034557994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_90
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 1083
+        width: 393
+        height: 394
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 035b1cecc9a9a5745b8d1f164980aec0
+      internalID: -1863810143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_91
+      rect:
+        serializedVersion: 2
+        x: 1027
+        y: 1147
+        width: 509
+        height: 262
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e40cdb2174afcd44880e46ecbff1a01a
+      internalID: 1315047434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_92
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 1056
+        width: 448
+        height: 448
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88b78bd8aebbde54abb5f9642215f15a
+      internalID: 1650396930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_93
+      rect:
+        serializedVersion: 2
+        x: 2053
+        y: 1029
+        width: 507
+        height: 499
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d021d003c8cc1c947886d9cc7007a335
+      internalID: -1887569111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_94
+      rect:
+        serializedVersion: 2
+        x: 2597
+        y: 1067
+        width: 434
+        height: 433
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9111d3a8e351a744e9353f15a6707711
+      internalID: -262295865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_95
+      rect:
+        serializedVersion: 2
+        x: 3113
+        y: 1032
+        width: 447
+        height: 480
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4731dd462e65bd49863deb637770f2c
+      internalID: -1757565381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_96
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 559
+        width: 495
+        height: 435
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68be3df8613b4f9499cd9c6a2296ce2b
+      internalID: 1443966031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_97
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 704
+        width: 402
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ae3eca87a142a341aeff71f8f0364e0
+      internalID: -576406063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_98
+      rect:
+        serializedVersion: 2
+        x: 1116
+        y: 575
+        width: 327
+        height: 378
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e90602ee7458734f8fe7740bf335d03
+      internalID: 1162193906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_99
+      rect:
+        serializedVersion: 2
+        x: 1585
+        y: 554
+        width: 405
+        height: 423
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d229e92ecddb0148af14638c14e65da
+      internalID: 1727495742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UniqueMagicAbilities_8x8_100
+      rect:
+        serializedVersion: 2
+        x: 2089
+        y: 530
+        width: 423
+        height: 473
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd97db806bc6cfc49b4f196a30f378c8
+      internalID: -1757171649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
+    customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: b318157a9c5c7a14f93c850d6851dcf8
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-  spritePackingTag: 
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      UniqueMagicAbilities_8x8_0: 1095033332
+      UniqueMagicAbilities_8x8_1: -525838863
+      UniqueMagicAbilities_8x8_10: 1061744197
+      UniqueMagicAbilities_8x8_100: -1757171649
+      UniqueMagicAbilities_8x8_11: 2091562109
+      UniqueMagicAbilities_8x8_12: 906923314
+      UniqueMagicAbilities_8x8_13: 1575990675
+      UniqueMagicAbilities_8x8_14: 1825541635
+      UniqueMagicAbilities_8x8_15: 494537701
+      UniqueMagicAbilities_8x8_16: -685579360
+      UniqueMagicAbilities_8x8_17: -1076741439
+      UniqueMagicAbilities_8x8_18: -1083602455
+      UniqueMagicAbilities_8x8_19: 377343589
+      UniqueMagicAbilities_8x8_2: -351605309
+      UniqueMagicAbilities_8x8_20: 1554460697
+      UniqueMagicAbilities_8x8_21: 2045780681
+      UniqueMagicAbilities_8x8_22: -1639565900
+      UniqueMagicAbilities_8x8_23: -721676465
+      UniqueMagicAbilities_8x8_24: -1159358359
+      UniqueMagicAbilities_8x8_25: -1964982509
+      UniqueMagicAbilities_8x8_26: -1677965483
+      UniqueMagicAbilities_8x8_27: -1729853301
+      UniqueMagicAbilities_8x8_28: -1035605865
+      UniqueMagicAbilities_8x8_29: 1698719815
+      UniqueMagicAbilities_8x8_3: -1029130401
+      UniqueMagicAbilities_8x8_30: 112323850
+      UniqueMagicAbilities_8x8_31: 1243020591
+      UniqueMagicAbilities_8x8_32: 230809234
+      UniqueMagicAbilities_8x8_33: 311616460
+      UniqueMagicAbilities_8x8_34: 1387794379
+      UniqueMagicAbilities_8x8_35: -528467225
+      UniqueMagicAbilities_8x8_36: 1214337261
+      UniqueMagicAbilities_8x8_37: -1956581879
+      UniqueMagicAbilities_8x8_38: 1550281670
+      UniqueMagicAbilities_8x8_39: -525382196
+      UniqueMagicAbilities_8x8_4: 997832074
+      UniqueMagicAbilities_8x8_40: -1268606465
+      UniqueMagicAbilities_8x8_41: -1463621497
+      UniqueMagicAbilities_8x8_42: -714931751
+      UniqueMagicAbilities_8x8_43: 1277271932
+      UniqueMagicAbilities_8x8_44: 2116091537
+      UniqueMagicAbilities_8x8_45: 1562338671
+      UniqueMagicAbilities_8x8_46: -1181999668
+      UniqueMagicAbilities_8x8_47: -28145577
+      UniqueMagicAbilities_8x8_48: -560306806
+      UniqueMagicAbilities_8x8_49: -177119930
+      UniqueMagicAbilities_8x8_5: 1897803272
+      UniqueMagicAbilities_8x8_50: 1915200665
+      UniqueMagicAbilities_8x8_51: 400272366
+      UniqueMagicAbilities_8x8_52: 622545229
+      UniqueMagicAbilities_8x8_53: 1942056797
+      UniqueMagicAbilities_8x8_54: 323701490
+      UniqueMagicAbilities_8x8_55: 213230050
+      UniqueMagicAbilities_8x8_56: -1076793260
+      UniqueMagicAbilities_8x8_57: 1508815148
+      UniqueMagicAbilities_8x8_58: -755998055
+      UniqueMagicAbilities_8x8_59: 1001281048
+      UniqueMagicAbilities_8x8_6: 1899788547
+      UniqueMagicAbilities_8x8_60: -1306994249
+      UniqueMagicAbilities_8x8_61: -1034104812
+      UniqueMagicAbilities_8x8_62: 1498961891
+      UniqueMagicAbilities_8x8_63: -890389409
+      UniqueMagicAbilities_8x8_64: 522044981
+      UniqueMagicAbilities_8x8_65: -474797052
+      UniqueMagicAbilities_8x8_66: -1634986617
+      UniqueMagicAbilities_8x8_67: 1657347115
+      UniqueMagicAbilities_8x8_68: -1805953987
+      UniqueMagicAbilities_8x8_69: 139922020
+      UniqueMagicAbilities_8x8_7: 1641817741
+      UniqueMagicAbilities_8x8_70: 1593444336
+      UniqueMagicAbilities_8x8_71: 1254379477
+      UniqueMagicAbilities_8x8_72: -456062340
+      UniqueMagicAbilities_8x8_73: -1275856531
+      UniqueMagicAbilities_8x8_74: -359915995
+      UniqueMagicAbilities_8x8_75: 324751334
+      UniqueMagicAbilities_8x8_76: -994580691
+      UniqueMagicAbilities_8x8_77: -582175641
+      UniqueMagicAbilities_8x8_78: -1499188332
+      UniqueMagicAbilities_8x8_79: 393280957
+      UniqueMagicAbilities_8x8_8: 1025396380
+      UniqueMagicAbilities_8x8_80: 1198868843
+      UniqueMagicAbilities_8x8_81: -1882502358
+      UniqueMagicAbilities_8x8_82: -2051409282
+      UniqueMagicAbilities_8x8_83: 263833939
+      UniqueMagicAbilities_8x8_84: -1807583017
+      UniqueMagicAbilities_8x8_85: 1633260297
+      UniqueMagicAbilities_8x8_86: 1710318672
+      UniqueMagicAbilities_8x8_87: -1545152762
+      UniqueMagicAbilities_8x8_88: 1349398076
+      UniqueMagicAbilities_8x8_89: -1034557994
+      UniqueMagicAbilities_8x8_9: -199240488
+      UniqueMagicAbilities_8x8_90: -1863810143
+      UniqueMagicAbilities_8x8_91: 1315047434
+      UniqueMagicAbilities_8x8_92: 1650396930
+      UniqueMagicAbilities_8x8_93: -1887569111
+      UniqueMagicAbilities_8x8_94: -262295865
+      UniqueMagicAbilities_8x8_95: -1757565381
+      UniqueMagicAbilities_8x8_96: 1443966031
+      UniqueMagicAbilities_8x8_97: -576406063
+      UniqueMagicAbilities_8x8_98: 1162193906
+      UniqueMagicAbilities_8x8_99: 1727495742
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  pSDShowRemoveMatteOption: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 

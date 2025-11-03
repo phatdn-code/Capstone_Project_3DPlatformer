@@ -36,7 +36,6 @@ namespace PLAYERTWO.PlatformerProject
 
         [Header("Movement Settings")]
         [SerializeField] private Transform centerPoint;
-        [SerializeField] private float wanderRadius = 10f;
         [SerializeField] private float movementRestTime = 2f;
         [SerializeField] private float movementSpeedMultiplier = 1.5f;
 
@@ -82,6 +81,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool unlockedPhase2Attack;
         private bool unlockedPhase3Attack;
 
+        private float wanderRadius;
         private float nextMeleeTime;
         private float m_originalSpeed;
 
@@ -96,6 +96,7 @@ namespace PLAYERTWO.PlatformerProject
             InitializePlayer();
             DisableAllEffects();
             OnBossPhaseStartEvent.AddListener(OnPhaseChanged);
+            wanderRadius = MovementBoundaryZone.Instance.GetBoundaryRadius();
         }
 
         protected override void OnBattleStarted()

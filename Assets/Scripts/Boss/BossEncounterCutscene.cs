@@ -38,11 +38,15 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+        private MovementBoundaryZone boundary;
+
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
 
         private void Start()
         {
+            boundary = FindFirstObjectByType<MovementBoundaryZone>();
+
             mainCam = Camera.main;
             if (mainCam != null)
                 camDefaultFOV = mainCam.fieldOfView;
@@ -65,7 +69,7 @@ namespace PLAYERTWO.PlatformerProject
         private IEnumerator RunSequence()
         {
             // 1) Khoá player
-            PlayerLockController.Instance.LockPlayer(true);
+            PlayerHub.Instance.LockPlayer(true);
 
             yield return new WaitForSeconds(cameraIntroDelay);
 
@@ -100,11 +104,13 @@ namespace PLAYERTWO.PlatformerProject
                 StartCoroutine(CameraResetFOV());
 
             // 6) Mở khoá player
-            PlayerLockController.Instance.LockPlayer(false);
+            PlayerHub.Instance.LockPlayer(false);
 
             // 7) Thực hiện animation bắt đầu vào combat
             bossCore.bossAnim?.PlayBattleStart();
             yield return new WaitForSeconds(2);
+
+            if (boundary != null) boundary.ActivateBoundary();
 
             bossCore.StartBattle();
         }
