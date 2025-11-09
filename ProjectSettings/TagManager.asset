@@ -21,6 +21,7 @@ TagManager:
   - Wall
   - Bomb
   - Boss
+  - ColliderChecking
   layers:
   - Default
   - TransparentFX

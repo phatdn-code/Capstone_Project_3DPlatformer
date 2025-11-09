@@ -269,6 +269,7 @@ MonoBehaviour:
   - {fileID: 3557520405291513237}
   puzzleInput: []
   keyObject: {fileID: 0}
+  hintObject: {fileID: 276454079902519153}
   spawnPoint: {fileID: 4464135976682966435}
   canReset: 1
 --- !u!1001 &48594095689489116
