@@ -144,11 +144,17 @@ namespace PLAYERTWO.PlatformerProject
             {
                 if (m_phaseTransition != null)
                     StartCoroutine(m_phaseTransition.ExecuteTransition(this, nextPhase));
-
-                // fallback logic nếu không có transition script
-                else DefaultPhaseTransition(nextPhase);
+                else
+                    DefaultPhaseTransition(nextPhase);
             }
-            else OnBossDefeated();
+            else
+            {
+                // Gọi Final Sequence
+                if (TryGetComponent(out BossLinker linker) && linker.finalSequence != null)
+                    linker.finalSequence.RunSequence(linker);
+
+                else OnBossDefeated();
+            }
         }
 
         /// <summary>

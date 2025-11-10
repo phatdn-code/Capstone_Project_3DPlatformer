@@ -1,42 +1,42 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// 🔒 Giới hạn khu vực di chuyển của Player trong bán kính nhất định.
-    /// Khi Player cố ra ngoài, hệ thống sẽ đẩy ngược lại và khóa input tạm thời.
+    /// 🔒 Giới hạn khu vực di chuyển hình tròn (tường vô hình trơn mượt).
+    /// Player không thể vượt ra ngoài, nhưng có thể trượt quanh rìa mượt mà như Physic Material friction thấp.
     /// </summary>
     [DisallowMultipleComponent]
     public class MovementBoundaryZone : SingletonMonobehaviour<MovementBoundaryZone>
     {
-        //─────────────────────────────────────────────
-        #region ✦ BIẾN CÀI ĐẶT ✦
-
         [Header("Boundary Settings")]
-        [SerializeField] private float boundaryRadius = 12f;       // Bán kính giới hạn
-        [SerializeField] private Transform zoneCenter;             // Tâm vùng giới hạn
+        [SerializeField] private float boundaryRadius = 12f;
+        [SerializeField] private Transform zoneCenter;
 
-        [Header("Push Back Settings")]
-        [SerializeField] private float pushBackForce = 10f;        // Lực đẩy ngược lại
-        [SerializeField] private float pushBackDuration = 0.3f;    // Thời gian đẩy
-        [SerializeField] private bool restrictInput = true;        // Khóa input tạm thời
+        [Header("Physical Behavior")]
+        [SerializeField, Tooltip("Độ bật nhẹ khi va biên (tăng cảm giác phản lực)")]
+        private float boundaryForce = 10f;
 
-        [Header("Activation")]
-        [SerializeField] private bool activateByTrigger = true;    // Có kích hoạt bằng trigger không
-        private bool isActive = false;                             // Đang hoạt động hay không
+        [SerializeField, Tooltip("Giảm ma sát khi trượt quanh rìa (1 = trượt tự do)")]
+        private float friction = 0.95f;
+
+        [SerializeField, Tooltip("Khoảng đệm nhỏ bên trong để tránh jitter")]
+        private float innerPadding = 0.05f;
+
+        [Header("Activation Control")]
+        [SerializeField, Tooltip("Có cần kích hoạt bằng trigger hay luôn bật")]
+        private bool activateByTrigger = true;
+        private bool isActive = false;
 
         [Header("Debug")]
-        [SerializeField] private Color zoneColor = new Color(0.3f, 0.7f, 1f, 0.15f);
         [SerializeField] private bool showGizmos = true;
+        [SerializeField] private Color zoneColor = new Color(0.3f, 0.7f, 1f, 0.15f);
 
-        // Tham chiếu Player & Input
         private Player playerInside;
         private PlayerInputManager inputManager;
 
-        #endregion
         //─────────────────────────────────────────────
-        #region ✦ UNITY LIFECYCLE ✦
+        #region === UNITY LIFECYCLE ===
 
         private void Start()
         {
@@ -49,78 +49,91 @@ namespace PLAYERTWO.PlatformerProject
 
         private void Update()
         {
+            // Nếu chưa kích hoạt thì không giới hạn
             if (!isActive || playerInside == null)
                 return;
 
-            float distance = Vector3.Distance(zoneCenter.position, playerInside.transform.position);
-            if (distance > boundaryRadius)
-                HandlePlayerOutsideZone();
+            // Kiểm tra và giới hạn chuyển động
+            ApplyCircularPhysicsConstraint();
         }
 
         #endregion
         //─────────────────────────────────────────────
-        #region ✦ KÍCH HOẠT VÙNG ✦
+        #region === PUBLIC CONTROL ===
 
         /// <summary>
-        /// 🔓 Kích hoạt vùng giới hạn (gọi từ BossEncounterCutscene).
+        /// 🔓 Kích hoạt vùng giới hạn (gọi từ BossEncounterCutscene hoặc sự kiện).
         /// </summary>
         public void ActivateBoundary() => isActive = true;
 
         /// <summary>
-        /// Trả về bán kính giới hạn (cho các script khác dùng, ví dụ SoldierRobot).
+        /// Trả về bán kính giới hạn (cho script khác như SoldierRobot dùng).
         /// </summary>
         public float GetBoundaryRadius() => boundaryRadius;
 
+        /// <summary>
+        /// Kiểm tra xem vùng giới hạn có đang kích hoạt không.
+        /// </summary>
+        public bool IsActive => isActive;
+
         #endregion
         //─────────────────────────────────────────────
-        #region ✦ XỬ LÝ PLAYER ✦
+        #region === CORE PHYSICS CONSTRAINT ===
 
         /// <summary>
-        /// Khi Player ra khỏi vùng, đẩy ngược lại và khóa input ngắn.
+        /// Giới hạn di chuyển trong vòng tròn — Player trượt quanh rìa thay vì bị kẹt.
         /// </summary>
-        private void HandlePlayerOutsideZone()
+        private void ApplyCircularPhysicsConstraint()
         {
-            Vector3 toPlayer = playerInside.transform.position - zoneCenter.position;
-            Vector3 pushDirection = -toPlayer.normalized;
+            Vector3 playerPos = playerInside.transform.position;
+            Vector3 toPlayer = playerPos - zoneCenter.position;
+            float distance = toPlayer.magnitude;
+            float maxRadius = boundaryRadius - innerPadding;
 
-            if (restrictInput && inputManager != null)
-                inputManager.DisableMovementTemporarily(pushBackDuration);
-
-            StartCoroutine(PushBackPlayer(playerInside, pushDirection * pushBackForce));
-        }
-
-        /// <summary>
-        /// Coroutine đẩy Player trở lại vùng an toàn.
-        /// </summary>
-        private IEnumerator PushBackPlayer(Player player, Vector3 force)
-        {
-            float elapsed = 0f;
-            Vector3 startVel = player.velocity;
-
-            while (elapsed < pushBackDuration)
+            // Nếu Player vượt ra khỏi ranh giới
+            if (distance > maxRadius)
             {
-                player.velocity = Vector3.Lerp(startVel, force, elapsed / pushBackDuration);
-                elapsed += Time.deltaTime;
-                yield return null;
-            }
+                Vector3 normal = toPlayer.normalized;
 
-            player.velocity = Vector3.zero;
+                // Đưa Player sát trong rìa (tránh jitter)
+                Vector3 correctedPos = zoneCenter.position + normal * maxRadius;
+
+                // Di chuyển mượt về rìa (nếu tốc độ cao)
+                playerInside.transform.position = Vector3.Lerp(
+                    playerPos,
+                    correctedPos,
+                    Time.deltaTime * boundaryForce
+                );
+
+                // Vận tốc hiện tại
+                Vector3 velocity = playerInside.velocity;
+
+                // Loại bỏ hướng đi ra ngoài (vuông góc tường)
+                float outwardSpeed = Vector3.Dot(velocity, normal);
+                if (outwardSpeed > 0f)
+                    velocity -= normal * outwardSpeed;
+
+                // Giữ lại vận tốc tiếp tuyến và thêm ma sát
+                velocity *= friction;
+
+                // Cộng phản lực nhẹ để Player cảm nhận có tường
+                velocity -= normal * boundaryForce * 0.05f * Time.deltaTime;
+
+                playerInside.velocity = velocity;
+            }
         }
 
         #endregion
         //─────────────────────────────────────────────
-        #region ✦ GIZMOS ✦
+        #region === GIZMOS ===
 
-        /// <summary>
-        /// Vẽ vùng giới hạn trong Scene để dễ quan sát.
-        /// </summary>
         private void OnDrawGizmos()
         {
             if (!showGizmos) return;
 
             Gizmos.color = zoneColor;
             Vector3 center = zoneCenter != null ? zoneCenter.position : transform.position;
-            Gizmos.DrawSphere(center, boundaryRadius);
+            Gizmos.DrawWireSphere(center, boundaryRadius);
         }
 
         #endregion

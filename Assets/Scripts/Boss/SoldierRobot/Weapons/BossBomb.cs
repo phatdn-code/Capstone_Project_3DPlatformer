@@ -43,6 +43,14 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float pulseDuration = 1f;
         [SerializeField] private float flashSpeed = 0.2f;
 
+        [Header("Special Settings")]
+        [SerializeField] private bool disableFuseOnLand = false;
+        public bool DisableFuseOnLand
+        {
+            get => disableFuseOnLand;
+            set => disableFuseOnLand = value;
+        }
+
         #endregion
 
         //─────────────────────────────────────────────
@@ -119,7 +127,8 @@ namespace PLAYERTWO.PlatformerProject
                 if (ownerBoss != null && ownerBoss.bossHealth.currentPhase >= 1)
                     StartChasingPlayer();
 
-                DoSquashAndStartFuse();
+                if (!disableFuseOnLand)
+                    DoSquashAndStartFuse();
             }
 
 
@@ -463,6 +472,55 @@ namespace PLAYERTWO.PlatformerProject
             Vector3 dir = (transform.forward + randomOffset).normalized;
             LaunchBomb(dir + Vector3.up * 0.6f);
         }
+
+        /// <summary>
+        /// 🚀 Bay đến vị trí chỉ định (dùng cho bomb khổng lồ hoặc cinematic)
+        /// </summary>
+        public void LaunchToPosition(Vector3 targetPos, float travelTime = 1.5f, float arcHeight = 5f)
+        {
+            // Ngắt mọi hoạt động trước đó (nếu có)
+            StopAllCoroutines();
+            DOTween.Kill(transform);
+
+            // Tạm tắt vật lý trong lúc bay theo tween
+            rb.isKinematic = true;
+            rb.useGravity = false;
+
+            // Xác định điểm đầu, giữa, cuối cho đường bay cong
+            Vector3 start = transform.position;
+            Vector3 end = targetPos;
+            Vector3 mid = (start + end) / 2f + Vector3.up * arcHeight;
+
+            // Tạo tween quỹ đạo cong
+            Sequence seq = DOTween.Sequence();
+
+            // Quỹ đạo di chuyển
+            seq.Append(transform.DOPath(
+                new Vector3[] { start, mid, end },
+                travelTime,
+                PathType.CatmullRom
+            ).SetEase(Ease.InOutSine));
+
+            // Hướng bomb về đích khi bay
+            seq.Join(transform.DOLookAt(end, 0.3f, AxisConstraint.Y));
+
+            // Khi bay xong
+            seq.OnComplete(() =>
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.isKinematic = false;
+                rb.useGravity = true;
+                hasLanded = true;
+
+                // 🧠 Chỉ bomb thường mới kích hoạt fuse sau khi chạm đất
+                if (!disableFuseOnLand)
+                    DoSquashAndStartFuse();
+
+                // Bomb cinematic (Final Bomb): đứng yên tại chỗ, chờ player phản công
+                else animator?.SetBool("IsMove", false);
+            });
+        }
+
 
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()

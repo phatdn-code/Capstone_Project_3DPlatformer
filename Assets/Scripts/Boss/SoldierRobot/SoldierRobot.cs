@@ -78,8 +78,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool m_isInAttackSequence;
         private bool m_isMoving;
 
-        private bool unlockedPhase2Attack;
-        private bool unlockedPhase3Attack;
+        private bool isPhase2Active;
 
         private float wanderRadius;
         private float nextMeleeTime;
@@ -145,8 +144,7 @@ namespace PLAYERTWO.PlatformerProject
 
         private void OnPhaseChanged(int phaseIndex)
         {
-            if (phaseIndex == 1) unlockedPhase2Attack = true;
-            if (phaseIndex == 2) unlockedPhase3Attack = true;
+            isPhase2Active = (phaseIndex >= 2);
         }
 
         #endregion
@@ -214,34 +212,52 @@ namespace PLAYERTWO.PlatformerProject
 
                 if (!isMeleeAttacking)
                 {
-                    // 🔹 Bước 1: Ném bomb
+                    // ────────────────────────────────
+                    // 🔹 BƯỚC 1: NÉM BOMB (luôn thực hiện)
+                    // ────────────────────────────────
                     ShootBomb(true);
                     yield return new WaitForSeconds(1f);
                     ShootBomb(false);
                     yield return new WaitForSeconds(3f);
 
-                    // 🔹 Bước 2: Skill đặc biệt Phase 2 / Phase 3
-                    bool usedSpecialSkill = false;
-
-                    if (unlockedPhase3Attack && Random.value < 0.7f)
-                    {
-                        yield return PerformAdvancedAOESkill(); // Phase 3 AOE
-                        usedSpecialSkill = true;
-                    }
-                    else if (unlockedPhase2Attack && Random.value < 0.6f)
-                    {
-                        yield return PerformSpecialSkill(); // Phase 2 AOE
-                        usedSpecialSkill = true;
-                    }
-
-                    if (!usedSpecialSkill)
-                        yield return FireballSequence();
+                    // ────────────────────────────────
+                    // 🔹 BƯỚC 2: Random chọn skill phụ
+                    // ────────────────────────────────
+                    yield return PerformRandomSecondarySkill();
                 }
 
-                // 🔹 Bước 3: Nghỉ và di chuyển
+                // ────────────────────────────────
+                // 🔹 BƯỚC 3: Nghỉ và di chuyển vị trí mới
+                // ────────────────────────────────
                 yield return new WaitForSeconds(5f);
                 yield return StartCoroutine(MoveToNewPosition());
             }
+        }
+
+        /// <summary>
+        /// 🎲 Random chọn skill phụ (Fireball hoặc AOE tuỳ theo phase)
+        /// </summary>
+        private IEnumerator PerformRandomSecondarySkill()
+        {
+            float roll = Random.value;
+
+            // Tỉ lệ base
+            float fireballChance = isPhase2Active ? 0.4f : 0.5f;
+            float aoeChance = isPhase2Active ? 0.7f : 0.8f;
+
+            // 🔥 Fireball
+            if (roll < fireballChance)
+                yield return FireballSequence();
+
+            else if (roll < aoeChance)
+            {
+                // 💥 AOE Skill (tuỳ phase)
+                if (isPhase2Active) yield return PerformAdvancedAOESkill();
+                else yield return PerformSpecialSkill();
+            }
+
+            // 😴 Không làm gì
+            else yield return new WaitForSeconds(1.5f);
         }
 
         #endregion

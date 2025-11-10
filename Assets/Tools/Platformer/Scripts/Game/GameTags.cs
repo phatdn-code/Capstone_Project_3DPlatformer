@@ -6,6 +6,7 @@ namespace PLAYERTWO.PlatformerProject
 	{
 		public static string Player = "Player";
 		public static string Enemy = "Enemy";
+		public static string Boss = "Boss";
 		public static string Hazard = "Hazard";
 		public static string Platform = "Platform";
 		public static string Pole = "Pole";

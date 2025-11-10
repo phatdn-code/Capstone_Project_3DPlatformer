@@ -39,6 +39,7 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         private MovementBoundaryZone boundary;
+        private Player player;
 
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
@@ -46,6 +47,7 @@ namespace PLAYERTWO.PlatformerProject
         private void Start()
         {
             boundary = FindFirstObjectByType<MovementBoundaryZone>();
+            player = PlayerHub.Instance.Player;
 
             mainCam = Camera.main;
             if (mainCam != null)
@@ -58,6 +60,9 @@ namespace PLAYERTWO.PlatformerProject
             if (!other.CompareTag("Player")) return;
 
             triggered = true;
+
+            // 🔹 Cập nhật vị trí respawn của player tại điểm boss encounter
+            SetPlayerRespawnPoint();
             StartCoroutine(RunSequence());
         }
 
@@ -149,6 +154,17 @@ namespace PLAYERTWO.PlatformerProject
                 mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, camDefaultFOV, t);
                 yield return null;
             }
+        }
+
+        #endregion
+
+        #region === PLAYER RESPAWN HANDLER ===
+
+        private void SetPlayerRespawnPoint()
+        {
+            // Lưu vị trí và hướng hiện tại của Player khi vừa chạm trigger
+            if (player != null)
+                player.SetRespawn(player.transform.position, player.transform.rotation);
         }
 
         #endregion

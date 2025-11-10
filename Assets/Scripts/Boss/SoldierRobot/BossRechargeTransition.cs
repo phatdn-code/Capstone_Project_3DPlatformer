@@ -8,15 +8,16 @@ namespace PLAYERTWO.PlatformerProject
     public class BossRechargeTransition : BossPhaseTransitionBase
     {
         //─────────────────────────────────────────────
-        #region === INSPECTOR FIELDS ===
+        #region ✦ THAM CHIẾU INSPECTOR ✦
 
-        [Header("References")]
+        [Header("Tham chiếu đối tượng")]
         [SerializeField] private Transform chargeStationTarget;
         [SerializeField] private Transform returnPoint;
         [SerializeField] private GameObject rechargeEffectPrefab;
 
-        [Tooltip("Các vật thể trong nhà sẽ bị méo khi boss hồi máu.")]
+        [Header("Hiệu ứng hồi năng lượng & Quái phụ Phase 2")]
         [SerializeField] private BossEnergyPumpEffect[] energyPumps;
+        [SerializeField] private SupportGunnerAI supportGunner;
 
         [Header("Cinemachine Settings")]
         [SerializeField] private CinemachineCamera bossCam;
@@ -24,53 +25,37 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private int bossCamPriority = 100;
         [SerializeField] private int normalCamPriority = 0;
 
-        [Header("Heal Settings")]
+        [Header("Thiết lập hồi máu")]
         [SerializeField] private float rechargeDuration = 10f;
 
-        [Header("Speed Boost Settings")]
-        [SerializeField] private float speedBoostMultiplier = 2f;   // Boss chạy nhanh hơn 40%
-        [SerializeField] private float speedRestoreDelay = 0.3f;      // Trễ 1 chút trước khi trả về tốc độ bình thường
+        [Header("Thiết lập tốc độ di chuyển")]
+        [SerializeField] private float speedBoostMultiplier = 2f;   // Boss chạy nhanh hơn
+        [SerializeField] private float speedRestoreDelay = 0.3f;    // Trễ trước khi trả lại tốc độ bình thường
 
         #endregion
 
         //─────────────────────────────────────────────
-        #region === MAIN TRANSITION FLOW ===
+        #region ✦ LUỒNG CHUYỂN PHA CHÍNH ✦
 
+        /// <summary>Toàn bộ quá trình hồi năng lượng & chuyển phase.</summary>
         public override IEnumerator ExecuteTransition(BossCore boss, int nextPhase)
         {
-            // 🧠 Lấy boss đúng kiểu
             SoldierRobot soldierBoss = boss as SoldierRobot;
-            if (soldierBoss == null)
-                yield break;
+            if (soldierBoss == null) yield break;
 
-            // ⏸️ Tạm dừng hành vi boss
             soldierBoss.SetPaused(true);
-
-            // 🔒 Khóa player
             PlayerHub.Instance.LockPlayer(true);
 
-            // 🎥 Focus camera sang boss
             yield return FocusCameraOnBoss(true);
-
-            // 🚀 Boss chạy nhanh đến nhà
             yield return MoveBossWithSpeedBoost(soldierBoss, chargeStationTarget);
-
-            // 🔄 Xoay boss hướng về nhà
             yield return soldierBoss.RotateTowardsTarget(chargeStationTarget);
 
-            // 💚 Hồi máu
             yield return StartRechargeSequence(nextPhase, soldierBoss);
-
-            // ⚙️ Chuyển phase mới
             ApplyNextPhase(nextPhase, soldierBoss);
 
-            // 🚀 Quay lại vị trí chiến đấu (cũng chạy nhanh)
             yield return MoveBossWithSpeedBoost(soldierBoss, returnPoint);
-
-            // 🎥 Trả camera về player
             yield return FocusCameraOnBoss(false);
 
-            // 🔓 Mở lại player và boss
             PlayerHub.Instance.LockPlayer(false);
             soldierBoss.SetPaused(false);
         }
@@ -78,12 +63,52 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         //─────────────────────────────────────────────
-        #region === STEP 1: CAMERA FOCUS ===
+        #region ✦ CHẾ ĐỘ CUTSCENE (FINAL PHASE) ✦
 
+        /// <summary>Chỉ hiển thị hiệu ứng hồi năng lượng, không đổi phase.</summary>
+        public IEnumerator PlayRechargeCutsceneOnly(SoldierRobot soldierBoss)
+        {
+            if (soldierBoss == null) yield break;
+
+            soldierBoss.SetPaused(true);
+            PlayerHub.Instance.LockPlayer(true);
+
+            yield return FocusCameraOnBoss(true);
+            yield return MoveBossWithSpeedBoost(soldierBoss, chargeStationTarget);
+            yield return soldierBoss.RotateTowardsTarget(chargeStationTarget);
+
+            soldierBoss.PlayRechargeAnimation(true);
+            StartPumpAndRechargeEffect();
+
+            yield return new WaitForSeconds(3f);
+
+            soldierBoss.PlayRechargeAnimation(false);
+            EndPumpAndRechargeEffect();
+
+            yield return FocusCameraOnBoss(false);
+            PlayerHub.Instance.LockPlayer(false);
+        }
+
+        /// <summary>Boss chỉ chạy đến trạm nạp năng lượng (không hồi).</summary>
+        public IEnumerator MoveBossToChargeStationOnly(SoldierRobot soldierBoss)
+        {
+            if (soldierBoss == null) yield break;
+
+            yield return FocusCameraOnBoss(true);
+            yield return MoveBossWithSpeedBoost(soldierBoss, chargeStationTarget);
+            yield return soldierBoss.RotateTowardsTarget(chargeStationTarget);
+            yield return FocusCameraOnBoss(false);
+        }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region ✦ BƯỚC 1: CAMERA FOCUS ✦
+
+        /// <summary>Focus camera vào boss hoặc trả lại player.</summary>
         private IEnumerator FocusCameraOnBoss(bool enable)
         {
-            if (bossCam == null)
-                yield break;
+            if (bossCam == null) yield break;
 
             bossCam.Priority = enable ? bossCamPriority : normalCamPriority;
             yield return new WaitForSeconds(cameraFocusTime);
@@ -92,40 +117,34 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         //─────────────────────────────────────────────
-        #region === STEP 2: MOVE WITH SPEED BOOST ===
+        #region ✦ BƯỚC 2: DI CHUYỂN VỚI TĂNG TỐC ✦
 
+        /// <summary>Cho boss di chuyển nhanh đến mục tiêu.</summary>
         private IEnumerator MoveBossWithSpeedBoost(SoldierRobot soldierBoss, Transform target)
         {
-            if (soldierBoss == null || target == null)
-                yield break;
+            if (soldierBoss == null || target == null) yield break;
 
-            // 🚀 Tăng tốc
             soldierBoss.SetSpeedMultiplier(speedBoostMultiplier);
-
-            // Di chuyển
             yield return soldierBoss.MoveToTarget(target);
-
-            // ⏳ Khôi phục tốc độ sau khi đến nơi
             soldierBoss.SetSpeedMultiplier(1f, speedRestoreDelay);
         }
-
 
         #endregion
 
         //─────────────────────────────────────────────
-        #region === STEP 3: HEAL SEQUENCE ===
+        #region ✦ BƯỚC 3: QUÁ TRÌNH HỒI NĂNG LƯỢNG ✦
 
+        /// <summary>Animation + hiệu ứng hồi máu.</summary>
         private IEnumerator StartRechargeSequence(int nextPhase, SoldierRobot soldierBoss)
         {
             soldierBoss.PlayRechargeAnimation(true);
-
             StartPumpAndRechargeEffect();
             yield return RechargeBossOverTime(nextPhase, soldierBoss);
             EndPumpAndRechargeEffect();
-
             soldierBoss.PlayRechargeAnimation(false);
         }
 
+        /// <summary>Tăng máu dần theo thời gian.</summary>
         private IEnumerator RechargeBossOverTime(int nextPhase, SoldierRobot soldierBoss)
         {
             float elapsed = 0f;
@@ -146,6 +165,7 @@ namespace PLAYERTWO.PlatformerProject
             }
         }
 
+        /// <summary>Bắt đầu hiệu ứng hồi năng lượng.</summary>
         private void StartPumpAndRechargeEffect()
         {
             foreach (var morph in energyPumps)
@@ -155,6 +175,7 @@ namespace PLAYERTWO.PlatformerProject
                 rechargeEffectPrefab.SetActive(true);
         }
 
+        /// <summary>Kết thúc hiệu ứng hồi năng lượng.</summary>
         private void EndPumpAndRechargeEffect()
         {
             foreach (var morph in energyPumps)
@@ -167,13 +188,21 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         //─────────────────────────────────────────────
-        #region === STEP 4: APPLY NEXT PHASE ===
+        #region ✦ BƯỚC 4: CHUYỂN PHA ✦
 
+        /// <summary>Áp dụng thông số cho phase mới & kích hoạt quái phụ.</summary>
         private void ApplyNextPhase(int nextPhase, SoldierRobot soldierBoss)
         {
             soldierBoss.bossHealth.InitializePhase(nextPhase, soldierBoss.phases[nextPhase].maxHealth);
             soldierBoss.ApplyPhaseVisual(nextPhase, instant: false);
             soldierBoss.OnBossPhaseStartEvent.Invoke(nextPhase);
+
+            if (nextPhase == 1 && supportGunner != null)
+            {
+                Vector3 center = MovementBoundaryZone.Instance.transform.position;
+                float radius = MovementBoundaryZone.Instance.GetBoundaryRadius();
+                supportGunner.ActivateGunner(center, radius);
+            }
         }
 
         #endregion
