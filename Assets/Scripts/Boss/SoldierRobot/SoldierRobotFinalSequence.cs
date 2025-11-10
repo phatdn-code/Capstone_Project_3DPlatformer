@@ -48,7 +48,7 @@ namespace PLAYERTWO.PlatformerProject
             var boss = linker.bossCore as SoldierRobot;
             if (boss == null) yield break;
 
-            var anim = linker.bossAnim as SoldierRobotAnimation;
+            var anim = linker.bossAnim;
 
             // 🔒 Khóa điều khiển và tạm dừng boss
             PlayerHub.Instance.LockPlayer(true);
@@ -106,7 +106,7 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>
         /// Boss bắn bomb khổng lồ ra giữa sân và focus camera vào bomb.
         /// </summary>
-        private IEnumerator ShootGiantBomb(SoldierRobotAnimation anim)
+        private IEnumerator ShootGiantBomb(BossAnimationBase anim)
         {
             anim?.PlaySpecialSkill();
             yield return new WaitForSeconds(0.5f);

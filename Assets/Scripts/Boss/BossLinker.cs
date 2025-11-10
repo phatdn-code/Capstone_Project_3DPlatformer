@@ -11,14 +11,12 @@ namespace PLAYERTWO.PlatformerProject
     public class BossLinker : MonoBehaviour
     {
         [Header("Boss Components")]
-        public BossCore bossCore;
-        public BossHealth bossHealth;
-        public BossUI bossUI;
-        public BossAnimationBase bossAnim;
-        public BossPhaseTransitionBase bossTransition;
-        public BossFinalSequenceBase finalSequence;
-
-        private bool hasTriggeredFinalSequence;
+        [HideInInspector] public BossCore bossCore;
+        [HideInInspector] public BossHealth bossHealth;
+        [HideInInspector] public BossUI bossUI;
+        [HideInInspector] public BossAnimationBase bossAnim;
+        [HideInInspector] public BossPhaseTransitionBase bossTransition;
+        [HideInInspector] public BossFinalSequenceBase finalSequence;
 
         //─────────────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
@@ -26,38 +24,8 @@ namespace PLAYERTWO.PlatformerProject
         private void Reset() => AutoLink();
         private void Awake() => AutoLink();
 
-        private void Start()
-        {
-            if (bossHealth != null)
-                bossHealth.OnBossDefeated.AddListener(HandleFinalSequence);
-
-        }
-
-        private void OnDestroy()
-        {
-            if (bossHealth != null)
-                bossHealth.OnBossDefeated.RemoveListener(HandleFinalSequence);
-
-        }
-
         #endregion
-        //─────────────────────────────────────────────────────
-        #region === FINAL SEQUENCE HANDLER ===
 
-        private void HandleFinalSequence()
-        {
-            if (hasTriggeredFinalSequence || finalSequence == null) return;
-            hasTriggeredFinalSequence = true;
-
-            finalSequence.RunSequence(this);
-        }
-
-        public void ResetFinalSequenceState()
-        {
-            hasTriggeredFinalSequence = false;
-        }
-
-        #endregion
         //─────────────────────────────────────────────────────
         #region === AUTO LINK & HELPERS ===
 
@@ -77,10 +45,7 @@ namespace PLAYERTWO.PlatformerProject
         public bool IsBossDead => bossHealth != null && bossHealth.isDead;
         public Animator Animator => bossAnim != null ? bossAnim.GetAnimator() : null;
 
-        public void DamageBoss(int amount) => bossHealth?.TakeDamage(amount);
         public void PlayDeathAnim() => bossAnim?.PlayDeath();
-        public void PlayPhaseChangeAnim() => bossAnim?.PlayPhaseChange();
-        public void SetMovingAnim(bool moving) => bossAnim?.SetMoving(moving);
 
         #endregion
     }

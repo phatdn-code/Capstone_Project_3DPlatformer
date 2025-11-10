@@ -35,6 +35,7 @@ namespace PLAYERTWO.PlatformerProject
         protected BossHealth m_bossHealth;
         protected BossAnimationBase m_bossAnim;
         protected BossPhaseTransitionBase m_phaseTransition;
+        protected BossFinalSequenceBase m_finalPhase;
 
         #endregion
 
@@ -105,6 +106,7 @@ namespace PLAYERTWO.PlatformerProject
             m_bossHealth = linker.bossHealth;
             m_bossAnim = linker.bossAnim;
             m_phaseTransition = linker.bossTransition;
+            m_finalPhase = linker.finalSequence;
         }
 
         private void InitializeDefaultPhasesIfNeeded()
@@ -147,13 +149,11 @@ namespace PLAYERTWO.PlatformerProject
                 else
                     DefaultPhaseTransition(nextPhase);
             }
+
             else
             {
-                // Gọi Final Sequence
-                if (TryGetComponent(out BossLinker linker) && linker.finalSequence != null)
-                    linker.finalSequence.RunSequence(linker);
-
-                else OnBossDefeated();
+                //if (m_finalPhase != null)
+                //    StartCoroutine(m_finalPhase.ExecuteFinalSequence(this));
             }
         }
 

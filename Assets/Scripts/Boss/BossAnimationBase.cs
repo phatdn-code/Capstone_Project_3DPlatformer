@@ -78,6 +78,7 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>For bosses with a unique special skill.</summary>
         public virtual void PlaySpecialSkill() { /* optional */ }
 
+        public virtual void PlayFinalSkill() { /* optional */ }
         #endregion
     }
 }
