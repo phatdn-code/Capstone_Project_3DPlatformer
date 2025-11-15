@@ -23,6 +23,7 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Camera (Cinemachine optional)")]
         [SerializeField] private CinemachineCamera bossCam;         // tuỳ chọn
         [SerializeField] private Transform focusTarget;             // nếu không dùng CM, sẽ xoay/zoom thủ công
+        [SerializeField] private float moveSpeedBoost = 5f;
         [SerializeField] private float normalFOV = 60f;
         [SerializeField] private float zoomFOV = 28f;
         [SerializeField] private float zoomSpeed = 2f;
@@ -88,7 +89,7 @@ namespace PLAYERTWO.PlatformerProject
             var soldier = bossCore as SoldierRobot;
             if (soldier != null && bossCombatPoint != null)
             {
-                soldier.SetSpeedMultiplier(1.5f);
+                soldier.SetSpeedMultiplier(moveSpeedBoost);
 
                 var moveRoutine = soldier.MoveToCombatPoint(bossCombatPoint);
                 if (moveRoutine != null)
@@ -112,7 +113,7 @@ namespace PLAYERTWO.PlatformerProject
             PlayerHub.Instance.LockPlayer(false);
 
             // 7) Thực hiện animation bắt đầu vào combat
-            bossCore.bossAnim?.PlayBattleStart();
+            bossCore.BossAnim?.PlayBattleStart();
             yield return new WaitForSeconds(2);
 
             if (boundary != null) boundary.ActivateBoundary();

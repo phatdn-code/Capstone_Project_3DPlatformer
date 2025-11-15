@@ -29,12 +29,12 @@ namespace PLAYERTWO.PlatformerProject
         public event Action<float> OnHealthChanged;
 
         private Color baseColor;
-        private BossLinker linker; // ✅ cache tại đây
+        private BossCore boss; // ✅ cache tại đây
 
         private void Start()
         {
             // Cache BossLinker một lần duy nhất
-            linker = GetComponent<BossLinker>();
+            boss = GetComponent<BossCore>();
 
             // Cache renderers
             if (renderers == null || renderers.Length == 0)
@@ -72,9 +72,8 @@ namespace PLAYERTWO.PlatformerProject
 
             Flash();
 
-            // ✅ chỉ gọi 1 lần thông qua linker đã cache
-            if (linker != null && linker.bossAnim != null)
-                linker.bossAnim.PlayTakeDamage();
+            if (boss != null && boss.BossAnim != null)
+                boss.BossAnim.PlayTakeDamage();
 
             if (m_currentHealth <= 0)
             {

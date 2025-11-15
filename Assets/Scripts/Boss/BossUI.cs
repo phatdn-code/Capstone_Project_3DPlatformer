@@ -54,17 +54,14 @@ namespace PLAYERTWO.PlatformerProject
             Unbind();
 
             boss = newBoss;
-            if (boss == null) return;
 
-            var linker = boss.GetComponent<BossLinker>();
-            if (linker != null && linker.bossHealth != null)
-                health = linker.bossHealth;
-            else
-                health = boss.GetComponent<BossHealth>();
+            if (newBoss == null) return;
+
+            health = newBoss.BossHealth;
 
             if (health == null) return;
 
-            boss.OnBossPhaseStartEvent.AddListener(OnBossPhaseStart);
+            newBoss.OnBossPhaseStartEvent.AddListener(OnBossPhaseStart);
             health.OnHealthChanged += OnHealthChanged;
             health.OnBossDefeated.AddListener(OnBossDefeated);
 
@@ -97,15 +94,15 @@ namespace PLAYERTWO.PlatformerProject
 
             barTween?.Kill();
             barTween = bossHealthBar.DOValue(normalized, barTweenDuration)
-                .SetEase(barEase);
+                        .SetEase(barEase).SetUpdate(true);
         }
 
         private void OnBossPhaseStart(int phaseIndex)
         {
             if (phaseNameText == null || boss == null) return;
 
-            string phaseName = (boss.phases != null && phaseIndex < boss.phases.Length)
-                ? boss.phases[phaseIndex].phaseName
+            string phaseName = (boss.Phases != null && phaseIndex < boss.Phases.Length)
+                ? boss.Phases[phaseIndex].phaseName
                 : $"Phase {phaseIndex + 1}";
 
             phaseNameText.text = phaseName;
@@ -120,7 +117,7 @@ namespace PLAYERTWO.PlatformerProject
             if (boss == null || health == null)
                 return;
 
-            bool isLastPhase = health.currentPhase >= boss.phases.Length - 1;
+            bool isLastPhase = health.currentPhase >= boss.Phases.Length - 1;
 
             if (isLastPhase)
                 HideCompletely();
@@ -145,8 +142,7 @@ namespace PLAYERTWO.PlatformerProject
             if (panelGroup == null) return;
 
             panelGroup.DOKill();
-            panelGroup.DOFade(0f, fadeDuration)
-                .OnComplete(() => gameObject.SetActive(false));
+            panelGroup.DOFade(0f, fadeDuration);
         }
 
         public void ShowBossIntro(string bossName)

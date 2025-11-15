@@ -29,7 +29,8 @@ public class BulletProjectile : MonoBehaviour
 
     private Rigidbody rb;
     private Tween deactivateTween;
-    private bool hasHit = false;
+    private BossCore boss;
+    private bool hasHit;
 
     #endregion
     //─────────────────────────────────────────────
@@ -39,6 +40,7 @@ public class BulletProjectile : MonoBehaviour
     {
         // Khởi tạo rigidbody
         rb = GetComponent<Rigidbody>();
+        boss = FindFirstObjectByType<BossCore>();
         rb.useGravity = false;
     }
 
@@ -101,7 +103,7 @@ public class BulletProjectile : MonoBehaviour
 
         hasHit = true;
 
-        // 💥 Tạo hiệu ứng trúng (hit effect)
+        // Tạo hiệu ứng trúng (hit effect)
         if (hitEffectPrefab)
         {
             Vector3 hitPos = transform.position;
@@ -109,11 +111,12 @@ public class BulletProjectile : MonoBehaviour
             PoolManager.Instance.ReuseComponent(hitEffectPrefab, hitPos, hitRot);
         }
 
-        // 🩸 Nếu trúng player → gây damage
+        // Nếu trúng player → gây damage
         if (other.CompareTag(GameTags.Player) && other.TryGetComponent<Player>(out var player))
-            player.ApplyDamage(damage, transform.position);
+            if (boss != null && !boss.IsInCutscene)
+                player.ApplyDamage(damage, transform.position);
 
-        // ⏸️ Tắt viên đạn (trả về pool)
+        // Tắt viên đạn (trả về pool)
         DeactivateSelf();
     }
 

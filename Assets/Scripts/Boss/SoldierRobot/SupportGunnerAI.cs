@@ -51,6 +51,7 @@ public class SupportGunnerAI : MonoBehaviour
 
     private readonly int hashIsRunning = Animator.StringToHash("IsRunning");
     private readonly int hashIsShooting = Animator.StringToHash("IsShooting");
+    private readonly int hashIsDead = Animator.StringToHash("Death");
 
     #endregion
     //─────────────────────────────────────────────
@@ -208,6 +209,11 @@ public class SupportGunnerAI : MonoBehaviour
         animator?.SetBool(hashIsShooting, value);
     }
 
+    public void PlayDeath()
+    {
+        animator?.SetTrigger(hashIsDead);
+    }
+
     #endregion
     //─────────────────────────────────────────────
     #region ✦ RETURN TO IDLE (FINAL PHASE END) ✦
@@ -218,6 +224,7 @@ public class SupportGunnerAI : MonoBehaviour
     public IEnumerator ReturnToIdlePoint()
     {
         // Dừng mọi hành động
+        moveSpeed = 14;
         isOrbiting = false;
         StopAllCoroutines();
 

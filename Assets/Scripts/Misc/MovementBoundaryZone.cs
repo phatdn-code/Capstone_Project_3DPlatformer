@@ -33,7 +33,6 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private Color zoneColor = new Color(0.3f, 0.7f, 1f, 0.15f);
 
         private Player playerInside;
-        private PlayerInputManager inputManager;
 
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
@@ -41,7 +40,6 @@ namespace PLAYERTWO.PlatformerProject
         private void Start()
         {
             playerInside = PlayerHub.Instance.Player;
-            inputManager = PlayerHub.Instance.InputManager;
 
             if (zoneCenter == null)
                 zoneCenter = transform;
@@ -70,11 +68,6 @@ namespace PLAYERTWO.PlatformerProject
         /// Trả về bán kính giới hạn (cho script khác như SoldierRobot dùng).
         /// </summary>
         public float GetBoundaryRadius() => boundaryRadius;
-
-        /// <summary>
-        /// Kiểm tra xem vùng giới hạn có đang kích hoạt không.
-        /// </summary>
-        public bool IsActive => isActive;
 
         #endregion
         //─────────────────────────────────────────────

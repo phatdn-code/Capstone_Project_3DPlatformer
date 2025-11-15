@@ -72,6 +72,7 @@ namespace PLAYERTWO.PlatformerProject
         private NavMeshAgent agent;
         private SoldierRobotAnimation soldierAnim;
         private Coroutine speedRoutine;
+        private Coroutine attackRoutine;
 
         private bool isPaused;
         private bool isMeleeAttacking;
@@ -83,6 +84,8 @@ namespace PLAYERTWO.PlatformerProject
         private float wanderRadius;
         private float nextMeleeTime;
         private float m_originalSpeed;
+
+        public bool IsPaused => isPaused;
 
         #endregion
         //─────────────────────────────────────────────
@@ -122,14 +125,14 @@ namespace PLAYERTWO.PlatformerProject
         private void InitializeComponents()
         {
             agent = GetComponent<NavMeshAgent>();
-            soldierAnim = base.bossAnim as SoldierRobotAnimation;
+            soldierAnim = base.BossAnim as SoldierRobotAnimation;
             if (agent != null) m_originalSpeed = agent.speed;
         }
 
         private void InitializePlayer()
         {
             if (player == null && autoFindPlayer)
-                player = FindFirstObjectByType<Player>();
+                player = PlayerHub.Instance.Player;
         }
 
         private void DisableAllEffects()
@@ -155,10 +158,8 @@ namespace PLAYERTWO.PlatformerProject
         {
             isPaused = pause;
             if (agent != null) agent.isStopped = pause;
-            if (bossAnim != null) bossAnim.SetMoving(false);
+            if (BossAnim != null) BossAnim.SetMoving(false);
         }
-
-        public bool IsPaused => isPaused;
 
         #endregion
         //─────────────────────────────────────────────
@@ -171,7 +172,7 @@ namespace PLAYERTWO.PlatformerProject
 
             if (agent != null) agent.isStopped = true;
 
-            yield return RotateTowardsPlayer(() => bossAnim?.PlayMeleeAttack());
+            yield return RotateTowardsPlayer(() => BossAnim?.PlayMeleeAttack());
             yield return new WaitForSeconds(1f);
 
             if (agent != null) agent.isStopped = false;
@@ -197,14 +198,25 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (m_isInAttackSequence) return;
             m_isInAttackSequence = true;
-            StartCoroutine(ExecuteAttackSequence());
+            attackRoutine = StartCoroutine(ExecuteAttackSequence());
+        }
+
+        public void StopAttackSequence()
+        {
+            m_isInAttackSequence = false;
+
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+            }
         }
 
         private IEnumerator ExecuteAttackSequence()
         {
             while (true)
             {
-                if (isPaused)
+                if (isPaused || IsInCutscene)
                 {
                     yield return null;
                     continue;
@@ -277,7 +289,7 @@ namespace PLAYERTWO.PlatformerProject
 
         private void ShootBomb(bool useRightHand)
         {
-            if (m_isMoving || isMeleeAttacking || isPaused) return;
+            if (m_isMoving || isMeleeAttacking || isPaused || IsInCutscene) return;
             Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null) return;
 
@@ -286,7 +298,7 @@ namespace PLAYERTWO.PlatformerProject
 
         public void ShootBombFromAnimation(bool useRightHand)
         {
-            if (m_isMoving || isPaused) return;
+            if (m_isMoving || isPaused || IsInCutscene) return;
             Transform spawnPoint = useRightHand ? rightHandSpawnPoint : leftHandSpawnPoint;
             if (spawnPoint == null || bombPrefab == null) return;
 
@@ -304,13 +316,13 @@ namespace PLAYERTWO.PlatformerProject
 
         private void ShootFireball()
         {
-            if (m_isMoving || isMeleeAttacking || isPaused) return;
+            if (m_isMoving || isMeleeAttacking || isPaused || IsInCutscene) return;
             StartCoroutine(RotateTowardsPlayer(() => soldierAnim?.PlayFireballShoot()));
         }
 
         public void CreateFireballFromAnimation()
         {
-            if (m_isMoving || fireballPrefab == null || fireballSpawnPoint == null || isPaused) return;
+            if (m_isMoving || isPaused || IsInCutscene) return;
 
             flashFireballEffect.SetActive(true);
             DOVirtual.DelayedCall(0.15f, () =>
@@ -432,7 +444,7 @@ namespace PLAYERTWO.PlatformerProject
             if (agent == null) yield break;
 
             m_isMoving = true;
-            bossAnim?.SetMoving(true);
+            BossAnim?.SetMoving(true);
             agent.isStopped = false;
             agent.SetDestination(destination);
 
@@ -443,7 +455,7 @@ namespace PLAYERTWO.PlatformerProject
                 yield return null;
             }
 
-            bossAnim?.SetMoving(false);
+            BossAnim?.SetMoving(false);
             agent.isStopped = true;
             if (restoreSpeed) agent.speed = m_originalSpeed;
             m_isMoving = false;
@@ -455,6 +467,13 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (target == null) yield break;
             yield return MoveAndRotateToPosition(target.position);
+        }
+
+        public Coroutine MoveToPoint(Vector3 position)
+        {
+            GameObject temp = new GameObject("Temp_Move_Point");
+            temp.transform.position = position;
+            return StartCoroutine(MoveToTarget(temp.transform));
         }
 
         private IEnumerator MoveToNewPosition()
@@ -539,6 +558,12 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (target == null) yield break;
             Vector3 direction = target.forward;
+            yield return RotateTowards(direction);
+        }
+
+        public IEnumerator RotateTowardsPoint(Vector3 point)
+        {
+            Vector3 direction = point - model.position;
             yield return RotateTowards(direction);
         }
 

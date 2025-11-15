@@ -9,6 +9,6 @@ namespace PLAYERTWO.PlatformerProject
     /// </summary>
     public abstract class BossPhaseTransitionBase : MonoBehaviour
     {
-        public abstract IEnumerator ExecuteTransition(BossCore boss, int nextPhase);
+        public abstract IEnumerator ExecuteTransition(int nextPhase);
     }
 }

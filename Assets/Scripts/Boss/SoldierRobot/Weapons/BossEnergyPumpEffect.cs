@@ -16,7 +16,7 @@ public class BossEnergyPumpEffect : MonoBehaviour
     private Vector3 baseScale;
     private Sequence pulseSequence;
 
-    private void Awake()
+    private void Start()
     {
         baseScale = transform.localScale;
     }
@@ -50,6 +50,7 @@ public class BossEnergyPumpEffect : MonoBehaviour
                 .SetDelay(pauseBetweenPulses)
                 .SetUpdate(true);
         }
+
         else
         {
             // Một nhịp duy nhất (nếu không bật continuous)

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
 using UnityEngine.Events;
-using DG.Tweening;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -15,12 +15,12 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === INSPECTOR FIELDS ===
 
-        [Header("Encounter")]
-        [SerializeField] private bool startInactive = true;   // ← CHỌN true cho boss cinematic
+        [Header("Encounter Settings")]
+        [SerializeField] private bool startInactive = true; // ← True cho cinematic intro
         private bool isEncounterActive = false;
         public bool IsEncounterActive => isEncounterActive;
 
-        [Header("Phases")]
+        [Header("Phases Configuration")]
         [SerializeField] protected BossPhase[] m_phases = new BossPhase[3];
 
         [Header("Boss Events")]
@@ -29,15 +29,18 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+
         //─────────────────────────────────────────────
         #region === RUNTIME REFERENCES ===
 
         protected BossHealth m_bossHealth;
+        protected BossUI m_bossUI;
         protected BossAnimationBase m_bossAnim;
         protected BossPhaseTransitionBase m_phaseTransition;
         protected BossFinalSequenceBase m_finalPhase;
 
         #endregion
+
 
         //─────────────────────────────────────────────
         #region === STATE VARIABLES ===
@@ -45,25 +48,63 @@ namespace PLAYERTWO.PlatformerProject
         protected bool m_isAttacking;
         protected float m_lastAttackTime;
 
+        private bool isInCutscene;
+        public bool IsInCutscene
+        {
+            get => isInCutscene;
+            set => isInCutscene = value;
+        }
+
         #endregion
 
+
         //─────────────────────────────────────────────
-        #region === PROPERTIES ===
+        #region === PUBLIC ACCESSORS ===
 
-        public BossHealth bossHealth => m_bossHealth;
-        public BossAnimationBase bossAnim => m_bossAnim;
-        public BossPhase[] phases { get => m_phases; set => m_phases = value; }
-        public bool IsAlive => bossHealth != null && bossHealth.CurrentHealth > 0;
+        // ─── Core Components ────────────────────────────────
+        /// <summary>BossHealth component reference.</summary>
+        public BossHealth BossHealth => m_bossHealth;
 
+        /// <summary>BossAnimationBase component reference.</summary>
+        public BossAnimationBase BossAnim => m_bossAnim;
+
+        /// <summary>BossUI component reference.</summary>
+        public BossUI BossUI => m_bossUI;
+
+        // ─── Phase & Sequence Components ─────────────────────
+        /// <summary>Handles phase transition logic between boss stages.</summary>
+        public BossPhaseTransitionBase PhaseTransition => m_phaseTransition;
+
+        /// <summary>Handles the final phase sequence (defeat or cinematic).</summary>
+        public BossFinalSequenceBase FinalPhase => m_finalPhase;
+
+        // ─── Phase Data ─────────────────────────────────────
+        /// <summary>Array of defined boss phases (modifiable at runtime).</summary>
+        public BossPhase[] Phases
+        {
+            get => m_phases;
+            set => m_phases = value;
+        }
+
+        // ─── State & Events ─────────────────────────────────
+        /// <summary>Returns true if boss is still alive.</summary>
+        public bool IsAlive => m_bossHealth != null && m_bossHealth.CurrentHealth > 0;
+
+        /// <summary>Invoked when a new boss phase starts.</summary>
         public UnityEvent<int> OnBossPhaseStartEvent => OnBossPhaseStart;
+
+        /// <summary>Invoked when the boss uses a special ability.</summary>
         public UnityEvent<string> OnSpecialAbilityUsedEvent => OnSpecialAbilityUsed;
 
-        public BossPhase currentPhase =>
+        // ─── Dynamic Info ───────────────────────────────────
+        /// <summary>Gets the currently active boss phase.</summary>
+        public BossPhase CurrentPhase =>
             (m_phases != null && m_phases.Length > 0 && m_bossHealth.currentPhase < m_phases.Length)
             ? m_phases[m_bossHealth.currentPhase]
             : null;
 
         #endregion
+
 
         //─────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
@@ -76,7 +117,7 @@ namespace PLAYERTWO.PlatformerProject
 
             if (!startInactive)
             {
-                // Khởi động như cũ
+                // Khởi động boss ngay lập tức nếu không phải cinematic
                 ApplyPhaseVisual(0, instant: true);
                 m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
                 OnBossPhaseStart.Invoke(0);
@@ -89,29 +130,29 @@ namespace PLAYERTWO.PlatformerProject
             base.OnUpdate();
             if (!isEncounterActive) return;
             if (m_bossHealth == null || m_bossHealth.isDead || m_bossHealth.isTransitioning) return;
+
             UpdateBossBehavior();
         }
 
         #endregion
+
 
         //─────────────────────────────────────────────
         #region === INITIALIZATION ===
 
         private void InitializeBoss()
         {
-            var linker = GetComponent<BossLinker>();
-
-            if (linker == null) return;
-
-            m_bossHealth = linker.bossHealth;
-            m_bossAnim = linker.bossAnim;
-            m_phaseTransition = linker.bossTransition;
-            m_finalPhase = linker.finalSequence;
+            m_bossHealth = GetComponent<BossHealth>();
+            m_bossAnim = GetComponent<BossAnimationBase>();
+            m_phaseTransition = GetComponent<BossPhaseTransitionBase>();
+            m_finalPhase = GetComponent<BossFinalSequenceBase>();
+            m_bossUI = GetComponent<BossUI>();
         }
 
         private void InitializeDefaultPhasesIfNeeded()
         {
-            if (m_phases != null && m_phases.Length > 0) return;
+            if (m_phases != null && m_phases.Length > 0)
+                return;
 
             m_phases = new BossPhase[3];
             for (int i = 0; i < 3; i++)
@@ -129,11 +170,11 @@ namespace PLAYERTWO.PlatformerProject
 
         private void HookHealthEvents()
         {
-            // Khi BossHealth báo defeated, quyết định phase tiếp theo hoặc kết thúc
             m_bossHealth.OnBossDefeated.AddListener(HandlePhaseOrDefeat);
         }
 
         #endregion
+
 
         //─────────────────────────────────────────────
         #region === PHASE MANAGEMENT ===
@@ -145,24 +186,19 @@ namespace PLAYERTWO.PlatformerProject
             if (m_phases != null && nextPhase < m_phases.Length)
             {
                 if (m_phaseTransition != null)
-                    StartCoroutine(m_phaseTransition.ExecuteTransition(this, nextPhase));
-                else
-                    DefaultPhaseTransition(nextPhase);
-            }
+                    StartCoroutine(m_phaseTransition.ExecuteTransition(nextPhase));
 
+                else DefaultPhaseTransition(nextPhase);
+            }
             else
             {
-                //if (m_finalPhase != null)
-                //    StartCoroutine(m_finalPhase.ExecuteFinalSequence(this));
+                if (m_finalPhase != null)
+                    StartCoroutine(m_finalPhase.ExecuteFinalSequence());
             }
         }
 
-        /// <summary>
-        /// Default fallback phase transition if no custom transition script is attached.
-        /// </summary>
         private void DefaultPhaseTransition(int nextPhase)
         {
-            // Chuyển phase ngay lập tức, không hoạt cảnh
             m_bossHealth.InitializePhase(nextPhase, m_phases[nextPhase].maxHealth);
             ApplyPhaseVisual(nextPhase, instant: true);
             OnBossPhaseStart.Invoke(nextPhase);
@@ -174,33 +210,29 @@ namespace PLAYERTWO.PlatformerProject
         {
             var phase = m_phases[phaseIndex];
 
-            // Color
+            // Color Transition
             foreach (var r in GetComponentsInChildren<Renderer>())
             {
                 if (instant) r.material.color = phase.phaseColor;
                 else r.material.DOColor(phase.phaseColor, 0.35f);
             }
 
-            // Scale
+            // Scale Transition
             if (instant)
                 transform.localScale = phase.scale;
             else
                 transform.DOScale(phase.scale, 0.35f).SetEase(Ease.OutBack);
         }
 
-        protected virtual void OnBossDefeated()
-        {
-            // Cho lớp con override nếu muốn thêm hiệu ứng khác
-            transform.DOScale(0f, 0.5f).SetEase(Ease.InBack)
-                .OnComplete(() => gameObject.SetActive(false));
-        }
-
         #endregion
+
 
         //─────────────────────────────────────────────
         #region === ENCOUNTER CONTROL ===
 
-        // Gọi khi bắt đầu trận (từ trigger/cutscene)
+        /// <summary>
+        /// Kích hoạt trận chiến (gọi từ trigger hoặc cutscene).
+        /// </summary>
         public void StartBattle()
         {
             if (isEncounterActive) return;
@@ -209,19 +241,23 @@ namespace PLAYERTWO.PlatformerProject
             m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
             OnBossPhaseStart.Invoke(0);
             isEncounterActive = true;
+
             OnBattleStarted();
         }
 
-        // Cho boss con override để kick loop tấn công
+        /// <summary>
+        /// Cho class con override để bắt đầu vòng lặp tấn công hoặc animation mở đầu.
+        /// </summary>
         protected virtual void OnBattleStarted() { }
 
         #endregion
+
 
         //─────────────────────────────────────────────
         #region === SPECIAL ABILITY ===
 
         /// <summary>
-        /// Cho lớp con gọi khi dùng kỹ năng đặc biệt để thông báo UI/Manager.
+        /// Thông báo cho UI hoặc Manager khi boss dùng kỹ năng đặc biệt.
         /// </summary>
         protected void NotifySpecialUsed(string nameOrId)
         {
@@ -230,11 +266,12 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+
         //─────────────────────────────────────────────
         #region === ABSTRACT METHODS ===
 
         /// <summary>
-        /// Lớp con override để định nghĩa hành vi boss trong mỗi frame.
+        /// Được override ở lớp con để cập nhật hành vi boss mỗi frame.
         /// </summary>
         protected abstract void UpdateBossBehavior();
 

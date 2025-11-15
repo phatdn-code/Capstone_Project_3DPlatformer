@@ -5,202 +5,279 @@ using Unity.Cinemachine;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// ✦ Xử lý đoạn Final Boss Sequence của SoldierRobot:
-    /// - Boss bắn bomb khổng lồ, quay về hồi năng lượng, chờ player phản công.
-    /// - Gồm các hiệu ứng camera, slow motion, cutscene và chiến thắng.
+    /// Final Sequence cho SoldierRobot:
+    /// Bắn bomb → Player reflect → Bomb trúng boss → SlowMo → Boss chết.
     /// </summary>
     public class SoldierRobotFinalSequence : BossFinalSequenceBase
     {
         //─────────────────────────────────────────────
-        #region ✦ THAM CHIẾU INSPECTOR ✦
+        #region === INSPECTOR: BOMB & RECHARGE ===
 
-        [Header("Thiết lập Bomb")]
+        [Header("Bomb Settings")]
         [SerializeField] private BossBomb giantBombPrefab;
         [SerializeField] private Transform bombSpawnPoint;
         [SerializeField] private Transform bombCenterPoint;
 
-        [Header("Tham chiếu khác")]
-        [SerializeField] private BossRechargeTransition rechargeTransition;
-        [SerializeField] private SupportGunnerAI supportGunner;
-        [SerializeField] private CinemachineCamera bossCam;
-        [SerializeField] private CinemachineCamera bombCam;
+        [Header("Effects")]
+        [SerializeField] private GameObject flashFinalBombEffect;
+        [SerializeField] private GameObject explosionFinalBombEffect;
+        [SerializeField] private GameObject zoneEffect;
 
-        [Header("Thiết lập Slow Motion")]
+        [Header("Recharge Settings")]
+        [SerializeField] private Transform rechargePoint;
+
+        [Header("Support Gunner")]
+        [SerializeField] private SupportGunnerAI supportGunner;
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === INSPECTOR: FX ===
+
+        [Header("Slow Motion")]
         [SerializeField] private float slowMoScale = 0.2f;
         [SerializeField] private float slowMoDuration = 1.5f;
 
         #endregion
 
         //─────────────────────────────────────────────
-        #region ✦ BIẾN NỘI BỘ ✦
+        #region === RUNTIME ===
+
+        private BossCore boss;
+        private SoldierRobot soldierBoss;
+        private SoldierRobotRechargeSequence rechargeTransition;
+        private BossBomb currentBomb;
+        private bool bombReflected;
 
         #endregion
 
         //─────────────────────────────────────────────
-        #region ✦ TRÌNH TỰ CHÍNH ✦
+        #region === UNITY ===
 
-        /// <summary>
-        /// Trình tự chính của Final Sequence: 
-        /// Boss bắn bomb → hồi năng lượng → player đánh bomb → slow motion win.
-        /// </summary>
-        public override IEnumerator ExecuteFinalSequence(BossLinker linker)
+        private void Start()
         {
-            var boss = linker.bossCore as SoldierRobot;
-            if (boss == null) yield break;
+            boss = GetComponent<BossCore>();
+            soldierBoss = boss as SoldierRobot;
+            rechargeTransition = GetComponent<SoldierRobotRechargeSequence>();
+        }
 
-            var anim = linker.bossAnim;
+        #endregion
 
-            // 🔒 Khóa điều khiển và tạm dừng boss
+        //─────────────────────────────────────────────
+        #region === ENTRY POINT ===
+
+        public override IEnumerator ExecuteFinalSequence()
+        {
+            boss.IsInCutscene = true;
+            bombReflected = false;
+            currentBomb = null;
+
+            soldierBoss.StopAttackSequence();
+
+            yield return HandleCameraAndPlayerControl();
+            yield return WaitForBombReflect();
+
+            boss.IsInCutscene = false;
+        }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === CAMERA / PLAYER CONTROL ===
+
+        private IEnumerator HandleCameraAndPlayerControl()
+        {
             PlayerHub.Instance.LockPlayer(true);
-            boss.SetPaused(true);
 
-            // 1️⃣ Focus camera vào boss
-            yield return FocusCamera(bossCam);
+            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
+            yield return ShootGiantBomb();
+            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
 
-            // 2️⃣ Boss bắn bomb khổng lồ ra giữa sân
-            yield return ShootGiantBomb(anim);
+            yield return MoveToRechargeStation();
 
-            // 3️⃣ Focus lại camera về boss
-            yield return FocusCamera(bossCam);
-
-            // 4️⃣ Boss + Support chạy về trạm hồi năng lượng
-            yield return MoveToRechargeStation(boss);
-
-            // 5️⃣ Boss hồi năng lượng (cutscene)
-            yield return rechargeTransition.PlayRechargeCutsceneOnly(boss);
-
-            // 6️⃣ Focus camera về player
-            yield return FocusCamera(null);
-
-            // 7️⃣ Player được tự do → đánh bomb → slow motion win
+            yield return CameraCutsceneController.instance.ReleaseToPlayer();
             PlayerHub.Instance.LockPlayer(false);
-            yield return WaitForBombReflect(linker);
         }
 
         #endregion
 
         //─────────────────────────────────────────────
-        #region ✦ XỬ LÝ CAMERA ✦
+        #region === SHOOT BOMB ===
 
-        /// <summary>
-        /// Focus camera vào camera được chọn, hoặc tắt toàn bộ.
-        /// </summary>
-        private IEnumerator FocusCamera(CinemachineCamera targetCam)
+        private IEnumerator ShootGiantBomb()
         {
-            // Tắt tất cả camera
-            if (bossCam != null) bossCam.Priority = 0;
-            if (bombCam != null) bombCam.Priority = 0;
+            yield return EnsureSafeDistanceFromCenter();
 
-            // Kích hoạt camera mục tiêu
-            if (targetCam != null)
-                targetCam.Priority = 100;
-
-            yield return new WaitForSeconds(0.5f); // thời gian chuyển mượt
-        }
-
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region ✦ BẮN BOMB ✦
-
-        /// <summary>
-        /// Boss bắn bomb khổng lồ ra giữa sân và focus camera vào bomb.
-        /// </summary>
-        private IEnumerator ShootGiantBomb(BossAnimationBase anim)
-        {
-            anim?.PlaySpecialSkill();
+            boss.BossAnim.PlayFinalSkill();
             yield return new WaitForSeconds(0.5f);
+
+            yield return SpawnAndFocusBomb();
+        }
+
+        private IEnumerator SpawnAndFocusBomb()
+        {
+            flashFinalBombEffect.SetActive(true);
+
+            currentBomb = null;
 
             if (giantBombPrefab && bombSpawnPoint && bombCenterPoint)
             {
-                var bombComp = PoolManager.Instance.ReuseComponent(
-                    giantBombPrefab.gameObject,
-                    bombSpawnPoint.position,
-                    Quaternion.identity
-                )?.GetComponent<BossBomb>();
+                // Spawn bomb
+                currentBomb = Instantiate(giantBombPrefab, bombSpawnPoint.position, Quaternion.identity);
 
-                if (bombComp)
-                {
-                    bombComp.DisableFuseOnLand = true;
-                    bombComp.LaunchToPosition(bombCenterPoint.position);
-                }
+                // Setup final sequence behavior
+                currentBomb.SetupForFinalSequence(PlayerHub.Instance.Player, soldierBoss);
+
+                // Register events ONCE
+                currentBomb.OnBombReflected += OnBombReflected;
+                currentBomb.OnFinalBombHitBoss += OnFinalBombHitBoss;
+
+                // Launch to center
+                currentBomb.LaunchToPosition(bombCenterPoint.position);
             }
 
-            // Focus camera vào bomb
-            if (bombCam != null)
-                yield return FocusCamera(bombCam);
-
-            yield return new WaitForSeconds(1.5f); // chờ bomb bay đến giữa sân
-        }
-
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region ✦ BOSS & SUPPORT DI CHUYỂN ✦
-
-        /// <summary>
-        /// Cho boss và quái phụ quay về trạm hồi năng lượng.
-        /// </summary>
-        private IEnumerator MoveToRechargeStation(SoldierRobot boss)
-        {
-            if (supportGunner != null)
-                yield return supportGunner.ReturnToIdlePoint();
-
-            if (rechargeTransition != null)
-                yield return rechargeTransition.MoveBossToChargeStationOnly(boss);
-        }
-
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region ✦ CHỜ PLAYER PHẢN CÔNG ✦
-
-        /// <summary>
-        /// Chờ player đánh bomb → focus camera → slow motion chiến thắng.
-        /// </summary>
-        private IEnumerator WaitForBombReflect(BossLinker linker)
-        {
-            GiantBombController bomb = FindFirstObjectByType<GiantBombController>();
-            bool reflected = false;
-
-            if (bomb)
+            if (currentBomb != null)
             {
-                bomb.onHitBoss += () => reflected = true;
-
-                // Khi player đánh → focus camera vào bomb
-                bomb.onHitBoss += () =>
-                {
-                    if (bombCam != null)
-                        bombCam.Priority = 100;
-                };
-            }
-
-            while (!reflected)
                 yield return null;
 
-            yield return PlaySlowMotionWin(linker);
+                CameraCutsceneController.instance.AssignSpecialTarget(currentBomb.transform);
+                yield return CameraCutsceneController.instance.FocusTo(BossCamType.Special);
+            }
+
+            yield return new WaitForSeconds(1.5f);
         }
 
         #endregion
 
         //─────────────────────────────────────────────
-        #region ✦ SLOW MOTION & THẮNG TRẬN ✦
+        #region === SAFE DISTANCE BEFORE SHOOT ===
 
-        /// <summary>
-        /// Hiệu ứng slow motion khi bomb phản công trúng boss → thắng trận.
-        /// </summary>
-        private IEnumerator PlaySlowMotionWin(BossLinker linker)
+        private IEnumerator EnsureSafeDistanceFromCenter()
         {
-            float orig = Time.timeScale;
+            soldierBoss.SetPaused(true);
+
+            const float safeDistance = 16f;
+            float distance = Vector3.Distance(transform.position, bombCenterPoint.position);
+
+            // Nếu đủ xa → chỉ xoay
+            if (distance >= safeDistance)
+            {
+                yield return soldierBoss.RotateTowardsPoint(bombCenterPoint.position);
+                yield break;
+            }
+
+            // Nếu gần quá → lùi lại
+            Vector3 dir = (transform.position - bombCenterPoint.position).normalized;
+            Vector3 targetPos = bombCenterPoint.position + dir * safeDistance;
+            targetPos.y = transform.position.y;
+
+            GameObject temp = new("Temp_MoveTarget");
+            temp.transform.position = targetPos;
+
+            yield return soldierBoss.MoveToTarget(temp.transform);
+
+            while (Vector3.Distance(soldierBoss.transform.position, targetPos) > 0.3f)
+                yield return null;
+
+            yield return soldierBoss.RotateTowardsPoint(bombCenterPoint.position);
+
+            Destroy(temp);
+        }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === MOVE TO RECHARGE ===
+
+        private IEnumerator MoveToRechargeStation()
+        {
+            if (!rechargePoint)
+            {
+                Debug.LogError("[FinalSequence] rechargePoint missing!");
+                yield break;
+            }
+
+            Coroutine cSupport =
+                (supportGunner != null) ? StartCoroutine(supportGunner.ReturnToIdlePoint()) : null;
+
+            Coroutine cBoss =
+                (rechargeTransition != null) ? StartCoroutine(rechargeTransition.PlayRechargeCutsceneOnly()) : null;
+
+            if (cSupport != null) yield return cSupport;
+            if (cBoss != null) yield return cBoss;
+        }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === WAIT FOR REFLECT → SLOWMO ===
+
+        private IEnumerator WaitForBombReflect()
+        {
+            // Nếu không có bomb → stop luôn
+            if (currentBomb == null)
+                yield break;
+
+            bombReflected = false;
+
+            while (!bombReflected)
+                yield return null;
+
+            yield return PlaySlowMotionWin();
+        }
+
+        private void OnBombReflected()
+        {
+            bombReflected = true;
+
+            StartCoroutine(CameraCutsceneController.instance.FocusTo(BossCamType.Special));
+        }
+
+        private IEnumerator PlaySlowMotionWin()
+        {
+            float original = Time.timeScale;
             Time.timeScale = slowMoScale;
+
             yield return new WaitForSecondsRealtime(slowMoDuration);
-            Time.timeScale = orig;
 
-            // Boss nổ chết
-            linker.PlayDeathAnim();
+            Time.timeScale = original;
+        }
 
-            // Có thể thêm UI chiến thắng ở đây
-            // linker.bossUI.ShowWinScreen();
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === FINAL HIT → BOSS DEATH ===
+
+        private void OnFinalBombHitBoss(SoldierRobot robot)
+        {
+            // Tắt recharge
+            if (rechargeTransition != null)
+            {
+                rechargeTransition.EndPumpAndRechargeEffect();
+                robot.PlayRechargeAnimation(false);
+            }
+
+            explosionFinalBombEffect.SetActive(true);
+
+            robot.SetPaused(true);
+            robot.BossAnim.PlayDeath();
+
+            supportGunner?.PlayDeath();
+
+            boss.IsInCutscene = false;
+
+            StartCoroutine(ReturnCameraAfterDelay());
+        }
+
+        private IEnumerator ReturnCameraAfterDelay()
+        {
+            yield return new WaitForSeconds(2f);
+
+            yield return CameraCutsceneController.instance.ReleaseToPlayer();
+
+            MovementBoundaryZone.Instance.enabled = false;
+
+            zoneEffect.SetActive(false);
         }
 
         #endregion

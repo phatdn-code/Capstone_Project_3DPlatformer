@@ -38,8 +38,20 @@ namespace PLAYERTWO.PlatformerProject
 
         private Material runtimeMat;
         private Coroutine explosionRoutine;
+        private BossCore boss;
 
         #endregion
+
+        #region === UNITY LIFECYCLE ===
+
+        private void Start()
+        {
+            // Khởi tạo rigidbody
+            boss = FindFirstObjectByType<BossCore>();
+        }
+
+        #endregion
+
         //─────────────────────────────────────────────
         #region === CONFIGURATION ===
 
@@ -201,7 +213,8 @@ namespace PLAYERTWO.PlatformerProject
             foreach (var c in cols)
             {
                 if (c.CompareTag(GameTags.Player) && c.TryGetComponent<Player>(out var player))
-                    player.ApplyDamage(damage, transform.position);
+                    if (boss != null && !boss.IsInCutscene)
+                        player.ApplyDamage(damage, transform.position);
             }
 
             // ⚡ Sau khi gây damage xong mới tắt object để PoolManager tái sử dụng

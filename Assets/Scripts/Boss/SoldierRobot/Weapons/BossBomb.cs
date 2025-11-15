@@ -2,6 +2,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -28,6 +29,8 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float explosionRadius = 6f;
         [SerializeField] private float explosionForce = 500f;
         [SerializeField] private SkinnedMeshRenderer bombRenderer;
+
+        [Header("Effects")]
         [SerializeField] private GameObject explosionEffect;
         [SerializeField] private GameObject explosionBossEffect;
 
@@ -43,13 +46,8 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float pulseDuration = 1f;
         [SerializeField] private float flashSpeed = 0.2f;
 
-        [Header("Special Settings")]
-        [SerializeField] private bool disableFuseOnLand = false;
-        public bool DisableFuseOnLand
-        {
-            get => disableFuseOnLand;
-            set => disableFuseOnLand = value;
-        }
+        public event System.Action OnBombReflected;
+        public event System.Action<SoldierRobot> OnFinalBombHitBoss;
 
         #endregion
 
@@ -62,6 +60,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool isFromPool;
         private bool isReflected;
         private bool isChasingPlayer;
+        private bool disableFuseOnLand;
 
         private float chaseSpeed = 5f;
 
@@ -72,6 +71,7 @@ namespace PLAYERTWO.PlatformerProject
 
         private SoldierRobot ownerBoss;
         private Rigidbody rb;
+        private Collider col;
         private Animator animator;
         private Player target;
         private Material runtimeMat;
@@ -88,6 +88,7 @@ namespace PLAYERTWO.PlatformerProject
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
+            col = GetComponent<Collider>();
             animator = GetComponent<Animator>();
         }
 
@@ -124,7 +125,7 @@ namespace PLAYERTWO.PlatformerProject
                 rb.isKinematic = false;
 
                 // Nếu boss ở Phase 2 -> rượt + đếm fuse
-                if (ownerBoss != null && ownerBoss.bossHealth.currentPhase >= 1)
+                if (ownerBoss != null && ownerBoss.BossHealth.currentPhase >= 1)
                     StartChasingPlayer();
 
                 if (!disableFuseOnLand)
@@ -155,6 +156,21 @@ namespace PLAYERTWO.PlatformerProject
             Invoke(nameof(EnableGravity), gravityDelay);
         }
 
+        public void SetupForFinalSequence(Player newTarget, SoldierRobot boss)
+        {
+            ownerBoss = boss;
+            target = newTarget;
+
+            ResetBombState();
+
+            // Final bomb không chase, không fuse
+            disableFuseOnLand = true;
+            hasLanded = true;
+
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
         /// <summary>Khởi tạo tham chiếu material runtime</summary>
         private void SetupMaterialReference()
         {
@@ -175,10 +191,9 @@ namespace PLAYERTWO.PlatformerProject
             fuseStarted = false;
             isReflected = false;
 
-            if (ownerBoss != null && ownerBoss.bossHealth.currentPhase < 2)
-                rb.useGravity = false;
-
+            rb.useGravity = false;
             rb.isKinematic = false;
+            col.isTrigger = false;
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             transform.localScale = Vector3.one;
@@ -312,12 +327,18 @@ namespace PLAYERTWO.PlatformerProject
             animator?.SetTrigger("TakeDown");
             rb.isKinematic = true;
             rb.useGravity = false;
+            col.isTrigger = true;
+
+            if (gameObject.TryGetComponent<NavMeshObstacle>(out var obstacle))
+                obstacle.enabled = false;
 
             if (reflectHitEffect != null)
                 PoolManager.Instance.ReuseComponent(reflectHitEffect, transform.position, Quaternion.identity);
 
             if (stunEffect != null)
                 stunEffect.SetActive(true);
+
+            OnBombReflected?.Invoke();
 
             var boss = ownerBoss;
             if (boss == null) return;
@@ -337,6 +358,8 @@ namespace PLAYERTWO.PlatformerProject
         private void OnHitBoss(SoldierRobot boss)
         {
             if (hasExploded) return;
+
+            OnFinalBombHitBoss?.Invoke(boss);
 
             if (boss.TryGetComponent<BossHealth>(out var bossHealth))
                 bossHealth.TakeDamage(bossDamage);
@@ -380,6 +403,8 @@ namespace PLAYERTWO.PlatformerProject
 
             if (isFromPool)
                 StartCoroutine(DisableAfterDelay(0.2f));
+
+            else Destroy(gameObject, 0.2f);
         }
 
         private IEnumerator DisableAfterDelay(float delay)

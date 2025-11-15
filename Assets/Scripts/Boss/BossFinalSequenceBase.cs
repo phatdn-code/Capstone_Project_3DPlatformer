@@ -4,5 +4,5 @@ using UnityEngine;
 
 public abstract class BossFinalSequenceBase : MonoBehaviour
 {
-    public abstract IEnumerator ExecuteFinalSequence(BossLinker linker);
+    public abstract IEnumerator ExecuteFinalSequence();
 }
