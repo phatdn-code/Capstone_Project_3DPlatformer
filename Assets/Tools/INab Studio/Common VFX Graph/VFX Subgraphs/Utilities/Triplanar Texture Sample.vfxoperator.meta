@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 65028582e29bf7f4b90b5e1abef10d1c
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Triplanar
+    Texture Sample.vfxoperator
+  uploadId: 773168

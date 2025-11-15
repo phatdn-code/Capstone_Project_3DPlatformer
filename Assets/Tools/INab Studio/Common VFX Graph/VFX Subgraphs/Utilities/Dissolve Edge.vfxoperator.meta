@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c67feec08d6a6ce43a588e176852b6c5
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Dissolve
+    Edge.vfxoperator
+  uploadId: 773168

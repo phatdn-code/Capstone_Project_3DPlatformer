@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8b2602863f65966429087f6de619c428
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/SDFs/PlaneSDF.vfxoperator
+  uploadId: 773168

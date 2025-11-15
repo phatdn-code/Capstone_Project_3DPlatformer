@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0a7705ffa07e0d74585186c8ac4cf7a5
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Random Direction.vfxoperator
+  uploadId: 773168

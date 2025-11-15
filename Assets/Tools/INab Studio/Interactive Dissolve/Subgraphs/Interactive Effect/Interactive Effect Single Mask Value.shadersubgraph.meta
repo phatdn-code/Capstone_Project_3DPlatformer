@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f088d2f17984dc64fad71d2a17f67367
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 60072b568d64c40a485e0fc55012dc9f, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Interactive Dissolve/Subgraphs/Interactive Effect/Interactive
+    Effect Single Mask Value.shadersubgraph
+  uploadId: 773168

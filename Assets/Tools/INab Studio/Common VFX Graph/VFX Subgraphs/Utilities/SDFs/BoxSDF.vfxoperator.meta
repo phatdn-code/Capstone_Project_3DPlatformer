@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a6037c3ebc0b66347b5b93b067764c37
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/SDFs/BoxSDF.vfxoperator
+  uploadId: 773168

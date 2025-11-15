@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1e510dba7bf006144ae39b42afca9735
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Blocks/Constant Spawn
+    Rate Custom.vfxblock
+  uploadId: 773168

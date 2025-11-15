@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9cc58b4cc6eeafd42bdd05ada9cb58b6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Interactive Dissolve/Scripts/Editor/Mask Settings.asset
+  uploadId: 773168

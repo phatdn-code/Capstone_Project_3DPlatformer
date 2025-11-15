@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 31e3cc5580ac47349be4e11dd860a17b
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Interactive Dissolve/Subgraphs/SDFs/3D_SDFs.hlsl
+  uploadId: 773168

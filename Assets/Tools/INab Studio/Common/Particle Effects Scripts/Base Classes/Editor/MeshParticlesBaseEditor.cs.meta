@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 333b5a1068d043f408a94fb071e5695b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common/Particle Effects Scripts/Base Classes/Editor/MeshParticlesBaseEditor.cs
+  uploadId: 773168

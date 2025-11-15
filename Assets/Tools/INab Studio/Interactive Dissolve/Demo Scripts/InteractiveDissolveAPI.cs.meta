@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: dd6a7db528e02004eaa194264157821f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Interactive Dissolve/Demo Scripts/InteractiveDissolveAPI.cs
+  uploadId: 773168

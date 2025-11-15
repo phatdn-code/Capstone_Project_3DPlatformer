@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 77dd6cd102c24ce46b9af7b50868a1df
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Scale Multiplier.vfxoperator
+  uploadId: 773168

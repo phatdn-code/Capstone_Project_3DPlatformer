@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ca3ad4d423c55824b8bf54dec5a503ab
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Blocks/Scale Multiplier/Force
+    Scaled.vfxblock
+  uploadId: 773168

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c56b25ef6676e9543ada8bacf99ba9a0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Interactive Dissolve/Demo Scripts/InteractiveDissolveTLDR.cs
+  uploadId: 773168

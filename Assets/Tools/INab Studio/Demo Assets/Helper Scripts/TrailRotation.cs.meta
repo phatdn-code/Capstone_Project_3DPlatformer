@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a08a52de155dfe945abee605d33dfd5a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Demo Assets/Helper Scripts/TrailRotation.cs
+  uploadId: 773168

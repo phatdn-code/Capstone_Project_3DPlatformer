@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f3475382e40c6b0438df60602951d341
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Blocks/Attract To
+    Mask Center.vfxblock
+  uploadId: 773168

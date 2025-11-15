@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a5380ea4b391ac043a0369a4dee03386
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Interactive Dissolve/Demo Scripts/StickyProjectile.cs
+  uploadId: 773168

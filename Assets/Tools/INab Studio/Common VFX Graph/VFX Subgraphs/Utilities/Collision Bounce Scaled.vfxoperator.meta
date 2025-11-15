@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 20250f81c3cac1c49a751e087a78b802
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Collision
+    Bounce Scaled.vfxoperator
+  uploadId: 773168

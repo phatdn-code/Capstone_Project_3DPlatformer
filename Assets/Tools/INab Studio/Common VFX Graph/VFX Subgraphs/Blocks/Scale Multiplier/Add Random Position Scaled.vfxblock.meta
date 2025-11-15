@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e1c901f63daf2c74a8d474fe5e4ce7b1
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Blocks/Scale Multiplier/Add
+    Random Position Scaled.vfxblock
+  uploadId: 773168

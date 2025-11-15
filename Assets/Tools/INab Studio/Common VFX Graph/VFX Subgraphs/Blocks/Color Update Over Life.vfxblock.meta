@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 69be53751899c714ba5c45e73d77b7e4
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Blocks/Color Update
+    Over Life.vfxblock
+  uploadId: 773168

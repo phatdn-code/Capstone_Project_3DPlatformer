@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d654ea3cacd0cfc489ee1b1191225aef
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common/Particle Effects Scripts/VfxGraph/VFXUniformMeshBaker.cs
+  uploadId: 773168

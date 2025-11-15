@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a5d45bb1ea7c1e0428d233f1ea95a96e
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Noise 3D
+    Frequency Scaled.vfxoperator
+  uploadId: 773168

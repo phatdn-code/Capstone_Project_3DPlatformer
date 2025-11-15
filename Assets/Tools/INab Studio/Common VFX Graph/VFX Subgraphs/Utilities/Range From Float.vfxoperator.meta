@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 95c2d8bb50134784ca69e86c7a536895
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Utilities/Range From
+    Float.vfxoperator
+  uploadId: 773168

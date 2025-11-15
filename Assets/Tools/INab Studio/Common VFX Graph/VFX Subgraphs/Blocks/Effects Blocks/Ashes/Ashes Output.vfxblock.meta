@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3d54ca0d785845a409a23b79af6b0fac
+VisualEffectImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275708
+  packageName: Interactive Dissolve Effects
+  packageVersion: 2.0
+  assetPath: Assets/INab Studio/Common VFX Graph/VFX Subgraphs/Blocks/Effects Blocks/Ashes/Ashes
+    Output.vfxblock
+  uploadId: 773168
