@@ -7,42 +7,27 @@ namespace PLAYERTWO.PlatformerProject
     [RequireComponent(typeof(Collider))]
     public class BossEncounterCutscene : MonoBehaviour
     {
-        //─────────────────────────────────────────────
-        #region === INSPECTOR FIELDS ===
-
-        [Header("Refs")]
-        [SerializeField] private BossCore bossCore;                 // Kéo BossCore (SoldierRobot) vào
-        [SerializeField] private Transform bossCombatPoint;         // Điểm boss sẽ đứng combat
+        [Header("Boss References")]
+        [SerializeField] private BossCore bossCore;
+        [SerializeField] private Transform bossCombatPoint;
         [SerializeField] private string bossDisplayName = "Soldier Robot";
         [SerializeField] private bool triggerOnce = true;
 
-        [Header("Timings")]
-        [SerializeField] private float cameraIntroDelay = 0.4f;
-        [SerializeField] private float cameraReturnDelay = 0.4f;
-
-        [Header("Camera (Cinemachine optional)")]
-        [SerializeField] private CinemachineCamera bossCam;         // tuỳ chọn
-        [SerializeField] private Transform focusTarget;             // nếu không dùng CM, sẽ xoay/zoom thủ công
+        [Header("Boss Movement")]
         [SerializeField] private float moveSpeedBoost = 5f;
-        [SerializeField] private float normalFOV = 60f;
-        [SerializeField] private float zoomFOV = 28f;
-        [SerializeField] private float zoomSpeed = 2f;
 
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region === RUNTIME VARIABLES ===
+        [Header("Dissolve Plane")]
+        [SerializeField] private Transform dissolvePlane;
+        [SerializeField] private float planeDropHeight = -2f;
+        [SerializeField] private float planeTargetHeight = 22f;
+        [SerializeField] private float planeDropSpeed = 5f;
 
         private bool triggered;
-        private Camera mainCam;
-        private float camDefaultFOV;
-
-        #endregion
-
         private MovementBoundaryZone boundary;
         private Player player;
 
         //─────────────────────────────────────────────
+
         #region === UNITY LIFECYCLE ===
 
         private void Start()
@@ -50,9 +35,13 @@ namespace PLAYERTWO.PlatformerProject
             boundary = FindFirstObjectByType<MovementBoundaryZone>();
             player = PlayerHub.Instance.Player;
 
-            mainCam = Camera.main;
-            if (mainCam != null)
-                camDefaultFOV = mainCam.fieldOfView;
+            // Đưa plane xuống vị trí ban đầu (ẩn)
+            if (dissolvePlane != null)
+            {
+                Vector3 pos = dissolvePlane.position;
+                pos.y = planeDropHeight;
+                dissolvePlane.position = pos;
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -62,31 +51,30 @@ namespace PLAYERTWO.PlatformerProject
 
             triggered = true;
 
-            // 🔹 Cập nhật vị trí respawn của player tại điểm boss encounter
             SetPlayerRespawnPoint();
             StartCoroutine(RunSequence());
         }
 
         #endregion
-
         //─────────────────────────────────────────────
+
         #region === CUTSCENE SEQUENCE ===
 
+        /// <summary>Chạy toàn bộ cutscene vào sàn đấu boss</summary>
         private IEnumerator RunSequence()
         {
-            // 1) Khoá player
+            // Lock player di chuyển
             PlayerHub.Instance.LockPlayer(true);
 
-            yield return new WaitForSeconds(cameraIntroDelay);
+            // Chuyển camera vào boss
+            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
 
-            // 2) Kích hoạt camera cinematic
-            if (bossCam != null)
-                bossCam.Priority = 20;
-            else if (mainCam != null && focusTarget != null)
-                StartCoroutine(CameraFocusOnBoss());
+            // Thả plane dissolve từ dưới lên
+            yield return StartCoroutine(DropDissolvePlane());
 
-            // 3) Boss tiến vào vị trí combat (dùng chính mover/anim của bạn)
+            // Boss chạy vào vị trí combat
             var soldier = bossCore as SoldierRobot;
+
             if (soldier != null && bossCombatPoint != null)
             {
                 soldier.SetSpeedMultiplier(moveSpeedBoost);
@@ -98,76 +86,61 @@ namespace PLAYERTWO.PlatformerProject
                 soldier.SetSpeedMultiplier(1f);
             }
 
-            // 4) Hiện UI Boss (tên + thanh máu) — intro
+            // Hiện UI intro của boss
             var ui = bossCore.GetComponent<BossUI>();
             ui?.ShowBossIntro(bossDisplayName);
 
-            // 5) Trả camera về player
-            yield return new WaitForSeconds(cameraReturnDelay);
-            if (bossCam != null)
-                bossCam.Priority = 0;
-            else if (mainCam != null)
-                StartCoroutine(CameraResetFOV());
+            // Trả camera về player
+            yield return CameraCutsceneController.instance.ReleaseToPlayer();
 
-            // 6) Mở khoá player
+            // Unlock player
             PlayerHub.Instance.LockPlayer(false);
 
-            // 7) Thực hiện animation bắt đầu vào combat
+            // Boss chơi animation bắt đầu combat
             bossCore.BossAnim?.PlayBattleStart();
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(2f);
 
-            if (boundary != null) boundary.ActivateBoundary();
-
+            // Bật boundary và bắt đầu combat
+            boundary?.ActivateBoundary();
             bossCore.StartBattle();
         }
 
-        #endregion
-
-        //─────────────────────────────────────────────
-        #region === CAMERA HELPERS (No-Cinemachine) ===
-
-        private IEnumerator CameraFocusOnBoss()
+        /// <summary>Kéo dissolve plane lên cao với tốc độ tùy chỉnh</summary>
+        private IEnumerator DropDissolvePlane()
         {
-            float t = 0f;
-            while (t < 1f)
-            {
-                t += Time.deltaTime * zoomSpeed;
-                mainCam.fieldOfView = Mathf.Lerp(camDefaultFOV, zoomFOV, t);
+            Vector3 start = dissolvePlane.position;
+            Vector3 end = new Vector3(start.x, planeTargetHeight, start.z);
 
-                Vector3 dir = (focusTarget.position - mainCam.transform.position).normalized;
-                Quaternion lookRot = Quaternion.LookRotation(dir, Vector3.up);
-                mainCam.transform.rotation = Quaternion.Slerp(
-                    mainCam.transform.rotation,
-                    lookRot,
-                    Time.deltaTime * zoomSpeed
+            while (Vector3.Distance(dissolvePlane.position, end) > 0.05f)
+            {
+                dissolvePlane.position = Vector3.MoveTowards(
+                    dissolvePlane.position,
+                    end,
+                    planeDropSpeed * Time.deltaTime
                 );
 
                 yield return null;
             }
+
+            // Snap vào đúng vị trí cho sạch sẽ
+            dissolvePlane.position = end;
         }
 
-        private IEnumerator CameraResetFOV()
-        {
-            float t = 0f;
-            while (t < 1f)
-            {
-                t += Time.deltaTime * zoomSpeed;
-                mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, camDefaultFOV, t);
-                yield return null;
-            }
-        }
 
         #endregion
+        //─────────────────────────────────────────────
 
-        #region === PLAYER RESPAWN HANDLER ===
 
+        #region === PLAYER RESPAWN ===
+
+        /// <summary>Lưu lại vị trí respawn của player khi chạm trigger</summary>
         private void SetPlayerRespawnPoint()
         {
-            // Lưu vị trí và hướng hiện tại của Player khi vừa chạm trigger
             if (player != null)
                 player.SetRespawn(player.transform.position, player.transform.rotation);
         }
 
         #endregion
+        //─────────────────────────────────────────────
     }
 }

@@ -213,15 +213,13 @@ namespace PLAYERTWO.PlatformerProject
             // Color Transition
             foreach (var r in GetComponentsInChildren<Renderer>())
             {
-                if (instant) r.material.color = phase.phaseColor;
-                else r.material.DOColor(phase.phaseColor, 0.35f);
+                if (instant) r.sharedMaterial.color = phase.phaseColor;
+                else r.sharedMaterial.DOColor(phase.phaseColor, 0.35f);
             }
 
             // Scale Transition
-            if (instant)
-                transform.localScale = phase.scale;
-            else
-                transform.DOScale(phase.scale, 0.35f).SetEase(Ease.OutBack);
+            if (instant) transform.localScale = phase.scale;
+            else transform.DOScale(phase.scale, 0.35f).SetEase(Ease.OutBack);
         }
 
         #endregion
