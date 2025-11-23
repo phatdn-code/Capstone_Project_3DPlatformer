@@ -5,7 +5,7 @@ using Unity.Cinemachine;
 namespace PLAYERTWO.PlatformerProject
 {
     [DisallowMultipleComponent]
-    public class CameraCutsceneController : Singleton<CameraCutsceneController>
+    public class CameraCutsceneController : SingletonMonobehaviour<CameraCutsceneController>
     {
         //─────────────────────────────────────────────
         #region === Inspector References ===

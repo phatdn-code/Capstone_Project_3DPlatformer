@@ -102,13 +102,13 @@ namespace PLAYERTWO.PlatformerProject
         {
             PlayerHub.Instance.LockPlayer(true);
 
-            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
+            yield return CameraCutsceneController.Instance.FocusTo(BossCamType.Boss);
             yield return ShootGiantBomb();
-            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
+            yield return CameraCutsceneController.Instance.FocusTo(BossCamType.Boss);
 
             yield return MoveToRechargeStation();
 
-            yield return CameraCutsceneController.instance.ReleaseToPlayer();
+            yield return CameraCutsceneController.Instance.ReleaseToPlayer();
             PlayerHub.Instance.LockPlayer(false);
         }
 
@@ -150,8 +150,8 @@ namespace PLAYERTWO.PlatformerProject
             if (currentBomb != null)
             {
                 yield return null;
-                CameraCutsceneController.instance.AssignSpecialTarget(currentBomb.transform);
-                yield return CameraCutsceneController.instance.FocusTo(BossCamType.Special);
+                CameraCutsceneController.Instance.AssignSpecialTarget(currentBomb.transform);
+                yield return CameraCutsceneController.Instance.FocusTo(BossCamType.Special);
             }
 
             yield return new WaitForSeconds(1.5f);
@@ -242,7 +242,7 @@ namespace PLAYERTWO.PlatformerProject
         private void OnBombReflected()
         {
             bombReflected = true;
-            StartCoroutine(CameraCutsceneController.instance.FocusTo(BossCamType.Special));
+            StartCoroutine(CameraCutsceneController.Instance.FocusTo(BossCamType.Special));
         }
 
         /// <summary>Slow motion chiến thắng.</summary>
@@ -302,7 +302,7 @@ namespace PLAYERTWO.PlatformerProject
             yield return StartDissolve();
             yield return new WaitForSeconds(.5f);
 
-            yield return CameraCutsceneController.instance.ReleaseToPlayer();
+            yield return CameraCutsceneController.Instance.ReleaseToPlayer();
 
             MovementBoundaryZone.Instance.enabled = false;
             zoneEffect.SetActive(false);

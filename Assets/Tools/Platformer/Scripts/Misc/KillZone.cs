@@ -22,12 +22,8 @@ namespace PLAYERTWO.PlatformerProject
 				return;
 
 			if (other.CompareTag(GameTags.Player))
-			{
 				if (other.TryGetComponent(out Player player))
-				{
 					player.Die();
-				}
-			}
 		}
 	}
 }

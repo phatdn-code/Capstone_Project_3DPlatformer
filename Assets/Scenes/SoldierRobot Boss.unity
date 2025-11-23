@@ -16866,7 +16866,7 @@ GameObject:
   - component: {fileID: 1774993619}
   - component: {fileID: 1774993618}
   m_Layer: 0
-  m_Name: Bomb Camera
+  m_Name: Special Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

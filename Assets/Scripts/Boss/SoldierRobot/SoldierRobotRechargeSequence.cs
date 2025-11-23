@@ -73,7 +73,7 @@ namespace PLAYERTWO.PlatformerProject
             PlayerHub.Instance.LockPlayer(true);
 
             // Focus camera vào boss
-            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
+            yield return CameraCutsceneController.Instance.FocusTo(BossCamType.Boss);
 
             // Boss chạy đến trạm nạp
             yield return MoveBossWithSpeedBoost(chargeStationTarget);
@@ -89,7 +89,7 @@ namespace PLAYERTWO.PlatformerProject
             yield return MoveBossWithSpeedBoost(returnPoint);
 
             // Trả camera lại cho player & mở khóa điều khiển
-            yield return CameraCutsceneController.instance.ReleaseToPlayer();
+            yield return CameraCutsceneController.Instance.ReleaseToPlayer();
             PlayerHub.Instance.LockPlayer(false);
             soldierBoss.SetPaused(false);
 

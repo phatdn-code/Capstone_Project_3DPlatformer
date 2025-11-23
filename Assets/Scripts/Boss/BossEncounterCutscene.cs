@@ -67,7 +67,7 @@ namespace PLAYERTWO.PlatformerProject
             PlayerHub.Instance.LockPlayer(true);
 
             // Chuyển camera vào boss
-            yield return CameraCutsceneController.instance.FocusTo(BossCamType.Boss);
+            yield return CameraCutsceneController.Instance.FocusTo(BossCamType.Boss);
 
             // Thả plane dissolve từ dưới lên
             yield return StartCoroutine(DropDissolvePlane());
@@ -91,7 +91,7 @@ namespace PLAYERTWO.PlatformerProject
             ui?.ShowBossIntro(bossDisplayName);
 
             // Trả camera về player
-            yield return CameraCutsceneController.instance.ReleaseToPlayer();
+            yield return CameraCutsceneController.Instance.ReleaseToPlayer();
 
             // Unlock player
             PlayerHub.Instance.LockPlayer(false);
