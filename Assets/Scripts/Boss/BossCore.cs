@@ -114,6 +114,7 @@ namespace PLAYERTWO.PlatformerProject
             InitializeBoss();
             InitializeDefaultPhasesIfNeeded();
             HookHealthEvents();
+            m_bossUI.Bind(this);
 
             if (!startInactive)
             {

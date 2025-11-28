@@ -58,8 +58,6 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
         // Lưu vị trí Y của portalGroup
         if (portalGroup != null)
             originalPortalY = portalGroup.position.y;
-
-        StartCoroutine(CutsceneFlow());
     }
 
     #endregion

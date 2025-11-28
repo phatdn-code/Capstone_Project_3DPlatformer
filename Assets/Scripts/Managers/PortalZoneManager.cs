@@ -6,28 +6,49 @@ using UnityEngine;
 
 public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 {
-    [Header("All Portal Zones")]
-    public List<PortalZone> zones = new List<PortalZone>();
+    //─────────────────────────────────────────────────────────────
+    #region === INSPECTOR FIELDS ===
 
-    [Header("Current Zone (runtime)")]
-    private PortalZone currentZone;
+    [Header("Danh sách tất cả Portal Zone")]
+    [SerializeField] private List<PortalZone> zones = new();
 
-    [Header("Return Portal Settings")]
-    public Portal returnPortal;
+    [Header("Cài đặt Return Portal")]
+    [SerializeField] private Portal returnPortal;
 
-    [Header("Transition Settings")]
+    [Header("Cài đặt Transition")]
     [SerializeField] private float dissolveMoveDuration = 2f;
+
+    [Header("Tham chiếu Boss")]
+    [SerializeField] private BossCore boss;
+
+    #endregion
+    //─────────────────────────────────────────────────────────────
+
+
+
+    //─────────────────────────────────────────────────────────────
+    #region === RUNTIME STATE ===
+
+    private PortalZone currentZone;
+    private DragonRobot dragonRobot;
+
+    #endregion
+    //─────────────────────────────────────────────────────────────
 
 
 
     //─────────────────────────────────────────────────────────────
     #region === UNITY LIFECYCLE ===
 
+    /// <summary>
+    /// Chờ 1 frame để tất cả object Awake/Start xong,
+    /// sau đó khởi tạo zone mặc định (zone có returnPortal).
+    /// </summary>
     private IEnumerator Start()
     {
-        // Đợi 1 frame để mọi object trong scene kịp Awake/Start
-        yield return new WaitForEndOfFrame();
+        dragonRobot = boss as DragonRobot;
 
+        yield return new WaitForEndOfFrame();
         InitReturnZone();
     }
 
@@ -40,8 +61,7 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     #region === INITIALIZATION ===
 
     /// <summary>
-    /// Khi game bắt đầu → kích hoạt zone chứa returnPortal.
-    /// (Dùng chung logic qua TryActivateZoneByPortal)
+    /// Bật zone chứa returnPortal khi bắt đầu game.
     /// </summary>
     private void InitReturnZone()
     {
@@ -57,8 +77,13 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     #region === PUBLIC API ===
 
     /// <summary>
-    /// Kích hoạt zone dựa trên portal player vừa đi qua.
-    /// (Dùng chung logic qua TryActivateZoneByPortal)
+    /// Lấy zone hiện tại đang active (zone mà game đang sử dụng).
+    /// </summary>
+    public PortalZone CurrentZone => currentZone;
+
+    /// <summary>
+    /// Player đi qua portal → kích hoạt zone tương ứng.
+    /// Dùng cho các Portal bình thường.
     /// </summary>
     public void ActivateZoneByPortal(Portal exitPortal)
     {
@@ -66,7 +91,8 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     }
 
     /// <summary>
-    /// Chạy dissolve-plane transition.
+    /// Chạy hiệu ứng dissolve-plane + camera + lock/unlock player
+    /// cho zone hiện tại.
     /// </summary>
     public void RunZoneTransition()
     {
@@ -74,13 +100,45 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     }
 
     /// <summary>
-    /// Nếu portal bằng returnPortal → chạy cutscene shuffle.
+    /// Nếu exitPortal chính là returnPortal → chạy cutscene shuffle đặc biệt.
     /// </summary>
     public void TryRunReturnPortalCutscene(Portal exitPortal)
     {
-        if (exitPortal != returnPortal) return;
+        if (exitPortal == returnPortal)
+            CutscenePortalShuffle.Instance.StartCutsceneFlow();
+    }
 
-        CutscenePortalShuffle.Instance.StartCutsceneFlow();
+    /// <summary>
+    /// Trả về điểm mà Dragon nên quay mặt về trong currentZone.
+    /// Ưu tiên:
+    /// 1) portalTargetPoint
+    /// 2) portal
+    /// 3) transform của zone
+    /// Nếu chưa có zone → fallback về Dragon hoặc PortalZoneManager.
+    /// </summary>
+    public Vector3 GetCurrentZoneFacingPoint()
+    {
+        // Nếu chưa có zone hiện tại
+        if (currentZone == null)
+        {
+            // Nếu có Dragon thì cho nhìn về chính Dragon
+            if (dragonRobot != null)
+                return dragonRobot.transform.position;
+
+            // Fallback cuối cùng: vị trí của PortalZoneManager
+            return transform.position;
+        }
+
+        // Ưu tiên điểm target riêng cho portal/boss
+        if (currentZone.portalTargetPoint != null)
+            return currentZone.portalTargetPoint.position;
+
+        // Nếu không có target point thì dùng vị trí portal
+        if (currentZone.portal != null)
+            return currentZone.portal.transform.position;
+
+        // Cuối cùng: dùng vị trí zone
+        return currentZone.transform.position;
     }
 
     #endregion
@@ -89,11 +147,10 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
 
     //─────────────────────────────────────────────────────────────
-    #region === PRIVATE HELPERS ===
+    #region === PRIVATE ZONE LOGIC ===
 
     /// <summary>
-    /// Hàm chung: nhận portal → tìm zone → nếu thấy thì ActivateZone().
-    /// Dùng cho InitReturnZone() và ActivateZoneByPortal().
+    /// Tìm zone chứa portal truyền vào và kích hoạt zone đó.
     /// </summary>
     private void TryActivateZoneByPortal(Portal portal)
     {
@@ -110,8 +167,9 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         ActivateZone(targetZone);
     }
 
-
-    /// <summary>Tìm zone chứa portal.</summary>
+    /// <summary>
+    /// Duyệt danh sách zones để tìm zone có portal khớp với tham số.
+    /// </summary>
     private PortalZone FindZoneByPortal(Portal portal)
     {
         foreach (var zone in zones)
@@ -123,9 +181,12 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         return null;
     }
 
-
     /// <summary>
-    /// Kích hoạt đúng 1 zone, reset portal về vị trí gốc, tắt portal và tắt các zone khác.
+    /// Kích hoạt 1 zone duy nhất:
+    /// - Cập nhật currentZone
+    /// - Reset vị trí/rotation portal về initial (trừ returnPortal)
+    /// - Tắt tất cả portal, chỉ bật zone target
+    /// - Gửi boss (Dragon) tới bossEntryPoint nếu có
     /// </summary>
     private void ActivateZone(PortalZone targetZone)
     {
@@ -135,9 +196,9 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         {
             if (zone == null) continue;
 
-            bool isTarget = (zone == targetZone);
+            bool isTarget = zone == targetZone;
 
-            // Reset portal về initialPosition (ngoại trừ returnPortal)
+            // Reset portal về vị trí gốc (ngoại trừ returnPortal)
             if (zone.portal != null)
             {
                 if (zone.portal != returnPortal)
@@ -146,13 +207,14 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
                     zone.portal.transform.rotation = zone.initialRotation;
                 }
 
-                // Luôn tắt portal trước transition
                 zone.portal.gameObject.SetActive(false);
             }
 
-            // Chỉ bật zone cần thiết
             zone.gameObject.SetActive(isTarget);
         }
+
+        // Gửi boss tới entryPoint của zone mới
+        TryMoveBossToEntryPoint(targetZone);
     }
 
     #endregion
@@ -163,6 +225,14 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     //─────────────────────────────────────────────────────────────
     #region === TRANSITION SEQUENCE ===
 
+    /// <summary>
+    /// Chạy sequence transition cho zone hiện tại:
+    /// - Lock player
+    /// - Di chuyển dissolve-plane
+    /// - Bật portal
+    /// - Trả camera về trạng thái cũ
+    /// - Mở lại player
+    /// </summary>
     private IEnumerator PlayZoneTransition()
     {
         if (currentZone == null)
@@ -171,22 +241,21 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
             yield break;
         }
 
-        // Khóa player
         PlayerHub.Instance.LockPlayer(true);
 
-        // Đưa portal về portalTargetPoint (khác với initialPosition)
+        // Đưa portal về vị trí spawn (portalTargetPoint) nếu có
         if (currentZone.portal != null && currentZone.portalTargetPoint != null)
         {
             currentZone.portal.transform.position = currentZone.portalTargetPoint.position;
             currentZone.portal.transform.rotation = currentZone.portalTargetPoint.rotation;
         }
 
-        // Ưu tiên camera zone
+        // Tạm tăng priority của camera zone để active
         var cam = currentZone.portalCamera;
         int oldPriority = cam.Priority;
         cam.Priority = 100;
 
-        // Chuẩn bị dissolve-plane
+        // Di chuyển dissolve-plane từ startY → endY
         if (currentZone.dissolvePlane != null)
         {
             Vector3 startPos = currentZone.dissolvePlane.position;
@@ -202,15 +271,34 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
             yield return t.WaitForCompletion();
         }
 
-        // Sau dissolve → bật portal
+        // Dissolve hoàn tất → bật portal
         if (currentZone.portal != null)
             currentZone.portal.gameObject.SetActive(true);
 
-        // Trả lại priority camera
+        // Trả priority camera về giá trị cũ
         cam.Priority = oldPriority;
 
-        // Mở khóa player
         PlayerHub.Instance.LockPlayer(false);
+    }
+
+    #endregion
+    //─────────────────────────────────────────────────────────────
+
+
+
+    //─────────────────────────────────────────────────────────────
+    #region === BOSS HANDLING ===
+
+    /// <summary>
+    /// Nếu zone có bossEntryPoint và DragonRobot tồn tại,
+    /// yêu cầu Dragon di chuyển tới điểm entry đó.
+    /// </summary>
+    private void TryMoveBossToEntryPoint(PortalZone zone)
+    {
+        if (zone == null || zone.bossEntryPoint == null) return;
+        if (dragonRobot == null) return;
+
+        dragonRobot.MoveToEntryPoint(zone.bossEntryPoint);
     }
 
     #endregion

@@ -1,30 +1,39 @@
-﻿using UnityEngine;
+﻿using EPOOutline;
+using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
     public class PortalAuxiliary : MonoBehaviour
     {
         //─────────────────────────────────────────────────────────────
-        #region === Inspector Fields ===
+        #region === INSPECTOR FIELDS ===
 
-        [Header("Effects")]
-        [SerializeField] private GameObject highlightEffect;      // Viền ngoài portal
-        [SerializeField] private GameObject innerEnergyEffect;    // Năng lượng bên trong
+        [Header("Correct Portal Indicator")]
+        [SerializeField] private GameObject arrowIndicator;   // Mũi tên chỉ portal đúng
+        [SerializeField] private Outlinable outline;          // Outline viền của portal
+
+        [Header("Energy Effect")]
+        [SerializeField] private GameObject innerEnergyEffect; // Hiệu ứng năng lượng trong portal
 
         #endregion
         //─────────────────────────────────────────────────────────────
 
 
+
         //─────────────────────────────────────────────────────────────
-        #region === Unity Lifecycle ===
+        #region === UNITY LIFECYCLE ===
 
         private void Start()
         {
-            // Tắt highlight ngay khi vào scene
-            if (highlightEffect != null)
-                highlightEffect.SetActive(false);
+            // Tắt mũi tên ban đầu
+            if (arrowIndicator != null)
+                arrowIndicator.SetActive(false);
 
-            // Tắt hiệu ứng năng lượng ngay khi vào scene
+            // Tắt outline ban đầu
+            if (outline != null)
+                outline.enabled = false;
+
+            // Tắt năng lượng ban đầu
             if (innerEnergyEffect != null)
                 innerEnergyEffect.SetActive(false);
         }
@@ -33,36 +42,41 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────────────────────
 
 
-        //─────────────────────────────────────────────────────────────
-        #region === Highlight API ===
 
+        //─────────────────────────────────────────────────────────────
+        #region === HIGHLIGHT API ===
         /// <summary>
-        /// Bật viền highlight bên ngoài portal.
+        /// Hiện arrow + outline để báo portal đúng.
         /// </summary>
         public void ShowHighlight()
         {
-            if (highlightEffect != null)
-                highlightEffect.SetActive(true);
+            if (arrowIndicator != null)
+                arrowIndicator.SetActive(true);
+
+            if (outline != null)
+                outline.enabled = true;
         }
 
         /// <summary>
-        /// Tắt viền highlight bên ngoài portal.
+        /// Ẩn arrow + outline.
         /// </summary>
         public void HideHighlight()
         {
-            if (highlightEffect != null)
-                highlightEffect.SetActive(false);
-        }
+            if (arrowIndicator != null)
+                arrowIndicator.SetActive(false);
 
+            if (outline != null)
+                outline.enabled = false;
+        }
         #endregion
         //─────────────────────────────────────────────────────────────
 
 
-        //─────────────────────────────────────────────────────────────
-        #region === Energy Effect API ===
 
+        //─────────────────────────────────────────────────────────────
+        #region === ENERGY API ===
         /// <summary>
-        /// Bật hiệu ứng năng lượng bên trong portal.
+        /// Hiện hiệu ứng năng lượng bên trong portal.
         /// </summary>
         public void ShowEnergy()
         {
@@ -71,14 +85,13 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Tắt hiệu ứng năng lượng bên trong portal.
+        /// Ẩn năng lượng bên trong portal.
         /// </summary>
         public void HideEnergy()
         {
             if (innerEnergyEffect != null)
                 innerEnergyEffect.SetActive(false);
         }
-
         #endregion
         //─────────────────────────────────────────────────────────────
     }

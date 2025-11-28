@@ -32,7 +32,7 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Melee Attack Settings")]
         [SerializeField] private float meleeRange = 3f;
         [SerializeField] private float meleeCooldown = 2f;
-        [SerializeField] private int meleeDamage = 10;
+        [SerializeField] private int meleeDamage = 1;
 
         [Header("Movement Settings")]
         [SerializeField] private Transform centerPoint;
@@ -125,7 +125,7 @@ namespace PLAYERTWO.PlatformerProject
         private void InitializeComponents()
         {
             agent = GetComponent<NavMeshAgent>();
-            soldierAnim = base.BossAnim as SoldierRobotAnimation;
+            soldierAnim = BossAnim as SoldierRobotAnimation;
             if (agent != null) m_originalSpeed = agent.speed;
         }
 

@@ -19,6 +19,9 @@ namespace PLAYERTWO.PlatformerProject
         public float dissolveStartY = 24f;
         public float dissolveEndY = -2f;
 
+        [Header("Boss Entry Point")]
+        public Transform bossEntryPoint;
+
         [Header("Initial Portal Transform (runtime)")]
         [HideInInspector] public Vector3 initialPosition;
         [HideInInspector] public Quaternion initialRotation;
