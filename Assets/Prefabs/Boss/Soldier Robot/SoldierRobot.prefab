@@ -200,7 +200,7 @@ MonoBehaviour:
   meleeDamage: 1
   centerPoint: {fileID: 0}
   movementRestTime: 2
-  movementSpeedMultiplier: 2.5
+  movementSpeedMultiplier: 2.8
   model: {fileID: 6356837346991364079}
   rotationSpeed: 5
   flashBombEffects:
@@ -208,20 +208,21 @@ MonoBehaviour:
   - {fileID: 8477608592989629867}
   flashFireballEffect: {fileID: 2031500618603018183}
   electricSmashEffect: {fileID: 7009690455691665017}
-  aoeWarningPrefab: {fileID: 8866518070374433124, guid: bf627f1d132fb7140aad073269887d2d,
+  dangerZonePrefab: {fileID: 3155161985883932501, guid: 4d0dea1900c9d774094f72a074fe11bd,
     type: 3}
+  phaseRadius: 3
+  phaseWarningDuration: 2.5
   aoeCount: 10
   aoeRadiusRange: 20
   aoeSpawnDelay: 1
+  phaseDamage: 20
   innerRingCount: 4
-  outerRingCount: 6
   innerRadius: 4
-  outerRadius: 8
-  aoeDelayBetweenRings: 1.2
-  innerWarnDuration: 1
-  outerWarnDuration: 1.8
   innerDamage: 20
+  outerRingCount: 6
+  outerRadius: 8
   outerDamage: 26
+  aoeDelayBetweenRings: 1.2
 --- !u!114 &7569222406182810505
 MonoBehaviour:
   m_ObjectHideFlags: 0

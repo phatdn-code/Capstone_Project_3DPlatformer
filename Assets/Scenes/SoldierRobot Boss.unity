@@ -2658,11 +2658,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Soldier Robot
       objectReference: {fileID: 0}
-    - target: {fileID: 1554781757866288289, guid: b1de0c0a66518e846909001c8c4599d1,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3435294661278983656, guid: b1de0c0a66518e846909001c8c4599d1,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13689,9 +13684,9 @@ MonoBehaviour:
     prefab: {fileID: 183222, guid: f2ee009e61b1177489331d95174281b1, type: 3}
     componentType: 
   - poolSize: 20
-    prefab: {fileID: 8866518070374433124, guid: bf627f1d132fb7140aad073269887d2d,
+    prefab: {fileID: 3155161985883932501, guid: 4d0dea1900c9d774094f72a074fe11bd,
       type: 3}
-    componentType: AOEWarningUnified
+    componentType: DangerZone
   - poolSize: 20
     prefab: {fileID: 1621032296894648, guid: e1d187b36111bfc41b365c2df451ffb4, type: 3}
     componentType: 

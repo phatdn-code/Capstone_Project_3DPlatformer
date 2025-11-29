@@ -9,6 +9,15 @@ namespace PLAYERTWO.PlatformerProject
     [DisallowMultipleComponent]
     public class DragonRobotAnimation : BossAnimationBase
     {
-        
+        /// <summary>
+        /// Bật / tắt trạng thái Flame Thrower trên Animator.
+        /// Dùng bool parameter, ví dụ "IsFlameThrowing".
+        /// </summary>
+        public void SetFlameThrower(bool isFlameThrowing)
+        {
+            if (animator == null) return;
+
+            animator.SetBool("IsFlameThrowing", isFlameThrowing);
+        }
     }
 }

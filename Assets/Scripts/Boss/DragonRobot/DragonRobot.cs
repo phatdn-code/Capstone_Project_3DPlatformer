@@ -1,8 +1,12 @@
 ﻿using DG.Tweening;
 using UnityEngine;
+using System.Collections;
 
 namespace PLAYERTWO.PlatformerProject
 {
+    /// <summary>
+    /// DragonRobot: di chuyển, xoay mặt và điều khiển skill tấn công (Flame Thrower).
+    /// </summary>
     public class DragonRobot : BossCore
     {
         //─────────────────────────────────────────────────────────────
@@ -13,44 +17,57 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private bool autoFindPlayer = true;
 
         [Header("Movement Settings")]
-        [SerializeField] private float baseMoveSpeed = 6f;           // Base speed (units/sec)
-        [SerializeField] private float distanceSpeedFactor = 0.6f;   // Tốc độ + thêm theo distance
-        [SerializeField] private float minUnitsPerSecond = 5f;       // Min speed
-        [SerializeField] private float maxUnitsPerSecond = 25f;      // Max speed
-        [SerializeField] private Ease moveEase = Ease.InOutSine;     // Tween ease for flying
+        [SerializeField] private float baseMoveSpeed = 6f;         // Tốc độ cơ bản (unit/giây)
+        [SerializeField] private float distanceSpeedFactor = 0.6f; // Tốc độ cộng thêm theo khoảng cách
+        [SerializeField] private float minUnitsPerSecond = 5f;     // Tốc độ tối thiểu
+        [SerializeField] private float maxUnitsPerSecond = 25f;    // Tốc độ tối đa
+        [SerializeField] private Ease moveEase = Ease.InOutSine;   // Độ mượt khi bay
 
         [Header("Visual / Facing Settings")]
-        [Tooltip("Sprite/Model root. If null → use this transform.")]
-        [SerializeField] private Transform visualRoot;
-        [Tooltip("Use 3D Y rotation (LookAt) instead of flip scale.")]
-        [SerializeField] private bool useYRotation = true;
-        [Tooltip("Time to rotate when changing facing.")]
-        [SerializeField] private float turnDuration = 0.2f;
+        [SerializeField] private Transform visualRoot;             // Gốc hiển thị (model/sprite)
+        [SerializeField] private bool useYRotation = true;         // True = xoay 3D theo Y, False = flip X
+        [SerializeField] private float turnDuration = 0.2f;        // Thời gian xoay mặt
 
         [Header("Animation Logic")]
-        [Tooltip("Minimum |deltaX| để tính là di chuyển ngang.")]
-        [SerializeField] private float horizontalAnimThreshold = 0.1f;
+        [SerializeField] private float horizontalAnimThreshold = 0.1f; // Ngưỡng |deltaX| để tính là đi ngang
+
+        [Header("Attack Settings")]
+        [SerializeField] private int totalSkillCount = 1;          // Số lượng skill để random
+        [SerializeField] private float attackStartDelay = 1f;      // Delay trước khi bắt đầu tấn công
+
+        [Header("Flame Thrower")]
+        [SerializeField] private float flameAttackDuration = 2f;   // Thời gian duy trì Flame Thrower
+        [SerializeField] private GameObject flameEffectObject;     // GameObject effect phun lửa
 
         #endregion
         //─────────────────────────────────────────────────────────────
 
 
-        #region === RUNTIME ===
+
+        //─────────────────────────────────────────────────────────────
+        #region === RUNTIME STATE ===
 
         private DragonRobotAnimation dragonAnim;
+        private Coroutine attackRoutine;
 
         #endregion
+        //─────────────────────────────────────────────────────────────
+
 
 
         //─────────────────────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
 
+        /// <summary>Khởi tạo ban đầu: cache component và tìm Player nếu cần.</summary>
         protected override void Start()
         {
             base.Start();
             InitializeComponents();
             InitializePlayer();
         }
+
+        /// <summary>Override behavior boss (hiện chưa dùng).</summary>
+        protected override void UpdateBossBehavior() { }
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -60,12 +77,14 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────────────────────
         #region === INITIALIZATION ===
 
+        /// <summary>Tự động gán Player từ PlayerHub nếu chưa set trong Inspector.</summary>
         private void InitializePlayer()
         {
             if (player == null && autoFindPlayer)
                 player = PlayerHub.Instance.Player;
         }
 
+        /// <summary>Cache DragonRobotAnimation và set visualRoot mặc định nếu trống.</summary>
         private void InitializeComponents()
         {
             dragonAnim = BossAnim as DragonRobotAnimation;
@@ -80,13 +99,16 @@ namespace PLAYERTWO.PlatformerProject
 
 
         //─────────────────────────────────────────────────────────────
-        #region === MOVE WITH AUTO TURN ===
+        #region === MOVEMENT / AUTO TURN ===
+
+        //─────────────────────────────────────────────────────────────
+        #region === MOVEMENT / AUTO TURN ===
 
         /// <summary>
-        /// - Xa → chạy nhanh hơn, gần → chậm lại nhưng vẫn đủ nhanh.
-        /// - Chỉ bật move anim khi chủ yếu đi ngang.
-        /// - Trong lúc bay thì nhìn theo target.
-        /// - Đến nơi xong → quay mặt về hướng currentZone (PortalZoneManager).
+        /// Di chuyển đến target:
+        /// - Xa thì đi nhanh hơn, gần thì chậm lại (clamp min/max).
+        /// - Bật anim di chuyển nếu chủ yếu đi ngang.
+        /// - Khi tới nơi → xoay mặt về currentZone → nếu KHÔNG phải return zone thì mới tấn công.
         /// </summary>
         public void MoveToEntryPoint(Transform target)
         {
@@ -107,31 +129,47 @@ namespace PLAYERTWO.PlatformerProject
             // Trong lúc bay: nhìn về điểm đến
             FaceTowards(end);
 
-            // Chỉ bật move anim nếu di chuyển chủ yếu ngang
+            // Bật / tắt anim di chuyển theo hướng chính
             if (horizontalDominant)
                 dragonAnim?.SetMoving(true);
+            else
+                dragonAnim?.SetMoving(false);
 
-            else dragonAnim?.SetMoving(false);
-
-            // SPEED: base + distance * factor, clamp trong min/max
-            float unitsPerSecond = baseMoveSpeed + distance * distanceSpeedFactor;
+            // Tính tốc độ theo khoảng cách (clamp trong min/max)
+            float unitsPerSecond = baseMoveSpeed + distanceSpeedFactor * distance;
             unitsPerSecond = Mathf.Clamp(unitsPerSecond, minUnitsPerSecond, maxUnitsPerSecond);
 
-            // Di chuyển bằng DOTween với speed-based
+            // Tween di chuyển speed-based
             transform.DOMove(end, unitsPerSecond)
-                     .SetSpeedBased(true)   // unitsPerSecond = units / second
+                     .SetSpeedBased(true)
                      .SetEase(moveEase)
                      .OnComplete(() =>
                      {
-                         // Dừng move anim
+                         // Dừng anim di chuyển
                          dragonAnim?.SetMoving(false);
 
-                         // Sau khi tới điểm bossEntryPoint → quay về hướng currentZone
                          var zoneManager = PortalZoneManager.Instance;
+
+                         // Nếu đang ở return zone → không tấn công
+                         bool shouldAttack = true;
+
+                         if (zoneManager != null && zoneManager.IsCurrentZoneReturnZone())
+                             shouldAttack = false;
+
                          if (zoneManager != null)
                          {
+                             // Xoay về hướng currentZone
                              Vector3 lookPoint = zoneManager.GetCurrentZoneFacingPoint();
-                             FaceTowards(lookPoint);
+                             Tween rotateTween = FaceTowards(lookPoint);
+
+                             // Chỉ gắn attack nếu được phép tấn công
+                             if (shouldAttack)
+                             {
+                                 if (rotateTween != null)
+                                     rotateTween.OnComplete(StartRandomAttack);
+
+                                 else StartRandomAttack();
+                             }
                          }
                      });
         }
@@ -140,18 +178,22 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────────────────────
 
 
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
 
         //─────────────────────────────────────────────────────────────
-        #region === FACE DIRECTION / LOOK AT TARGET ===
+        #region === FACING / LOOK AT TARGET ===
 
         /// <summary>
-        /// Xoay visualRoot nhìn về targetPos.
-        /// - useYRotation = true  → 3D LookAt (yaw only).
-        /// - useYRotation = false → 2D-style flip trên X scale.
+        /// Xoay visualRoot để nhìn về vị trí target:
+        /// - Dùng xoay 3D theo Y hoặc flip X tùy cài đặt.
+        /// - Trả về Tween xoay (nếu dùng DOTween rotation) để bắt OnComplete bên ngoài.
         /// </summary>
-        private void FaceTowards(Vector3 targetPos, bool keepUpright = true)
+        private Tween FaceTowards(Vector3 targetPos, bool keepUpright = true)
         {
-            if (visualRoot == null) return;
+            if (visualRoot == null) return null;
 
             Vector3 dir = targetPos - visualRoot.position;
 
@@ -160,23 +202,25 @@ namespace PLAYERTWO.PlatformerProject
                 if (keepUpright)
                     dir.y = 0f;
 
-                if (dir.sqrMagnitude < 0.0001f) return;
+                if (dir.sqrMagnitude < 0.0001f) return null;
 
                 dir.Normalize();
 
                 Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up);
 
                 visualRoot.DOKill();
-                visualRoot.DORotateQuaternion(targetRot, turnDuration);
+                return visualRoot.DORotateQuaternion(targetRot, turnDuration);
             }
             else
             {
                 float dirX = dir.x;
-                if (Mathf.Approximately(dirX, 0f)) return;
+                if (Mathf.Approximately(dirX, 0f)) return null;
 
                 Vector3 s = visualRoot.localScale;
                 s.x = dirX > 0f ? Mathf.Abs(s.x) : -Mathf.Abs(s.x);
                 visualRoot.localScale = s;
+
+                return null;
             }
         }
 
@@ -185,6 +229,87 @@ namespace PLAYERTWO.PlatformerProject
 
 
 
-        protected override void UpdateBossBehavior() { }
+        //─────────────────────────────────────────────────────────────
+        #region === ATTACK LOGIC / FLAME THROWER ===
+
+        /// <summary>Bật/tắt GameObject effect phun lửa (VFX).</summary>
+        private void SetFlameEffectActive(bool isActive)
+        {
+            if (flameEffectObject == null) return;
+            flameEffectObject.SetActive(isActive);
+        }
+
+        /// <summary>
+        /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy)
+        /// rồi khởi chạy RandomAttackRoutine.
+        /// </summary>
+        private void StartRandomAttack()
+        {
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+            }
+
+            attackRoutine = StartCoroutine(RandomAttackRoutine());
+        }
+
+        /// <summary>
+        /// Coroutine random skill:
+        /// - Chờ attackStartDelay giây.
+        /// - Random 1 skill dựa trên totalSkillCount.
+        /// - Thực thi routine skill tương ứng.
+        /// </summary>
+        private IEnumerator RandomAttackRoutine()
+        {
+            yield return new WaitForSeconds(attackStartDelay);
+
+            int skillCount = Mathf.Max(1, totalSkillCount);
+            int index = Random.Range(0, skillCount);
+
+            switch (index)
+            {
+                case 0:
+                    // Skill 0: Flame Thrower
+                    yield return StartCoroutine(FlameThrowerRoutine());
+                    break;
+
+                default:
+                    // Chưa có skill khác → fallback về Flame Thrower
+                    yield return StartCoroutine(FlameThrowerRoutine());
+                    break;
+            }
+
+            attackRoutine = null;
+        }
+
+        /// <summary>
+        /// Routine Flame Thrower:
+        /// - Bật bool animation Flame.
+        /// - Tắt bool Flame + tắt VFX nếu đang bật.
+        /// </summary>
+        private IEnumerator FlameThrowerRoutine()
+        {
+            if (dragonAnim != null)
+                dragonAnim.SetFlameThrower(true);
+
+            yield return new WaitForSeconds(flameAttackDuration);
+
+            if (dragonAnim != null)
+                dragonAnim.SetFlameThrower(false);
+
+            SetFlameEffectActive(false);
+        }
+
+        /// <summary>
+        /// Hàm gọi từ Animation Event: bắt đầu VFX phun lửa khi clip tới frame phun.
+        /// </summary>
+        public void StartFlameThrowerFromAnimation()
+        {
+            SetFlameEffectActive(true);
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
     }
 }

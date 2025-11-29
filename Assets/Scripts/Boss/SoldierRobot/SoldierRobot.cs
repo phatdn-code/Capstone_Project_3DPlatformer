@@ -48,22 +48,26 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private GameObject flashFireballEffect;
         [SerializeField] private GameObject electricSmashEffect;
 
-        [Header("AOE Skill (Phase 2)")]
-        [SerializeField] private GameObject aoeWarningPrefab;   // Prefab vòng cảnh báo (AOEWarningUnified)
+        [Header("Danger Zone Settings - Common")]
+        [SerializeField] private GameObject dangerZonePrefab;
+        [SerializeField] private float phaseRadius = 3f;            // bán kính nổ của từng DangerZone
+        [SerializeField] private float phaseWarningDuration = 2f;   // thời gian chờ trước khi nổ
+
+        [Header("Phase 1 DangerZone Settings (Random)")]
         [SerializeField] private int aoeCount = 5;
         [SerializeField] private float aoeRadiusRange = 8f;
         [SerializeField] private float aoeSpawnDelay = 0.15f;
+        [SerializeField] private int phaseDamage = 20;
 
-        [Header("AOE Skill (Phase 3)")]
+        [Header("Phase 2 DangerZone Settings (Dual Ring)")]
         [SerializeField] private int innerRingCount = 4;
-        [SerializeField] private int outerRingCount = 6;
         [SerializeField] private float innerRadius = 4f;
-        [SerializeField] private float outerRadius = 8f;
-        [SerializeField] private float aoeDelayBetweenRings = 1.2f;
-        [SerializeField] private float innerWarnDuration = 1.0f;
-        [SerializeField] private float outerWarnDuration = 1.8f;
         [SerializeField] private int innerDamage = 20;
+
+        [SerializeField] private int outerRingCount = 6;
+        [SerializeField] private float outerRadius = 8f;
         [SerializeField] private int outerDamage = 26;
+        [SerializeField] private float aoeDelayBetweenRings = 1.2f;
 
         #endregion
         //─────────────────────────────────────────────
@@ -341,34 +345,56 @@ namespace PLAYERTWO.PlatformerProject
 
         private IEnumerator PerformSpecialSkill()
         {
-            Debug.Log("🔥 Boss performs Phase 2 AOE skill!");
+            Debug.Log("🔥 Boss performs Phase 1 Danger Zone skill!");
             soldierAnim?.PlaySpecialSkill();
 
             yield return new WaitForSeconds(0.5f);
             electricSmashEffect.SetActive(true);
             yield return new WaitForSeconds(0.3f);
 
-            yield return StartCoroutine(SpawnAOEWarnings());
+            yield return StartCoroutine(SpawnRandomDangerZones());
         }
 
         private IEnumerator PerformAdvancedAOESkill()
         {
-            Debug.Log("💢 Boss performs Phase 3 dual-ring AOE!");
+            Debug.Log("💢 Boss performs Phase 2 dual-ring Danger Zone!");
             soldierAnim?.PlaySpecialSkill();
 
             yield return new WaitForSeconds(0.5f);
             electricSmashEffect.SetActive(true);
             yield return new WaitForSeconds(0.3f);
-            yield return StartCoroutine(SpawnRingAOE(innerRingCount, innerRadius, innerWarnDuration, innerDamage, AOEMode.Phase3_Inner));
+
+            // Vòng trong
+            yield return StartCoroutine(
+                SpawnRingDangerZones(
+                    innerRingCount,
+                    innerRadius,
+                    innerDamage
+                )
+            );
+
+            // Delay giữa 2 vòng
             yield return new WaitForSeconds(aoeDelayBetweenRings);
-            yield return StartCoroutine(SpawnRingAOE(outerRingCount, outerRadius, outerWarnDuration, outerDamage, AOEMode.Phase3_Outer));
+
+            // Vòng ngoài
+            yield return StartCoroutine(
+                SpawnRingDangerZones(
+                    outerRingCount,
+                    outerRadius,
+                    outerDamage
+                )
+            );
         }
 
-        private IEnumerator SpawnRingAOE(int count, float radius, float warnDuration, int dmg, AOEMode mode)
+
+        /// <summary>
+        /// Phase 2: Spawn DangerZone theo vòng tròn quanh boss.
+        /// </summary>
+        private IEnumerator SpawnRingDangerZones(int count, float ringRadius, int ringDamage)
         {
-            if (aoeWarningPrefab == null)
+            if (dangerZonePrefab == null)
             {
-                Debug.LogWarning("⚠️ Missing aoeWarningPrefab (Phase 3)");
+                Debug.LogWarning("⚠️ Missing dangerZonePrefab (Phase 2)");
                 yield break;
             }
 
@@ -377,25 +403,41 @@ namespace PLAYERTWO.PlatformerProject
             for (int i = 0; i < count; i++)
             {
                 float angle = step * i * Mathf.Deg2Rad;
-                Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+                Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * ringRadius;
                 Vector3 spawnPos = transform.position + offset + Vector3.up * 0.1f;
 
-                var aoe = PoolManager.Instance.ReuseComponent(
-                    aoeWarningPrefab, spawnPos, Quaternion.identity)
-                    ?.GetComponent<AOEWarningUnified>();
+                var pooled = PoolManager.Instance.ReuseComponent(
+                    dangerZonePrefab, spawnPos, Quaternion.identity
+                );
 
-                if (aoe != null)
-                    aoe.Configure(mode, radius, warnDuration, dmg);
+                if (pooled != null)
+                {
+                    var dz = pooled as DangerZone ?? pooled.GetComponent<DangerZone>();
+                    if (dz != null)
+                    {
+                        // Phase 2: bán kính hit vẫn là phaseRadius,
+                        // thời gian chờ vẫn phaseWarningDuration,
+                        // damage = ringDamage (innerDamage hoặc outerDamage)
+                        dz.Configure(
+                            phaseRadius,
+                            phaseWarningDuration,
+                            ringDamage
+                        );
+                    }
+                }
 
                 yield return new WaitForSeconds(0.06f);
             }
         }
 
-        private IEnumerator SpawnAOEWarnings()
+        /// <summary>
+        /// Phase 1: Spawn DangerZone ngẫu nhiên xung quanh centerPoint.
+        /// </summary>
+        private IEnumerator SpawnRandomDangerZones()
         {
-            if (aoeWarningPrefab == null)
+            if (dangerZonePrefab == null)
             {
-                Debug.LogWarning("⚠️ Missing aoeWarningPrefab (Phase 2)");
+                Debug.LogWarning("⚠️ Missing dangerZonePrefab (Phase 1)");
                 yield break;
             }
 
@@ -409,16 +451,28 @@ namespace PLAYERTWO.PlatformerProject
 
                 Vector3 spawnPos = centerPoint.position + offset + Vector3.up * 0.1f;
 
-                var aoe = PoolManager.Instance.ReuseComponent(
-                    aoeWarningPrefab, spawnPos, Quaternion.identity)
-                    ?.GetComponent<AOEWarningUnified>();
+                var pooled = PoolManager.Instance.ReuseComponent(
+                    dangerZonePrefab, spawnPos, Quaternion.identity
+                );
 
-                if (aoe != null)
-                    aoe.Configure(AOEMode.Phase2, 3f, 1.5f, 20);
+                if (pooled != null)
+                {
+                    var dz = pooled as DangerZone ?? pooled.GetComponent<DangerZone>();
+                    if (dz != null)
+                    {
+                        // Phase 1: dùng phaseRadius + phaseWarningDuration + phaseDamage
+                        dz.Configure(
+                            phaseRadius,
+                            phaseWarningDuration,
+                            phaseDamage
+                        );
+                    }
+                }
 
                 yield return new WaitForSeconds(aoeSpawnDelay);
             }
         }
+
 
         #endregion
         //─────────────────────────────────────────────

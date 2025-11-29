@@ -285,6 +285,21 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     //─────────────────────────────────────────────────────────────
 
 
+    //─────────────────────────────────────────────────────────────
+    #region === PUBLIC HELPERS ===
+
+    /// <summary>
+    /// Trả về true nếu currentZone đang dùng returnPortal.
+    /// Dùng cho boss để biết zone hiện tại có phải “return zone” hay không.
+    /// </summary>
+    public bool IsCurrentZoneReturnZone()
+    {
+        if (currentZone == null || returnPortal == null) return false;
+        return currentZone.portal == returnPortal;
+    }
+
+    #endregion
+
 
     //─────────────────────────────────────────────────────────────
     #region === BOSS HANDLING ===
