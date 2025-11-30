@@ -298,6 +298,27 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         return currentZone.portal == returnPortal;
     }
 
+    /// <summary>Trả về bossEntryPoint của currentZone (có thể null).</summary>
+    public Transform GetCurrentZoneBossEntryPoint()
+    {
+        if (currentZone == null) return null;
+        return currentZone.bossEntryPoint;
+    }
+
+    /// <summary>Trả về Transform flameCastPoint của currentZone (có thể null).</summary>
+    public Transform GetCurrentZoneFlameCastPoint()
+    {
+        if (currentZone == null) return null;
+        return currentZone.flameCastPoint;
+    }
+
+    /// <summary>Trả về Transform blastCastPoint của currentZone (có thể null).</summary>
+    public Transform GetCurrentZoneBlastCastPoint()
+    {
+        if (currentZone == null) return null;
+        return currentZone.blastCastPoint;
+    }
+
     #endregion
 
 

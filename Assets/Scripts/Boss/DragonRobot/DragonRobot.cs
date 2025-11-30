@@ -5,7 +5,7 @@ using System.Collections;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// DragonRobot: di chuyển, xoay mặt và điều khiển skill tấn công (Flame Thrower).
+    /// DragonRobot: di chuyển, xoay mặt và điều khiển các skill tấn công (Flame / Blast).
     /// </summary>
     public class DragonRobot : BossCore
     {
@@ -32,12 +32,21 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float horizontalAnimThreshold = 0.1f; // Ngưỡng |deltaX| để tính là đi ngang
 
         [Header("Attack Settings")]
-        [SerializeField] private int totalSkillCount = 1;          // Số lượng skill để random
+        [SerializeField] private int totalSkillCount = 2;          // Số lượng skill để random (0 = Flame, 1 = Blast)
         [SerializeField] private float attackStartDelay = 1f;      // Delay trước khi bắt đầu tấn công
 
         [Header("Flame Thrower")]
         [SerializeField] private float flameAttackDuration = 2f;   // Thời gian duy trì Flame Thrower
+        [SerializeField] private float flameMoveDuration = 1.2f;   // Thời gian đi tới / về điểm cast Flame
         [SerializeField] private GameObject flameEffectObject;     // GameObject effect phun lửa
+
+        [Header("Blast Attack")]
+        [SerializeField] private BossFireball fireballPrefab;      // Prefab cầu lửa
+        [SerializeField] private Transform fireballSpawnPoint;     // Vị trí spawn cầu lửa
+        [SerializeField] private GameObject blastFlashEffect;      // Flash effect khi bắn cầu lửa
+        [SerializeField] private int blastFireballCount = 3;       // Tổng số quả phải bắn
+        [SerializeField] private float blastAimDuration = 0.5f;    // Thời gian ngắm trước mỗi phát
+        [SerializeField] private float blastShotAnimDuration = 0.6f; // Thời gian ước chừng animation 1 phát
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -49,6 +58,11 @@ namespace PLAYERTWO.PlatformerProject
 
         private DragonRobotAnimation dragonAnim;
         private Coroutine attackRoutine;
+
+        // Blast state
+        private bool isBlastSequenceActive = false;   // Đang chạy chuỗi blast hay không
+        private bool isBlastRotLocked = false;        // Có cho xoay về Player trong lúc blast không
+        private int blastShotsDone = 0;               // Đã bắn được bao nhiêu quả trong chuỗi
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -77,7 +91,7 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────────────────────
         #region === INITIALIZATION ===
 
-        /// <summary>Tự động gán Player từ PlayerHub nếu chưa set trong Inspector.</summary>
+        /// <summary>Tự động gán Player từ PlayerHub nếu chưa set.</summary>
         private void InitializePlayer()
         {
             if (player == null && autoFindPlayer)
@@ -97,9 +111,6 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────────────────────
 
 
-
-        //─────────────────────────────────────────────────────────────
-        #region === MOVEMENT / AUTO TURN ===
 
         //─────────────────────────────────────────────────────────────
         #region === MOVEMENT / AUTO TURN ===
@@ -152,7 +163,6 @@ namespace PLAYERTWO.PlatformerProject
 
                          // Nếu đang ở return zone → không tấn công
                          bool shouldAttack = true;
-
                          if (zoneManager != null && zoneManager.IsCurrentZoneReturnZone())
                              shouldAttack = false;
 
@@ -167,16 +177,18 @@ namespace PLAYERTWO.PlatformerProject
                              {
                                  if (rotateTween != null)
                                      rotateTween.OnComplete(StartRandomAttack);
-
-                                 else StartRandomAttack();
+                                 else
+                                     StartRandomAttack();
                              }
+                         }
+                         else
+                         {
+                             // Không có zoneManager → xem như zone thường
+                             if (shouldAttack)
+                                 StartRandomAttack();
                          }
                      });
         }
-
-        #endregion
-        //─────────────────────────────────────────────────────────────
-
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -187,9 +199,9 @@ namespace PLAYERTWO.PlatformerProject
         #region === FACING / LOOK AT TARGET ===
 
         /// <summary>
-        /// Xoay visualRoot để nhìn về vị trí target:
-        /// - Dùng xoay 3D theo Y hoặc flip X tùy cài đặt.
-        /// - Trả về Tween xoay (nếu dùng DOTween rotation) để bắt OnComplete bên ngoài.
+        /// Xoay visualRoot để nhìn về target:
+        /// - Dùng xoay 3D theo Y hoặc flip X.
+        /// - Trả về Tween xoay để bắt OnComplete nếu cần.
         /// </summary>
         private Tween FaceTowards(Vector3 targetPos, bool keepUpright = true)
         {
@@ -230,7 +242,7 @@ namespace PLAYERTWO.PlatformerProject
 
 
         //─────────────────────────────────────────────────────────────
-        #region === ATTACK LOGIC / FLAME THROWER ===
+        #region === ATTACK LOGIC (CHUNG) ===
 
         /// <summary>Bật/tắt GameObject effect phun lửa (VFX).</summary>
         private void SetFlameEffectActive(bool isActive)
@@ -240,8 +252,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy)
-        /// rồi khởi chạy RandomAttackRoutine.
+        /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy) rồi chạy RandomAttackRoutine.
         /// </summary>
         private void StartRandomAttack()
         {
@@ -256,8 +267,8 @@ namespace PLAYERTWO.PlatformerProject
 
         /// <summary>
         /// Coroutine random skill:
-        /// - Chờ attackStartDelay giây.
-        /// - Random 1 skill dựa trên totalSkillCount.
+        /// - Chờ attackStartDelay.
+        /// - Random skill dựa trên totalSkillCount.
         /// - Thực thi routine skill tương ứng.
         /// </summary>
         private IEnumerator RandomAttackRoutine()
@@ -274,6 +285,11 @@ namespace PLAYERTWO.PlatformerProject
                     yield return StartCoroutine(FlameThrowerRoutine());
                     break;
 
+                case 1:
+                    // Skill 1: Blast Attack (bắn 3 quả cầu lửa)
+                    yield return StartCoroutine(BlastAttackRoutine());
+                    break;
+
                 default:
                     // Chưa có skill khác → fallback về Flame Thrower
                     yield return StartCoroutine(FlameThrowerRoutine());
@@ -283,26 +299,81 @@ namespace PLAYERTWO.PlatformerProject
             attackRoutine = null;
         }
 
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === FLAME THROWER ROUTINE ===
+
         /// <summary>
         /// Routine Flame Thrower:
-        /// - Bật bool animation Flame.
-        /// - Tắt bool Flame + tắt VFX nếu đang bật.
+        /// - Lấy flameCastPoint + bossEntryPoint từ PortalZone hiện tại.
+        /// - Di chuyển nhẹ tới flameCastPoint (nếu có), không xoay, không anim chạy.
+        /// - Bật animation Flame, chờ flameAttackDuration.
+        /// - Tắt Flame + VFX.
+        /// - Di chuyển nhẹ nhàng về bossEntryPoint (nếu có).
         /// </summary>
         private IEnumerator FlameThrowerRoutine()
         {
+            // Lấy point cast + point quay về từ zone hiện tại
+            Transform flameCastPoint = null;
+            Transform bossEntryPoint = null;
+            var zoneManager = PortalZoneManager.Instance;
+
+            if (zoneManager != null)
+            {
+                flameCastPoint = zoneManager.GetCurrentZoneFlameCastPoint();
+                bossEntryPoint = zoneManager.GetCurrentZoneBossEntryPoint();
+            }
+
+            // 1. Di chuyển tới điểm cast flame (nếu có)
+            if (flameCastPoint != null)
+            {
+                dragonAnim?.SetMoving(false); // Không anim chạy
+                transform.DOKill();           // Ngắt tween cũ nếu có
+
+                float duration = flameMoveDuration > 0f ? flameMoveDuration : 0.5f;
+
+                Tween goTween = transform
+                    .DOMove(flameCastPoint.position, duration)
+                    .SetEase(Ease.InOutSine);
+
+                // Không xoay, không FaceTowards ở đoạn này
+                yield return goTween.WaitForCompletion();
+            }
+
+            // 2. Bật animation Flame
             if (dragonAnim != null)
                 dragonAnim.SetFlameThrower(true);
 
+            // Thời gian duy trì chiêu (VFX bật bằng Animation Event)
             yield return new WaitForSeconds(flameAttackDuration);
 
+            // 3. Tắt animation Flame + đảm bảo tắt VFX
             if (dragonAnim != null)
                 dragonAnim.SetFlameThrower(false);
 
             SetFlameEffectActive(false);
+
+            // 4. Di chuyển về lại bossEntryPoint (nếu có)
+            if (bossEntryPoint != null)
+            {
+                transform.DOKill();
+
+                float duration = flameMoveDuration > 0f ? flameMoveDuration : 0.5f;
+
+                Tween backTween = transform
+                    .DOMove(bossEntryPoint.position, duration)
+                    .SetEase(Ease.InOutSine);
+
+                yield return backTween.WaitForCompletion();
+            }
         }
 
         /// <summary>
-        /// Hàm gọi từ Animation Event: bắt đầu VFX phun lửa khi clip tới frame phun.
+        /// Gọi từ Animation Event: bật VFX phun lửa đúng frame trong clip.
         /// </summary>
         public void StartFlameThrowerFromAnimation()
         {
@@ -311,5 +382,215 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
         //─────────────────────────────────────────────────────────────
+
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === BLAST ATTACK (BOSSFIREBALL) ===
+
+        /// <summary>
+        /// Routine Blast Attack:
+        /// - Lấy blastCastPoint + bossEntryPoint từ PortalZone hiện tại.
+        /// - Bay chậm tới blastCastPoint (không xoay, không anim chạy).
+        /// - Ở điểm cast: chạy chuỗi 3 phát Blast (ngắm → anim → event bắn).
+        /// - Bắn xong 3 quả → bay về lại bossEntryPoint.
+        /// </summary>
+        private IEnumerator BlastAttackRoutine()
+        {
+            // Thiếu player hoặc anim → fallback sang Flame
+            if (player == null || dragonAnim == null)
+            {
+                yield return StartCoroutine(FlameThrowerRoutine());
+                yield break;
+            }
+
+            // Lấy điểm cast + điểm quay về từ zone hiện tại
+            Transform blastCastPoint = null;
+            Transform bossEntryPoint = null;
+            var zoneManager = PortalZoneManager.Instance;
+
+            if (zoneManager != null)
+            {
+                blastCastPoint = zoneManager.GetCurrentZoneBlastCastPoint();
+                bossEntryPoint = zoneManager.GetCurrentZoneBossEntryPoint();
+            }
+
+            // 1) Bay tới blastCastPoint (nếu có) – nhẹ, không xoay, không anim chạy
+            dragonAnim.SetMoving(false);
+            transform.DOKill();
+
+            if (blastCastPoint != null)
+            {
+                float moveDuration = flameMoveDuration > 0f ? flameMoveDuration : 0.5f;
+
+                Tween toCastTween = transform
+                    .DOMove(blastCastPoint.position, moveDuration)
+                    .SetEase(Ease.InOutSine);
+
+                // Không FaceTowards ở đoạn này → không xoay khi bay tới điểm cast
+                yield return toCastTween.WaitForCompletion();
+            }
+
+            // 2) Setup state chuỗi blast tại vị trí cast
+            isBlastSequenceActive = true;
+            isBlastRotLocked = false;
+            blastShotsDone = 0;
+
+            // Bắt đầu phát thứ nhất (BeginNextBlastShot lo ngắm + play anim)
+            BeginNextBlastShot();
+
+            // Chờ cho tới khi chuỗi blast kết thúc
+            yield return new WaitUntil(() => !isBlastSequenceActive);
+
+            // 3) Blast xong → bay về lại bossEntryPoint (nếu có)
+            if (bossEntryPoint != null)
+            {
+                transform.DOKill();
+                if (visualRoot != null) visualRoot.DOKill();
+
+                float returnDuration = flameMoveDuration > 0f ? flameMoveDuration : 0.5f;
+
+                // Vừa bay về, vừa xoay về hướng bossEntryPoint
+                Tween backTween = transform
+                    .DOMove(bossEntryPoint.position, returnDuration)
+                    .SetEase(Ease.InOutSine);
+
+                if (visualRoot != null)
+                    visualRoot.DORotateQuaternion(bossEntryPoint.rotation, returnDuration);
+
+                yield return backTween.WaitForCompletion();
+            }
+        }
+
+        /// <summary>
+        /// Bắt đầu 1 phát Blast mới:
+        /// - Đủ số phát → kết thúc chuỗi.
+        /// - Chưa đủ → chạy coroutine ngắm Player rồi play animation.
+        /// </summary>
+        private void BeginNextBlastShot()
+        {
+            if (!isBlastSequenceActive)
+                return;
+
+            if (blastShotsDone >= blastFireballCount)
+            {
+                // Đã đủ số phát → kết thúc chuỗi blast
+                isBlastSequenceActive = false;
+                return;
+            }
+
+            // Bắt đầu 1 vòng: ngắm → anim → event bắn
+            StartCoroutine(BeginBlastShotAfterAim());
+        }
+
+        /// <summary>
+        /// Pha "ngắm": xoay theo Player trong blastAimDuration,
+        /// sau đó bắt đầu animation Blast và lock xoay.
+        /// </summary>
+        private IEnumerator BeginBlastShotAfterAim()
+        {
+            float timer = 0f;
+
+            // Pha ngắm – cho phép xoay về Player
+            while (timer < blastAimDuration && isBlastSequenceActive)
+            {
+                if (!isBlastRotLocked && player != null)
+                    FaceTowards(player.transform.position);
+
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            if (!isBlastSequenceActive)
+                yield break;
+
+            // Bắt đầu animation Blast cho phát này: từ đây không cho xoay nữa
+            isBlastRotLocked = true;
+            dragonAnim?.PlayBlastAttack();
+
+            // Optional: chờ ước chừng thời gian animation 1 phát
+            float animTimer = 0f;
+            while (animTimer < blastShotAnimDuration && isBlastSequenceActive)
+            {
+                // Trong lúc anim: không xoay vì isBlastRotLocked = true
+                animTimer += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        /// <summary>
+        /// Animation Event: bắn ra 1 quả cầu lửa cho Blast,
+        /// bật flash effect và tăng số phát đã bắn.
+        /// </summary>
+        public void ShootBlastFireballFromAnimation()
+        {
+            if (blastFlashEffect != null)
+                blastFlashEffect.SetActive(true);
+
+            SpawnFireballAtPlayer();
+            blastShotsDone++;
+        }
+
+        /// <summary>
+        /// Animation Event ở cuối motion bắn:
+        /// - Mở lại xoay về Player.
+        /// - Chưa đủ 3 phát → chuẩn bị phát tiếp.
+        /// - Đủ 3 phát → kết thúc chuỗi blast.
+        /// </summary>
+        public void OnBlastShotEndFromAnimation()
+        {
+            // Cho phép xoay lại về Player
+            isBlastRotLocked = false;
+
+            if (!isBlastSequenceActive)
+                return;
+
+            // Đã bắn đủ → kết thúc chuỗi blast
+            if (blastShotsDone >= blastFireballCount)
+                isBlastSequenceActive = false;
+
+            // Chưa đủ → ngắm + bắn phát tiếp theo
+            else BeginNextBlastShot();
+        }
+
+        /// <summary>
+        /// Spawn 1 BossFireball bay theo hướng fireballSpawnPoint (forward).
+        /// </summary>
+        private void SpawnFireballAtPlayer()
+        {
+            if (fireballPrefab == null || fireballSpawnPoint == null)
+                return;
+
+            BossFireball fireball = null;
+
+            // Ưu tiên lấy từ PoolManager
+            var pooled = PoolManager.Instance.ReuseComponent(
+                fireballPrefab.gameObject,
+                fireballSpawnPoint.position,
+                fireballSpawnPoint.rotation
+            );
+            fireball = pooled as BossFireball;
+
+            // Nếu pool chưa có thì Instantiate mới
+            if (fireball == null)
+            {
+                GameObject go = Instantiate(
+                    fireballPrefab.gameObject,
+                    fireballSpawnPoint.position,
+                    fireballSpawnPoint.rotation
+                );
+                fireball = go.GetComponent<BossFireball>();
+            }
+
+            if (fireball != null)
+            {
+                // Setup target = fireballSpawnPoint (BossFireball sẽ dùng target.forward nếu bạn đã bật)
+                fireball.SetupFromPool(fireballSpawnPoint, this);
+            }
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
     }
 }

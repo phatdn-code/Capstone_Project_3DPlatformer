@@ -22,6 +22,10 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Boss Entry Point")]
         public Transform bossEntryPoint;
 
+        [Header("Boss Skill Points")]
+        public Transform flameCastPoint;      // Điểm thực hiện Flame Thrower
+        public Transform blastCastPoint;      // Điểm thực hiện Blast Attack
+
         [Header("Initial Portal Transform (runtime)")]
         [HideInInspector] public Vector3 initialPosition;
         [HideInInspector] public Quaternion initialRotation;

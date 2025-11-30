@@ -340,7 +340,7 @@ namespace PLAYERTWO.PlatformerProject
                 ?.GetComponent<BossFireball>();
 
             if (fireball != null && player != null)
-                fireball.SetupFromPool(player, this);
+                fireball.SetupFromPool(player.transform, this);
         }
 
         private IEnumerator PerformSpecialSkill()

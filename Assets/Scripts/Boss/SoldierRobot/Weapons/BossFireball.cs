@@ -25,11 +25,14 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Hit Effect (Particle)")]
         [SerializeField] private GameObject hitEffect;
 
+        [Header("Direction Mode")]
+        [SerializeField] private bool useTargetForwardDirection;
+
         //─────────────────────────────────────────────
         private Rigidbody rb;
+        private Transform target;
+        private BossCore ownerBoss;
         private bool hasHit;
-        private Player target;
-        private SoldierRobot ownerBoss;
 
         //─────────────────────────────────────────────
         private void Awake()
@@ -61,7 +64,7 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>
         /// Setup từ Pool — truyền Player target & boss sở hữu.
         /// </summary>
-        public void SetupFromPool(Player newTarget, SoldierRobot boss)
+        public void SetupFromPool(Transform newTarget, BossCore boss)
         {
             target = newTarget;
             ownerBoss = boss;
@@ -81,7 +84,15 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (target != null)
             {
-                Vector3 direction = (target.transform.position - transform.position).normalized;
+                Vector3 direction;
+
+                // Bay theo hướng forward của target
+                if (useTargetForwardDirection)
+                    direction = target.forward;
+
+                // Behavior cũ: bay từ fireball → target.position
+                else direction = (target.position - transform.position).normalized;
+
                 direction.y = 0;
                 return direction;
             }
@@ -153,9 +164,6 @@ namespace PLAYERTWO.PlatformerProject
 
             var pooled = PoolManager.Instance.ReuseComponent(
                 hitEffect, transform.position, Quaternion.identity);
-
-            if (pooled == null)
-                Instantiate(hitEffect, transform.position, Quaternion.identity);
         }
 
         //─────────────────────────────────────────────

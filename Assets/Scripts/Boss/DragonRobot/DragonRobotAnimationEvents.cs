@@ -11,7 +11,6 @@ namespace PLAYERTWO.PlatformerProject
     {
         //─────────────────────────────────────────────────────────────
         [Header("References")]
-        [Tooltip("Tham chiếu đến DragonRobot (logic gameplay).")]
         [SerializeField] private DragonRobot dragonRobot;
 
         //─────────────────────────────────────────────────────────────
@@ -26,6 +25,19 @@ namespace PLAYERTWO.PlatformerProject
             PlayFlameStartSound();
         }
 
+        /// <summary>
+        /// Được gọi ở frame bắn Blast Attack – spawn 1 quả cầu lửa.
+        /// </summary>
+        public void OnBlastShoot()
+        {
+            dragonRobot?.ShootBlastFireballFromAnimation();
+            PlayBlastShootSound();
+        }
+
+        public void OnBlastShotEnd()
+        {
+            dragonRobot?.OnBlastShotEndFromAnimation();
+        }
 
         /// <summary>
         /// Được gọi khi Dragon nhận damage (hit reaction).
@@ -55,7 +67,7 @@ namespace PLAYERTWO.PlatformerProject
         // Helpers (stub) – bạn tự fill sau
 
         private void PlayFlameStartSound() { /* TODO: âm thanh bắt đầu phun lửa */ }
-        private void PlayFlameEndEffect() { /* TODO: hiệu ứng tắt lửa / khói */ }
+        private void PlayBlastShootSound() { /* TODO: âm thanh bắn cầu lửa */ }
         private void PlayRoarSound() { /* TODO: âm thanh gầm */ }
         private void PlayLandingEffect() { /* TODO: dust VFX, camera shake */ }
         private void PlayDamageSound() { /* TODO: âm thanh bị trúng */ }
