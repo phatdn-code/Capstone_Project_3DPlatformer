@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -32,7 +33,7 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float horizontalAnimThreshold = 0.1f; // Ngưỡng |deltaX| để tính là đi ngang
 
         [Header("Attack Settings")]
-        [SerializeField] private int totalSkillCount = 2;          // Số lượng skill để random (0 = Flame, 1 = Blast)
+        [SerializeField] private int totalSkillCount = 3;          // Số lượng skill để random (0 = Flame, 1 = Blast)
         [SerializeField] private float attackStartDelay = 1f;      // Delay trước khi bắt đầu tấn công
 
         [Header("Flame Thrower")]
@@ -47,6 +48,14 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private int blastFireballCount = 3;       // Tổng số quả phải bắn
         [SerializeField] private float blastAimDuration = 0.5f;    // Thời gian ngắm trước mỗi phát
         [SerializeField] private float blastShotAnimDuration = 0.6f; // Thời gian ước chừng animation 1 phát
+
+        [Header("Meteor Attack")]
+        [SerializeField] private float meteorMoveDuration = 0.8f;            // Thời gian bay giữa các điểm
+        [SerializeField] private float meteorAttackRadius = 30f;             // Bán kính đứng cách target
+        [SerializeField] private float meteorStrikeAnimDuration = 1.0f;      // Thời gian anim meteor 1 lần
+        [SerializeField] private float meteorBetweenPointsDelay = 1f;        // Delay nghỉ giữa 2 điểm
+        [SerializeField] private GameObject meteorEffectObject;              // Effect VFX cho Meteor (spawn từ trên)
+        [SerializeField] private GameObject meteorWarningEffect;             // Effect cảnh báo vùng rơi Meteor
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -76,8 +85,10 @@ namespace PLAYERTWO.PlatformerProject
         protected override void Start()
         {
             base.Start();
+
             InitializeComponents();
             InitializePlayer();
+            DisableAllVisualEffects();
         }
 
         /// <summary>Override behavior boss (hiện chưa dùng).</summary>
@@ -252,6 +263,42 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
+        /// Bật/tắt GameObject effect Meteor (VFX trên trời rơi xuống).
+        /// </summary>
+        private void SetMeteorEffectActive(bool isActive)
+        {
+            if (meteorEffectObject == null) return;
+            meteorEffectObject.SetActive(isActive);
+        }
+
+        /// <summary>
+        /// Bật/tắt effect cảnh báo vùng rơi Meteor, đồng thời set vị trí (nếu truyền vào).
+        /// </summary>
+        private void SetMeteorWarningActive(bool isActive, Vector3? worldPos = null)
+        {
+            if (meteorWarningEffect == null) return;
+
+            if (worldPos.HasValue)
+                meteorWarningEffect.transform.position = worldPos.Value;
+
+            meteorWarningEffect.SetActive(isActive);
+        }
+
+        /// <summary>
+        /// Tắt toàn bộ effect VFX của Dragon khi mới vào game / reset.
+        /// </summary>
+        private void DisableAllVisualEffects()
+        {
+            SetFlameEffectActive(false);
+            SetMeteorEffectActive(false);
+
+            if (blastFlashEffect != null)
+                blastFlashEffect.SetActive(false);
+
+            SetMeteorWarningActive(false);
+        }
+
+        /// <summary>
         /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy) rồi chạy RandomAttackRoutine.
         /// </summary>
         private void StartRandomAttack()
@@ -281,17 +328,18 @@ namespace PLAYERTWO.PlatformerProject
             switch (index)
             {
                 case 0:
-                    // Skill 0: Flame Thrower
                     yield return StartCoroutine(FlameThrowerRoutine());
                     break;
 
                 case 1:
-                    // Skill 1: Blast Attack (bắn 3 quả cầu lửa)
                     yield return StartCoroutine(BlastAttackRoutine());
                     break;
 
+                case 2:
+                    yield return StartCoroutine(MeteorAttackRoutine());
+                    break;
+
                 default:
-                    // Chưa có skill khác → fallback về Flame Thrower
                     yield return StartCoroutine(FlameThrowerRoutine());
                     break;
             }
@@ -587,6 +635,276 @@ namespace PLAYERTWO.PlatformerProject
                 // Setup target = fireballSpawnPoint (BossFireball sẽ dùng target.forward nếu bạn đã bật)
                 fireball.SetupFromPool(fireballSpawnPoint, this);
             }
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+
+        #region === METEOR ATTACK ===
+
+        /// <summary>
+        /// Chuỗi xử lý skill Meteor:
+        /// - Lấy danh sách meteorCastPoints từ PortalZone hiện tại.
+        /// - Chọn ngẫu nhiên 3–4 điểm.
+        /// - Bay lên cao, lượn qua từng điểm và cast Meteor.
+        /// - Cuối cùng bay về vị trí/hướng ban đầu.
+        /// </summary>
+        private IEnumerator MeteorAttackRoutine()
+        {
+            Transform[] chosenPoints;
+            float meteorHeight;
+            Vector3 originalPos;
+            Quaternion originalRot;
+
+            // Chuẩn bị dữ liệu cần cho skill Meteor (zone, height, điểm random, vị trí gốc)
+            if (!TryPrepareMeteorContext(out chosenPoints, out meteorHeight, out originalPos, out originalRot))
+            {
+                // Thiếu dữ liệu cần thiết → fallback sang Flame
+                yield return StartCoroutine(FlameThrowerRoutine());
+                yield break;
+            }
+
+            // 1) Bay lên cao: giữ nguyên XZ, đặt Y = meteorHeight
+            yield return LiftToMeteorHeight(meteorHeight);
+
+            // 2) Lần lượt bay tới từng điểm Meteor và tấn công
+            foreach (var point in chosenPoints)
+            {
+                if (point == null) continue;
+                yield return FlyAndStrikeMeteorAtPoint(point, meteorHeight);
+            }
+
+            // 3) Kết thúc Meteor → bay về vị trí/hướng ban đầu
+            yield return ReturnFromMeteor(originalPos, originalRot);
+        }
+
+        /// <summary>
+        /// Chuẩn bị context cho Meteor:
+        /// - Lấy Zone hiện tại, meteorCastPoints, bossEntryPoint.
+        /// - Lấy meteorHeightY.
+        /// - Chọn 3–4 điểm random.
+        /// - Lưu lại vị trí/hướng ban đầu.
+        /// </summary>
+        private bool TryPrepareMeteorContext(
+            out Transform[] chosenPoints,
+            out float meteorHeight,
+            out Vector3 originalPos,
+            out Quaternion originalRot)
+        {
+            chosenPoints = null;
+            meteorHeight = 0f;
+            originalPos = Vector3.zero;
+            originalRot = Quaternion.identity;
+
+            var zoneManager = PortalZoneManager.Instance;
+            if (zoneManager == null)
+                return false;
+
+            // Lấy các điểm Meteor + bossEntryPoint
+            Transform[] meteorPoints = zoneManager.GetCurrentZoneMeteorCastPoints();
+            Transform bossEntryPoint = zoneManager.GetCurrentZoneBossEntryPoint();
+
+            if (meteorPoints == null || meteorPoints.Length == 0)
+                return false;
+
+            // Lấy chiều cao bay từ Zone (meteorHeightY)
+            meteorHeight = zoneManager.GetCurrentZoneMeteorHeightY();
+            if (meteorHeight <= 0f)
+            {
+                // Nếu chưa set hoặc set sai → dùng Y hiện tại làm fallback
+                meteorHeight = transform.position.y;
+            }
+
+            // Lưu vị trí gốc để quay về (ưu tiên bossEntryPoint)
+            originalPos = bossEntryPoint != null ? bossEntryPoint.position : transform.position;
+            originalRot = visualRoot != null ? visualRoot.rotation : transform.rotation;
+
+            // Đảm bảo không còn tween cũ, tắt anim di chuyển
+            dragonAnim?.SetMoving(false);
+            transform.DOKill();
+            if (visualRoot != null) visualRoot.DOKill();
+
+            // Chọn ngẫu nhiên 3–4 điểm khác nhau
+            int countToUse = Mathf.Clamp(Random.Range(3, 5), 1, meteorPoints.Length);
+            chosenPoints = ShuffleAndTake(meteorPoints, countToUse);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Bay thẳng lên tầm cao Meteor (chỉ đổi Y, giữ nguyên XZ).
+        /// </summary>
+        private IEnumerator LiftToMeteorHeight(float meteorHeight)
+        {
+            float duration = meteorMoveDuration > 0f ? meteorMoveDuration : 0.6f;
+
+            Vector3 liftPos = new Vector3(
+                transform.position.x,
+                meteorHeight,
+                transform.position.z
+            );
+
+            Tween liftTween = transform
+                .DOMove(liftPos, duration)
+                .SetEase(Ease.InOutSine);
+
+            yield return liftTween.WaitForCompletion();
+        }
+
+        /// <summary>
+        /// Bay tới một điểm Meteor, xoay mặt về target và play animation đánh Meteor.
+        /// Dragon luôn đứng cách target đúng bằng meteorAttackRadius (trên mặt phẳng XZ),
+        /// đồng thời bật effect cảnh báo tại vùng rơi meteor trong lúc cast.
+        /// </summary>
+        private IEnumerator FlyAndStrikeMeteorAtPoint(Transform targetPoint, float meteorHeight)
+        {
+            if (targetPoint == null)
+                yield break;
+
+            // Vị trí hiện tại và vị trí target (chiếu xuống mặt phẳng XZ)
+            Vector3 fromPos = transform.position;
+
+            Vector3 targetXZ = new Vector3(
+                targetPoint.position.x,
+                0f,
+                targetPoint.position.z
+            );
+
+            Vector3 fromXZ = new Vector3(
+                fromPos.x,
+                0f,
+                fromPos.z
+            );
+
+            // Hướng từ target ra Dragon (để đứng trên đường hiện tại nhưng đúng radius)
+            Vector3 flatDir = fromXZ - targetXZ;
+
+            // Nếu đang trùng/siêu gần target → chọn hướng fallback
+            if (flatDir.sqrMagnitude < 0.0001f)
+            {
+                // Ưu tiên hướng nhìn hiện tại
+                Vector3 fallback = visualRoot != null ? visualRoot.forward : transform.forward;
+                fallback.y = 0f;
+
+                if (fallback.sqrMagnitude < 0.0001f)
+                    fallback = Vector3.forward; // fallback cuối
+
+                flatDir = fallback;
+            }
+
+            flatDir.Normalize();
+
+            // Vị trí đúng cách target một đoạn meteorAttackRadius trên mặt phẳng XZ
+            Vector3 finalXZ = targetXZ + flatDir * meteorAttackRadius;
+
+            Vector3 finalPos = new Vector3(
+                finalXZ.x,
+                meteorHeight,
+                finalXZ.z
+            );
+
+            float moveDur = meteorMoveDuration > 0f ? meteorMoveDuration : 0.6f;
+
+            // Cho xoay về hướng điểm đến trước khi bay
+            FaceTowards(finalPos);
+
+            Tween moveTween = transform
+                .DOMove(finalPos, moveDur)
+                .SetEase(Ease.InOutSine);
+
+            yield return moveTween.WaitForCompletion();
+
+            // ĐÃ ĐẾN VỊ TRÍ TẤN CÔNG → XOAY MẶT VỀ CHÍNH TARGET
+            Vector3 facePoint = targetPoint.position;
+            facePoint.y = meteorHeight; // nhìn ngang mặt phẳng bay
+            FaceTowards(facePoint);
+
+            // Bật effect cảnh báo tại vùng target (dùng vị trí targetPoint)
+            // Nếu warning là vòng tròn dưới đất → giữ Y của targetPoint.
+            SetMeteorWarningActive(
+                true,
+                new Vector3(
+                    targetPoint.position.x,
+                    targetPoint.position.y,
+                    targetPoint.position.z
+                )
+            );
+
+            // Cho xoay xong một chút để tạo cảm giác "ngắm"
+            yield return new WaitForSeconds(1f);
+
+            // Play animation Meteor Attack (Animation Events sẽ lo spawn meteor rơi)
+            dragonAnim?.PlayMeteorAttack();
+
+            // Chờ thời gian animation
+            yield return new WaitForSeconds(meteorStrikeAnimDuration);
+            yield return new WaitForSeconds(meteorBetweenPointsDelay);
+        }
+
+
+        /// <summary>
+        /// Bay về vị trí và hướng ban đầu sau khi kết thúc toàn bộ skill Meteor.
+        /// </summary>
+        private IEnumerator ReturnFromMeteor(Vector3 originalPos, Quaternion originalRot)
+        {
+            transform.DOKill();
+            if (visualRoot != null) visualRoot.DOKill();
+
+            float returnDur = meteorMoveDuration > 0f ? meteorMoveDuration : 0.6f;
+
+            Tween backTween = transform
+                .DOMove(originalPos, returnDur)
+                .SetEase(Ease.InOutSine);
+
+            if (visualRoot != null)
+                visualRoot.DORotateQuaternion(originalRot, returnDur);
+
+            yield return backTween.WaitForCompletion();
+        }
+
+        /// <summary>
+        /// Trộn ngẫu nhiên mảng points và lấy về tối đa count điểm đầu tiên.
+        /// Dùng cho Meteor để chọn 3–4 điểm khác nhau.
+        /// </summary>
+        private Transform[] ShuffleAndTake(Transform[] source, int count)
+        {
+            // Không có dữ liệu thì trả mảng rỗng
+            if (source == null || source.Length == 0)
+                return System.Array.Empty<Transform>();
+
+            // Số lượng thực tế cần lấy
+            int takeCount = Mathf.Clamp(count, 1, source.Length);
+
+            // Clone mảng để không phá mảng gốc
+            Transform[] buffer = (Transform[])source.Clone();
+
+            // Fisher–Yates shuffle một phần (chỉ cần shuffle takeCount phần tử đầu)
+            for (int i = 0; i < takeCount; i++)
+            {
+                int swapIndex = Random.Range(i, buffer.Length);
+                Transform tmp = buffer[i];
+                buffer[i] = buffer[swapIndex];
+                buffer[swapIndex] = tmp;
+            }
+
+            // Copy ra mảng kết quả với đúng số lượng cần
+            Transform[] result = new Transform[takeCount];
+            for (int i = 0; i < takeCount; i++)
+                result[i] = buffer[i];
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gọi từ Animation Event: bật VFX tạo meteor đúng frame trong clip.
+        /// </summary>
+        public void StartMeteorFromAnimation()
+        {
+            // Tắt effect cảnh báo sau khi chiêu Meteor của điểm này kết thúc
+            SetMeteorWarningActive(false, null);
+            SetMeteorEffectActive(true);
         }
 
         #endregion

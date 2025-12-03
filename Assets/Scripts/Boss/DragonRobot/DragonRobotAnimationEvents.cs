@@ -34,9 +34,21 @@ namespace PLAYERTWO.PlatformerProject
             PlayBlastShootSound();
         }
 
+        /// <summary>
+        /// Được gọi ở cuối motion bắn Blast Attack (kết thúc 1 phát bắn).
+        /// </summary>
         public void OnBlastShotEnd()
         {
             dragonRobot?.OnBlastShotEndFromAnimation();
+        }
+
+        /// <summary>
+        /// Được gọi ở frame chuẩn bị tung Meteor (bắt đầu skill Meteor).
+        /// </summary>
+        public void OnMeteorStart()
+        {
+            dragonRobot?.StartMeteorFromAnimation();
+            PlayMeteorSound();
         }
 
         /// <summary>
@@ -68,6 +80,7 @@ namespace PLAYERTWO.PlatformerProject
 
         private void PlayFlameStartSound() { /* TODO: âm thanh bắt đầu phun lửa */ }
         private void PlayBlastShootSound() { /* TODO: âm thanh bắn cầu lửa */ }
+        private void PlayMeteorSound() { /* TODO: âm thanh tung chiêu Meteor */ }
         private void PlayRoarSound() { /* TODO: âm thanh gầm */ }
         private void PlayLandingEffect() { /* TODO: dust VFX, camera shake */ }
         private void PlayDamageSound() { /* TODO: âm thanh bị trúng */ }

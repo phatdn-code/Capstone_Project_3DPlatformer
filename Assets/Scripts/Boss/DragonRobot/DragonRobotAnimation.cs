@@ -26,11 +26,19 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (animator == null) return;
 
-            // Nếu bạn có trigger "TakeDamage" giống Soldier thì clear trước cho an toàn
             animator.ResetTrigger("TakeDamage");
-
-            // Trigger clip blast attack, nhớ tạo parameter "BlastAttack" trong Animator
             animator.SetTrigger("BlastAttack");
+        }
+
+        /// <summary>
+        /// Play animation Meteor Attack (dùng trigger MeteorAttack).
+        /// </summary>
+        public void PlayMeteorAttack()
+        {
+            if (animator == null) return;
+
+            animator.ResetTrigger("TakeDamage");
+            animator.SetTrigger("MeteorAttack");
         }
     }
 }

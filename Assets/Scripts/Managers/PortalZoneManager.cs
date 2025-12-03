@@ -319,6 +319,25 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         return currentZone.blastCastPoint;
     }
 
+    /// <summary>Trả về mảng Transform MeteorCastPoints của currentZone (có thể null).</summary>
+    public Transform[] GetCurrentZoneMeteorCastPoints()
+    {
+        if (currentZone == null) return null;
+        return currentZone.meteorCastPoints;
+    }
+
+    /// <summary>
+    /// Trả về chiều cao Meteor (meteorHeightY) của currentZone.
+    /// Nếu chưa có zone thì trả về 0.
+    /// </summary>
+    public float GetCurrentZoneMeteorHeightY()
+    {
+        if (currentZone == null)
+            return 0f;
+
+        return currentZone.meteorHeightY;
+    }
+
     #endregion
 
 
