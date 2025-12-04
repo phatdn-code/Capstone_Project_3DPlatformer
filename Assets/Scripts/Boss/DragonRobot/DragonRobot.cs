@@ -57,6 +57,14 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private GameObject meteorEffectObject;              // Effect VFX cho Meteor (spawn từ trên)
         [SerializeField] private GameObject meteorWarningEffect;             // Effect cảnh báo vùng rơi Meteor
 
+        [Header("Meteor Rain Attack")]
+        [SerializeField] private float meteorRainMoveDuration = 0.8f;        // Thời gian bay giữa các điểm (Rain)
+        [SerializeField] private float meteorRainAttackRadius = 30f;         // Bán kính đứng cách target (Rain)
+        [SerializeField] private float meteorRainStrikeAnimDuration = 4.0f;  // Thời gian anim mưa meteor 1 lần
+        [SerializeField] private float meteorRainBetweenPointsDelay = 1f;    // Delay nghỉ giữa 2 điểm (Rain)
+        [SerializeField] private GameObject meteorRainEffectObject;          // VFX mưa meteor
+        [SerializeField] private GameObject meteorRainWarningEffect;         // Vòng cảnh báo cho mưa meteor
+
         #endregion
         //─────────────────────────────────────────────────────────────
 
@@ -271,6 +279,16 @@ namespace PLAYERTWO.PlatformerProject
             meteorEffectObject.SetActive(isActive);
         }
 
+
+        /// <summary>
+        /// Bật/tắt GameObject effect Meteor Rain.
+        /// </summary>
+        private void SetMeteorRainEffectActive(bool isActive)
+        {
+            if (meteorRainEffectObject == null) return;
+            meteorRainEffectObject.SetActive(isActive);
+        }
+
         /// <summary>
         /// Bật/tắt effect cảnh báo vùng rơi Meteor, đồng thời set vị trí (nếu truyền vào).
         /// </summary>
@@ -285,18 +303,35 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
+        /// Bật/tắt effect cảnh báo vùng rơi Meteor Rain,
+        /// đồng thời set vị trí (nếu truyền vào).
+        /// </summary>
+        private void SetMeteorRainWarningActive(bool isActive, Vector3? worldPos = null)
+        {
+            if (meteorRainWarningEffect == null) return;
+
+            if (worldPos.HasValue)
+                meteorRainWarningEffect.transform.position = worldPos.Value;
+
+            meteorRainWarningEffect.SetActive(isActive);
+        }
+
+        /// <summary>
         /// Tắt toàn bộ effect VFX của Dragon khi mới vào game / reset.
         /// </summary>
         private void DisableAllVisualEffects()
         {
             SetFlameEffectActive(false);
             SetMeteorEffectActive(false);
+            SetMeteorRainEffectActive(false);
 
             if (blastFlashEffect != null)
                 blastFlashEffect.SetActive(false);
 
             SetMeteorWarningActive(false);
+            SetMeteorRainWarningActive(false);
         }
+
 
         /// <summary>
         /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy) rồi chạy RandomAttackRoutine.
@@ -323,7 +358,7 @@ namespace PLAYERTWO.PlatformerProject
             yield return new WaitForSeconds(attackStartDelay);
 
             int skillCount = Mathf.Max(1, totalSkillCount);
-            int index = Random.Range(0, skillCount);
+            int index = 3;
 
             switch (index)
             {
@@ -337,6 +372,10 @@ namespace PLAYERTWO.PlatformerProject
 
                 case 2:
                     yield return StartCoroutine(MeteorAttackRoutine());
+                    break;
+
+                case 3:
+                    yield return StartCoroutine(MeteorRainAttackRoutine());
                     break;
 
                 default:
@@ -642,6 +681,7 @@ namespace PLAYERTWO.PlatformerProject
 
 
 
+        //─────────────────────────────────────────────────────────────
         #region === METEOR ATTACK ===
 
         /// <summary>
@@ -910,5 +950,228 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
         //─────────────────────────────────────────────────────────────
 
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === METEOR RAIN ATTACK ===
+
+        /// <summary>
+        /// Chuỗi xử lý skill Meteor Rain:
+        /// - Lấy danh sách meteorRainPoints từ PortalZone hiện tại.
+        /// - Random tối đa 2 điểm.
+        /// - Bay lên cao (meteorRainBossHeightY), lượn qua từng điểm và cast Meteor Rain.
+        /// - Cuối cùng bay về vị trí/hướng ban đầu.
+        /// </summary>
+        private IEnumerator MeteorRainAttackRoutine()
+        {
+            Transform[] rainPoints;
+            float rainHeight;
+            Vector3 originalPos;
+            Quaternion originalRot;
+
+            // Chuẩn bị dữ liệu cần cho skill Meteor Rain
+            if (!TryPrepareMeteorRainContext(out rainPoints, out rainHeight, out originalPos, out originalRot))
+            {
+                // Thiếu dữ liệu → fallback sang Flame
+                yield return StartCoroutine(FlameThrowerRoutine());
+                yield break;
+            }
+
+            // 1) Bay lên cao: giữ nguyên XZ, đặt Y = rainHeight
+            yield return LiftToMeteorRainHeight(rainHeight);
+
+            // 2) Lần lượt bay tới từng điểm Meteor Rain và tấn công (tối đa 2 lần)
+            int hitsToUse = Mathf.Min(2, rainPoints.Length);
+            for (int i = 0; i < hitsToUse; i++)
+            {
+                Transform point = rainPoints[i];
+                if (point == null) continue;
+
+                yield return FlyAndStrikeMeteorRainAtPoint(point, rainHeight);
+            }
+
+            // 3) Kết thúc Meteor Rain → bay về vị trí/hướng ban đầu
+            yield return ReturnFromMeteor(originalPos, originalRot);
+        }
+
+        /// <summary>
+        /// Chuẩn bị context cho Meteor Rain:
+        /// - Lấy Zone hiện tại, meteorRainPoints, bossEntryPoint.
+        /// - Lấy meteorRainBossHeightY.
+        /// - Random tối đa 2 điểm từ danh sách.
+        /// - Lưu lại vị trí/hướng ban đầu của Boss.
+        /// </summary>
+        private bool TryPrepareMeteorRainContext(
+            out Transform[] chosenPoints,
+            out float rainHeight,
+            out Vector3 originalPos,
+            out Quaternion originalRot)
+        {
+            chosenPoints = null;
+            rainHeight = 0f;
+            originalPos = Vector3.zero;
+            originalRot = Quaternion.identity;
+
+            var zoneManager = PortalZoneManager.Instance;
+            if (zoneManager == null)
+                return false;
+
+            // Lấy các điểm Meteor Rain + bossEntryPoint
+            Transform[] rainPoints = zoneManager.GetCurrentZoneMeteorRainPoints();
+            Transform bossEntryPoint = zoneManager.GetCurrentZoneBossEntryPoint();
+
+            if (rainPoints == null || rainPoints.Length == 0)
+                return false;
+
+            // Lấy chiều cao bay từ Zone (meteorRainBossHeightY)
+            rainHeight = zoneManager.GetCurrentZoneMeteorRainBossHeightY();
+            if (rainHeight < 0f)
+            {
+                // Nếu chưa set hoặc set sai → dùng Y hiện tại làm fallback
+                rainHeight = transform.position.y;
+            }
+
+            // Lưu vị trí gốc để quay về (ưu tiên bossEntryPoint)
+            originalPos = bossEntryPoint != null ? bossEntryPoint.position : transform.position;
+            originalRot = visualRoot != null ? visualRoot.rotation : transform.rotation;
+
+            // Đảm bảo không còn tween cũ, tắt anim di chuyển
+            dragonAnim?.SetMoving(false);
+            transform.DOKill();
+            if (visualRoot != null) visualRoot.DOKill();
+
+            // Chọn tối đa 2 điểm random từ danh sách
+            int countToUse = Mathf.Clamp(2, 1, rainPoints.Length);
+            chosenPoints = ShuffleAndTake(rainPoints, countToUse);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Bay thẳng lên tầm cao Meteor Rain (chỉ đổi Y, giữ nguyên XZ).
+        /// Dùng duration riêng của Meteor Rain.
+        /// </summary>
+        private IEnumerator LiftToMeteorRainHeight(float rainHeight)
+        {
+            float duration = meteorRainMoveDuration > 0f ? meteorRainMoveDuration : 0.6f;
+
+            Vector3 liftPos = new Vector3(
+                transform.position.x,
+                rainHeight,
+                transform.position.z
+            );
+
+            Tween liftTween = transform
+                .DOMove(liftPos, duration)
+                .SetEase(Ease.InOutSine);
+
+            yield return liftTween.WaitForCompletion();
+        }
+
+        /// <summary>
+        /// Bay tới một điểm Meteor Rain, bật warning và play animation Rain.
+        /// Dragon đứng cách target đúng bằng meteorRainAttackRadius (trên mặt phẳng XZ).
+        /// </summary>
+        private IEnumerator FlyAndStrikeMeteorRainAtPoint(Transform targetPoint, float rainHeight)
+        {
+            if (targetPoint == null)
+                yield break;
+
+            // Vị trí hiện tại và target (chiếu xuống mặt phẳng XZ)
+            Vector3 fromPos = transform.position;
+
+            Vector3 targetXZ = new Vector3(
+                targetPoint.position.x,
+                0f,
+                targetPoint.position.z
+            );
+
+            Vector3 fromXZ = new Vector3(
+                fromPos.x,
+                0f,
+                fromPos.z
+            );
+
+            // Hướng từ target ra Dragon (để đứng trên đường hiện tại nhưng đúng radius)
+            Vector3 flatDir = fromXZ - targetXZ;
+
+            // Nếu đang trùng/siêu gần target → chọn hướng fallback
+            if (flatDir.sqrMagnitude < 0.0001f)
+            {
+                // Ưu tiên hướng nhìn hiện tại
+                Vector3 fallback = visualRoot != null ? visualRoot.forward : transform.forward;
+                fallback.y = 0f;
+
+                if (fallback.sqrMagnitude < 0.0001f)
+                    fallback = Vector3.forward; // fallback cuối
+
+                flatDir = fallback;
+            }
+
+            flatDir.Normalize();
+
+            // Vị trí đúng cách target một đoạn meteorRainAttackRadius trên mặt phẳng XZ
+            Vector3 finalXZ = targetXZ + flatDir * meteorRainAttackRadius;
+
+            Vector3 finalPos = new Vector3(
+                finalXZ.x,
+                rainHeight,
+                finalXZ.z
+            );
+
+            float moveDur = meteorRainMoveDuration > 0f ? meteorRainMoveDuration : 0.6f;
+
+            // Cho xoay về hướng điểm đến trước khi bay
+            FaceTowards(finalPos);
+
+            Tween moveTween = transform
+                .DOMove(finalPos, moveDur)
+                .SetEase(Ease.InOutSine);
+
+            yield return moveTween.WaitForCompletion();
+
+            // ĐÃ ĐẾN VỊ TRÍ TẤN CÔNG → XOAY MẶT VỀ CHÍNH TARGET
+            Vector3 facePoint = targetPoint.position;
+            facePoint.y = rainHeight; // nhìn ngang mặt phẳng bay
+            FaceTowards(facePoint);
+
+            // Bật effect cảnh báo mưa meteor tại vùng target
+            if (meteorRainWarningEffect != null)
+            {
+                meteorRainWarningEffect.transform.position = new Vector3(
+                    targetPoint.position.x,
+                    targetPoint.position.y,
+                    targetPoint.position.z
+                );
+                meteorRainWarningEffect.SetActive(true);
+            }
+
+            // Cho xoay/nhắm một chút trước khi cast
+            yield return new WaitForSeconds(1f);
+
+            // Bật trạng thái animation Meteor Rain (bool trên Animator)
+            dragonAnim?.SetMeteorRain(true);
+
+            SetMeteorRainWarningActive(false, null);
+            SetMeteorRainEffectActive(true);
+
+            // Thời gian animation mưa meteor
+            yield return new WaitForSeconds(meteorRainStrikeAnimDuration);
+
+            // Tắt trạng thái animation
+            dragonAnim?.SetMeteorRain(false);
+
+            SetMeteorRainEffectActive(false);
+
+            // Tắt warning sau khi kết thúc một lần cast
+            if (meteorRainWarningEffect != null)
+                meteorRainWarningEffect.SetActive(false);
+
+            // Nghỉ giữa 2 lần tấn công Rain
+            yield return new WaitForSeconds(meteorRainBetweenPointsDelay);
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
     }
 }

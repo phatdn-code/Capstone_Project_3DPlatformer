@@ -26,9 +26,13 @@ namespace PLAYERTWO.PlatformerProject
         public Transform flameCastPoint;          // Điểm thực hiện Flame Thrower
         public Transform blastCastPoint;          // Điểm thực hiện Blast Attack
         public Transform[] meteorCastPoints;      // Các điểm di chuyển/strike của Meteor Attack
+        public Transform[] meteorRainPoints;      // Các điểm spawn / vùng mưa Meteor
 
         [Header("Meteor Settings")]
         public float meteorHeightY = 6.3f;        // Độ cao Y khi Boss bay dùng Meteor
+
+        [Header("Meteor Rain Settings")]
+        public float meteorRainHeightY = 10f;     // Độ cao Y khi Boss dùng skill mưa Meteor
 
         [Header("Initial Portal Transform (runtime)")]
         [HideInInspector] public Vector3 initialPosition;

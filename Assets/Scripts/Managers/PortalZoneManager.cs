@@ -338,6 +338,24 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         return currentZone.meteorHeightY;
     }
 
+    /// <summary>
+    /// Lấy danh sách điểm spawn cho skill mưa Meteor của currentZone.
+    /// </summary>
+    public Transform[] GetCurrentZoneMeteorRainPoints()
+    {
+        if (currentZone == null) return null;
+        return currentZone.meteorRainPoints;
+    }
+
+    /// <summary>
+    /// Lấy độ cao Y mà boss đứng khi dùng skill mưa Meteor trong currentZone.
+    /// </summary>
+    public float GetCurrentZoneMeteorRainBossHeightY()
+    {
+        if (currentZone == null) return 0f;
+        return currentZone.meteorRainHeightY;
+    }
+
     #endregion
 
 

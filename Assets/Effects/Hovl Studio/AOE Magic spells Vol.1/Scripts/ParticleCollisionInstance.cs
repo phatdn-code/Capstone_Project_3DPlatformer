@@ -37,12 +37,12 @@ public class ParticleCollisionInstance : MonoBehaviour
                     instance.transform.LookAt(collisionEvents[i].intersection + collisionEvents[i].normal);
                     instance.transform.rotation *= Quaternion.Euler(rotationOffset);
                 }
+
                 Destroy(instance, DestroyTimeDelay);
             }
         }
+
         if (DestoyMainEffect == true)
-        {
             Destroy(gameObject, DestroyTimeDelay + 0.5f);
-        }
     }
 }

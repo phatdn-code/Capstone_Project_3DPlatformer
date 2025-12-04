@@ -16,6 +16,7 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (animator == null) return;
 
+            animator.ResetTrigger("TakeDamage");
             animator.SetBool("IsFlameThrowing", isFlameThrowing);
         }
 
@@ -39,6 +40,17 @@ namespace PLAYERTWO.PlatformerProject
 
             animator.ResetTrigger("TakeDamage");
             animator.SetTrigger("MeteorAttack");
+        }
+
+        /// <summary>
+        /// Bật / tắt trạng thái Meteor Rain (skill mưa meteor, dùng bool).
+        /// </summary>
+        public void SetMeteorRain(bool isRaining)
+        {
+            if (animator == null) return;
+
+            animator.ResetTrigger("TakeDamage");
+            animator.SetBool("IsMeteorRaining", isRaining);
         }
     }
 }
