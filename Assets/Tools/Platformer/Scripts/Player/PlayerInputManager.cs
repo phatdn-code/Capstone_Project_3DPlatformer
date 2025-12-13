@@ -200,6 +200,11 @@ namespace PLAYERTWO.PlatformerProject
             return new Vector3(axis.x, 0, axis.y);
         }
 
+        public virtual Vector2 GetLookAxisRaw()
+        {
+            return m_look.ReadValue<Vector2>();
+        }
+
         public virtual bool IsLookingWithMouse()
         {
             return m_look.activeControl != null &&

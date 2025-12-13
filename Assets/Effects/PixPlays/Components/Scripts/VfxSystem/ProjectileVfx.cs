@@ -3,66 +3,49 @@
 namespace PixPlays.ElementalVFX
 {
     /// <summary>
-    /// Điều khiển VFX cho đạn nước:
-    /// - Cast (bắn ra)
-    /// - Projectile (đạn đang bay, bám theo WaterProjectile)
-    /// - Hit (trúng mục tiêu)
+    /// VFX cho đạn nước:
+    /// - Hiệu ứng đạn đang bay (projectile)
+    /// - Hiệu ứng trúng mục tiêu (hit)
+    /// Không xử lý muzzle / cast, chỉ bám theo WaterProjectile.
     /// </summary>
     public class ProjectileVfx : MonoBehaviour
     {
-        [Header("Muzzle (tùy chọn)")]
-        [SerializeField] private Transform muzzle;              // Miệng súng / điểm xuất phát VFX
+        //────────────────────────────────────────────────────
+        #region === INSPECTOR FIELDS ===
 
-        [Header("VFX References")]
-        [SerializeField] private ParticleSystem _castEffect;    // Hiệu ứng lúc bắn
+        [Header("Projectile / Hit VFX")]
         [SerializeField] private ParticleSystem _projectileEffect; // Hiệu ứng đạn đang bay
-        [SerializeField] private ParticleSystem _hitEffect;     // Hiệu ứng trúng
+        [SerializeField] private ParticleSystem _hitEffect;        // Hiệu ứng trúng mục tiêu
+
+        #endregion
+        //────────────────────────────────────────────────────
+
+
+        //────────────────────────────────────────────────────
+        #region === PUBLIC API ===
 
         /// <summary>
-        /// Cast tại muzzle nếu có, ngược lại dùng transform hiện tại.
+        /// Bắt đầu VFX đạn bay tại vị trí source, hướng theo direction.
+        /// (Gọi khi WaterProjectile vừa được bắn ra.)
         /// </summary>
-        public void PlayCastFromMuzzle()
+        public void StartProjectile(Vector3 source, Vector3 direction)
         {
-            Vector3 source = muzzle != null ? muzzle.position : transform.position;
-            Vector3 dir = muzzle != null ? muzzle.forward : transform.forward;
-            PlayCast(source, dir);
+            if (_projectileEffect == null)
+                return;
+
+            _projectileEffect.gameObject.SetActive(true);
+            _projectileEffect.transform.position = source;
+
+            if (direction.sqrMagnitude > 0.0001f)
+                _projectileEffect.transform.forward = direction.normalized;
+
+            _projectileEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _projectileEffect.Play();
         }
 
         /// <summary>
-        /// Gọi khi bắt đầu bắn: spawn cast VFX + projectile VFX tại source.
-        /// direction dùng để chỉnh forward cho đẹp.
-        /// </summary>
-        public void PlayCast(Vector3 source, Vector3 direction)
-        {
-            // Cast VFX
-            if (_castEffect != null)
-            {
-                _castEffect.gameObject.SetActive(true);
-                _castEffect.transform.position = source;
-
-                if (direction.sqrMagnitude > 0.0001f)
-                    _castEffect.transform.forward = direction.normalized;
-
-                _castEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                _castEffect.Play();
-            }
-
-            // Projectile VFX
-            if (_projectileEffect != null)
-            {
-                _projectileEffect.gameObject.SetActive(true);
-                _projectileEffect.transform.position = source;
-
-                if (direction.sqrMagnitude > 0.0001f)
-                    _projectileEffect.transform.forward = direction.normalized;
-
-                _projectileEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                _projectileEffect.Play();
-            }
-        }
-
-        /// <summary>
-        /// Gọi mỗi frame từ WaterProjectile để VFX bám theo vị trí + hướng bay hiện tại.
+        /// Cập nhật vị trí và hướng của VFX đạn bay mỗi frame.
+        /// (Gọi từ WaterProjectile.Update.)
         /// </summary>
         public void UpdateProjectile(Vector3 position, Vector3 velocity)
         {
@@ -72,14 +55,12 @@ namespace PixPlays.ElementalVFX
             _projectileEffect.transform.position = position;
 
             if (velocity.sqrMagnitude > 0.0001f)
-            {
                 _projectileEffect.transform.forward = velocity.normalized;
-            }
         }
 
         /// <summary>
-        /// Gọi khi projectile va chạm: tắt VFX bay, bật VFX hit tại điểm va chạm.
-        /// Chỉ dùng khi thực sự trúng (OnCollisionEnter).
+        /// Chạy VFX trúng mục tiêu tại hitPoint, xoay theo hitNormal.
+        /// (Đồng thời tắt VFX đạn đang bay.)
         /// </summary>
         public void PlayHit(Vector3 hitPoint, Vector3 hitNormal)
         {
@@ -105,16 +86,10 @@ namespace PixPlays.ElementalVFX
         }
 
         /// <summary>
-        /// Dừng toàn bộ VFX (khi despawn projectile).
+        /// Tắt sạch tất cả VFX (dùng trước khi despawn projectile).
         /// </summary>
         public void StopAll()
         {
-            if (_castEffect != null)
-            {
-                _castEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                _castEffect.gameObject.SetActive(false);
-            }
-
             if (_projectileEffect != null)
             {
                 _projectileEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -127,5 +102,8 @@ namespace PixPlays.ElementalVFX
                 _hitEffect.gameObject.SetActive(false);
             }
         }
+
+        #endregion
+        //────────────────────────────────────────────────────
     }
 }
