@@ -268,9 +268,6 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
 
         // 6) Reset lại trigger để highlight lần sau
         hasTriggeredHighlight = false;
-
-        // 7) Kill tất cả tween để tránh tween bị giữ lại
-        DOTween.KillAll();
     }
 
     #endregion

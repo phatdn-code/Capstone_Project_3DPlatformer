@@ -9,7 +9,7 @@ namespace PLAYERTWO.PlatformerProject
     [RequireComponent(typeof(Collider))]
     public class DragonRobotIntroSequence : MonoBehaviour
     {
-        [Header("Boss Settings")]
+        [Header("Boss References")]
         [SerializeField] private BossCore bossCore;              // Boss
         [SerializeField] private Transform bossStartPoint;       // Vị trí boss xuất hiện ban đầu
         [SerializeField] private Transform bossCombatEntryPoint;        // Vị trí boss bay đến
@@ -51,23 +51,22 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
 
 
-
         //─────────────────────────────────────────────
         #region === INTRO SEQUENCE ===
 
         private IEnumerator RunSequence()
         {
-            // 1) Lock player
+            // Lock player
             PlayerHub.Instance.LockPlayer(true);
 
-            // 2) Camera intro ON
+            // Camera intro ON
             if (bossIntroCamera != null)
                 bossIntroCamera.Priority = cameraHighPriority;
 
-            // 3) Turn boss ON
+            // Turn boss ON
             bossCore.gameObject.SetActive(true);
 
-            // 4) Đặt boss về vị trí gốc *trước khi bay*
+            // Đặt boss về vị trí xuất phát
             if (bossStartPoint != null)
             {
                 bossCore.transform.SetPositionAndRotation(
@@ -76,23 +75,28 @@ namespace PLAYERTWO.PlatformerProject
                 );
             }
 
-            // 5) Boss bay lên vị trí target
+            Tween flyTween = null;
+
             if (bossCombatEntryPoint != null)
             {
-                Tween flyTween = bossCore.transform
+                flyTween = bossCore.transform
                     .DOMove(bossCombatEntryPoint.position, flyDuration)
                     .SetEase(flyEase);
-
-                yield return flyTween.WaitForCompletion();
             }
 
-            // 6) Tắt camera intro
+            yield return flyTween.WaitForCompletion();
+
+            // Bật UI boss
+            bossCore.BossUI?.ShowBossIntro();
+
+            // Tắt camera intro
             if (bossIntroCamera != null)
                 bossIntroCamera.Priority = cameraNormalPriority;
 
-            // 7) Bắt đầu cutscene shuffle
+            // Bắt đầu flow tiếp theo
             CutscenePortalShuffle.Instance.StartCutsceneFlow();
         }
+
 
         #endregion
         //─────────────────────────────────────────────

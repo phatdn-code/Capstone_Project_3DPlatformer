@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PixPlays.ElementalVFX
+namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
     /// VFX cho đạn nước:

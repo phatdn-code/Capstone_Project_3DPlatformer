@@ -6,7 +6,7 @@ using DG.Tweening;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Hiển thị giao diện Boss (thanh máu, tên phase, hiệu ứng chuyển phase...).
+    /// Hiển thị giao diện Boss (thanh máu, tên phase, hiệu ứng chuyển phase).
     /// </summary>
     [AddComponentMenu("PLAYER TWO/Platformer Project/Boss/Boss UI")]
     public class BossUI : MonoBehaviour
@@ -49,27 +49,30 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === BINDING ===
 
+        /// <summary>
+        /// Gán Boss và đăng ký các sự kiện liên quan
+        /// </summary>
         public void Bind(BossCore newBoss)
         {
             Unbind();
 
             boss = newBoss;
+            if (boss == null) return;
 
-            if (newBoss == null) return;
-
-            health = newBoss.BossHealth;
-
+            health = boss.BossHealth;
             if (health == null) return;
 
-            newBoss.OnBossPhaseStartEvent.AddListener(OnBossPhaseStart);
+            boss.OnBossPhaseStartEvent.AddListener(OnBossPhaseStart);
             health.OnHealthChanged += OnHealthChanged;
             health.OnBossDefeated.AddListener(OnBossDefeated);
 
-            Show();
             OnHealthChanged(health.HealthPercentage);
-            OnBossPhaseStart(health.currentPhase);
+            UpdatePhaseName(health.currentPhase);
         }
 
+        /// <summary>
+        /// Huỷ đăng ký sự kiện khi không còn dùng Boss
+        /// </summary>
         public void Unbind()
         {
             if (boss != null && health != null)
@@ -88,37 +91,36 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === EVENT HANDLERS ===
 
+        /// <summary>
+        /// Cập nhật thanh máu Boss
+        /// </summary>
         private void OnHealthChanged(float normalized)
         {
             if (bossHealthBar == null) return;
 
             barTween?.Kill();
-            barTween = bossHealthBar.DOValue(normalized, barTweenDuration)
-                        .SetEase(barEase).SetUpdate(true);
+            barTween = bossHealthBar
+                .DOValue(normalized, barTweenDuration)
+                .SetEase(barEase)
+                .SetUpdate(true);
         }
 
+        /// <summary>
+        /// Khi Boss chuyển phase
+        /// </summary>
         private void OnBossPhaseStart(int phaseIndex)
         {
-            if (phaseNameText == null || boss == null) return;
-
-            string phaseName = (boss.Phases != null && phaseIndex < boss.Phases.Length)
-                ? boss.Phases[phaseIndex].phaseName
-                : $"Phase {phaseIndex + 1}";
-
-            phaseNameText.text = phaseName;
-            phaseNameText.transform.DOPunchScale(Vector3.one * 0.25f, 0.25f);
-
-            // Đảm bảo UI vẫn hiển thị khi sang phase mới
-            Show();
+            UpdatePhaseName(phaseIndex);
         }
 
+        /// <summary>
+        /// Khi Boss bị đánh bại hoàn toàn
+        /// </summary>
         private void OnBossDefeated()
         {
-            if (boss == null || health == null)
-                return;
+            if (boss == null || health == null) return;
 
             bool isLastPhase = health.currentPhase >= boss.Phases.Length - 1;
-
             if (isLastPhase)
                 HideCompletely();
         }
@@ -128,6 +130,9 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === UI CONTROL ===
 
+        /// <summary>
+        /// Hiện UI Boss
+        /// </summary>
         private void Show()
         {
             if (panelGroup == null) return;
@@ -136,7 +141,9 @@ namespace PLAYERTWO.PlatformerProject
             panelGroup.DOFade(1f, fadeDuration);
         }
 
-        /// <summary>Ẩn hoàn toàn khi boss thật sự chết.</summary>
+        /// <summary>
+        /// Ẩn hoàn toàn UI khi Boss chết
+        /// </summary>
         private void HideCompletely()
         {
             if (panelGroup == null) return;
@@ -145,20 +152,47 @@ namespace PLAYERTWO.PlatformerProject
             panelGroup.DOFade(0f, fadeDuration);
         }
 
-        public void ShowBossIntro(string bossName)
+        /// <summary>
+        /// Hiển thị intro Boss (khi mới xuất hiện)
+        /// </summary>
+        public void ShowBossIntro()
         {
             if (panelGroup != null)
             {
                 panelGroup.gameObject.SetActive(true);
                 panelGroup.alpha = 0f;
-                panelGroup.DOFade(1f, 0.35f);
+                Show();
             }
 
-            if (phaseNameText != null)
-            {
-                phaseNameText.text = bossName;
-                phaseNameText.transform.DOPunchScale(Vector3.one * 0.25f, 0.25f);
-            }
+            if (health != null)
+                UpdatePhaseName(health.currentPhase);
+        }
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === PHASE NAME HELPERS ===
+
+        /// <summary>
+        /// Lấy tên phase theo index (có fallback)
+        /// </summary>
+        private string GetPhaseName(int phaseIndex)
+        {
+            if (boss?.Phases != null && phaseIndex < boss.Phases.Length)
+                return boss.Phases[phaseIndex].phaseName;
+
+            return $"Phase {phaseIndex + 1}";
+        }
+
+        /// <summary>
+        /// Cập nhật text tên phase + hiệu ứng
+        /// </summary>
+        private void UpdatePhaseName(int phaseIndex)
+        {
+            if (phaseNameText == null || boss == null) return;
+
+            phaseNameText.text = GetPhaseName(phaseIndex);
+            phaseNameText.transform.DOPunchScale(Vector3.one * 0.25f, 0.25f);
         }
 
         #endregion

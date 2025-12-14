@@ -210,7 +210,7 @@ Material:
     m_Colors:
     - _AdvancedDissolveBakedKeywords: {r: 0, g: 0, b: 0, a: 0}
     - _AdvancedDissolveCutoutGeometric1Normal: {r: 0, g: -1.0000005, b: 0, a: 0}
-    - _AdvancedDissolveCutoutGeometric1Position: {r: 0, g: 1.0000005, b: -0.00000047683716,
+    - _AdvancedDissolveCutoutGeometric1Position: {r: 0, g: 1.0000005, b: 0.0000023841853,
         a: 0}
     - _AdvancedDissolveCutoutGeometric2Normal: {r: 1, g: 0, b: 0, a: 0}
     - _AdvancedDissolveCutoutGeometric2Position: {r: 0, g: 0, b: 0, a: 0}

@@ -87,8 +87,7 @@ namespace PLAYERTWO.PlatformerProject
             }
 
             // Hiện UI intro của boss
-            var ui = bossCore.GetComponent<BossUI>();
-            ui?.ShowBossIntro(bossDisplayName);
+            bossCore.BossUI?.ShowBossIntro();
 
             // Trả camera về player
             yield return CameraCutsceneController.Instance.ReleaseToPlayer();

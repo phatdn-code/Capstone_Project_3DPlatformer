@@ -1,7 +1,7 @@
 ﻿using PLAYERTWO.PlatformerProject;
 using UnityEngine;
 
-namespace PixPlays.ElementalVFX
+namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
     /// Đạn nước bay theo quỹ đạo bomb:

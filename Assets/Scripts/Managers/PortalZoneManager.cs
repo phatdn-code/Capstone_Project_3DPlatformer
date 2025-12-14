@@ -25,7 +25,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     //─────────────────────────────────────────────────────────────
 
 
-
     //─────────────────────────────────────────────────────────────
     #region === RUNTIME STATE ===
 
@@ -34,7 +33,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     #endregion
     //─────────────────────────────────────────────────────────────
-
 
 
     //─────────────────────────────────────────────────────────────
@@ -56,7 +54,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     //─────────────────────────────────────────────────────────────
 
 
-
     //─────────────────────────────────────────────────────────────
     #region === INITIALIZATION ===
 
@@ -70,7 +67,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     #endregion
     //─────────────────────────────────────────────────────────────
-
 
 
     //─────────────────────────────────────────────────────────────
@@ -143,7 +139,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     #endregion
     //─────────────────────────────────────────────────────────────
-
 
 
     //─────────────────────────────────────────────────────────────
@@ -219,7 +214,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     #endregion
     //─────────────────────────────────────────────────────────────
-
 
 
     //─────────────────────────────────────────────────────────────

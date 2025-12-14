@@ -20,6 +20,9 @@ namespace PLAYERTWO.PlatformerProject
         private bool isEncounterActive = false;
         public bool IsEncounterActive => isEncounterActive;
 
+        [Header("Boss Settings")]
+        [SerializeField] private string bossName;
+
         [Header("Phases Configuration")]
         [SerializeField] protected BossPhase[] m_phases = new BossPhase[3];
 

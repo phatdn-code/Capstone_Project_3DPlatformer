@@ -2,10 +2,6 @@
 
 namespace PLAYERTWO.PlatformerProject
 {
-    /// <summary>
-    /// Centralized hub that caches all Player subsystems and
-    /// provides global access to control player state, input, and camera.
-    /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerInputManager))]
     [RequireComponent(typeof(PlayerStatsManager))]
@@ -29,11 +25,14 @@ namespace PLAYERTWO.PlatformerProject
         public PlayerAnimator Animator { get; private set; }
         public PlayerParticles Particles { get; private set; }
 
+        [Header("Player Model Root")]
+        [SerializeField] private GameObject playerModelRoot;   // chỉ là mesh / rig, KHÔNG phải root Player
+
         private PlayerCamera m_camera;
 
         #endregion
-
         //─────────────────────────────────────────────
+
         #region === Unity Lifecycle ===
 
         protected override void Awake()
@@ -44,13 +43,12 @@ namespace PLAYERTWO.PlatformerProject
 
         private void Start()
         {
-            // Cache PlayerCamera (once per scene)
             m_camera = FindFirstObjectByType<PlayerCamera>();
         }
 
         #endregion
-
         //─────────────────────────────────────────────
+
         #region === Core Methods ===
 
         private void CacheSubsystems()
@@ -65,10 +63,7 @@ namespace PLAYERTWO.PlatformerProject
             Particles = GetComponent<PlayerParticles>();
         }
 
-        /// <summary>
-        /// Lock or unlock player input and camera movement.
-        /// Useful for cutscenes, menus, or death states.
-        /// </summary>
+        /// <summary>Khóa / mở toàn bộ input + camera (dùng cho cutscene, pause, death...).</summary>
         public void LockPlayer(bool locked)
         {
             if (InputManager != null)
@@ -76,6 +71,16 @@ namespace PLAYERTWO.PlatformerProject
 
             if (m_camera != null)
                 m_camera.SetFreeze(locked);
+        }
+
+        /// <summary>Chỉ ẩn / hiện model nhân vật, KHÔNG đụng vào input.</summary>
+        public void SetPlayerControlAndModel(bool enable)
+        {
+            // Model
+            if (playerModelRoot != null)
+                playerModelRoot.SetActive(!enable);
+
+            LockPlayer(enable);
         }
 
         #endregion
