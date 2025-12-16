@@ -148,12 +148,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87d9251b9199c4842bb234d2b4af294d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 10
+  roomLength: 11
   roomSize: 30
   roomPrefab: {fileID: 4447644140932279001, guid: 01aa06735d4dd8642bd6892d2ff7cbfd,
     type: 3}
   roadPrefab: {fileID: 54860533011645601, guid: 2f214c71889dc5749be1cf1dad617512,
     type: 3}
+  dungeonDataSO: {fileID: 11400000, guid: 3177c367dc03bcd4f85a41f19757854b, type: 2}
 --- !u!4 &548741830
 Transform:
   m_ObjectHideFlags: 0
