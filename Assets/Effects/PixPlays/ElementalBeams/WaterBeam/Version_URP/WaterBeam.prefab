@@ -29265,12 +29265,18 @@ MonoBehaviour:
   castEffect: {fileID: 7872154574053049255}
   hitEffect: {fileID: 4983268638556942400}
   bodyTip: {fileID: 1311369321759718800}
-  extendSpeed: 30
   maxDistance: 30
+  extendSpeed: 30
+  retractSpeed: 120
+  hitOffset: 0.02
+  lengthPadding: 0.05
+  hitRadius: 0.35
   hitMask:
     serializedVersion: 2
-    m_Bits: 4294967295
-  hitOffset: 0.02
+    m_Bits: 32768
+  clearParticlesOnClamp: 1
+  clampClearThreshold: 0.05
+  shieldDamagePerSecond: 10
 --- !u!1 &6047285389234487748
 GameObject:
   m_ObjectHideFlags: 0
