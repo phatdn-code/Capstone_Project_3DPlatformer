@@ -45,6 +45,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool _cachedOriginalScale;
 
         private Tween _scaleTween;
+        private Tween _rechargeTween;
 
         #endregion
 
@@ -112,6 +113,49 @@ namespace PLAYERTWO.PlatformerProject
 
             if (enableShieldAfterRefill)
                 Enable(instant);
+        }
+
+        /// <summary>Hồi shield về đầy (chạy tween), xong thì gọi callback + bắn event.</summary>
+        public void StartRechargeToFull(float duration, System.Action onFullyRefilled = null)
+        {
+            if (maxShieldValue < 1) maxShieldValue = 1;
+            if (duration <= 0f) duration = 0.01f;
+
+            // Kill tween cũ nếu đang hồi
+            if (_rechargeTween != null && _rechargeTween.IsActive())
+                _rechargeTween.Kill();
+
+            // Nếu đã đầy thì gọi luôn
+            if (shieldValue >= maxShieldValue)
+            {
+                shieldValue = maxShieldValue;
+                SyncShieldUI(true);
+
+                onFullyRefilled?.Invoke();
+                return;
+            }
+
+            // Tween hồi shieldValue về max
+            int startValue = Mathf.Clamp(shieldValue, 0, maxShieldValue);
+            _rechargeTween = DOTween.To(
+                    () => startValue,
+                    v =>
+                    {
+                        startValue = v;
+                        shieldValue = v;
+                        SyncShieldUI(true);
+                    },
+                    maxShieldValue,
+                    duration
+                )
+                .SetEase(Ease.Linear)
+                .OnComplete(() =>
+                {
+                    shieldValue = maxShieldValue;
+                    SyncShieldUI(true);
+
+                    onFullyRefilled?.Invoke();
+                });
         }
 
         #endregion

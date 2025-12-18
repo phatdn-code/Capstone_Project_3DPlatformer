@@ -56,6 +56,7 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void OnDamageTaken()
         {
+            dragonRobot?.OnTakeDamageRetreatFromAnimation();
             PlayDamageSound();
         }
 

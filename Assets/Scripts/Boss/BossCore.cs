@@ -194,6 +194,7 @@ namespace PLAYERTWO.PlatformerProject
 
                 else DefaultPhaseTransition(nextPhase);
             }
+
             else
             {
                 if (m_finalPhase != null)

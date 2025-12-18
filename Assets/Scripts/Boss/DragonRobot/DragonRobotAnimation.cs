@@ -52,5 +52,14 @@ namespace PLAYERTWO.PlatformerProject
             animator.ResetTrigger("TakeDamage");
             animator.SetBool("IsMeteorRaining", isRaining);
         }
+
+        /// <summary>Bật / tắt shield của boss (bool trên Animator).</summary>
+        public void SetShield(bool isOn)
+        {
+            if (animator == null) return;
+
+            animator.ResetTrigger("TakeDamage");
+            animator.SetBool("IsShieldOn", isOn);
+        }
     }
 }

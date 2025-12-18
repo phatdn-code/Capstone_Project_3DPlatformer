@@ -16,6 +16,11 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private int m_maxHealth = 100;
         [SerializeField] private int m_currentHealth = 100;
 
+        [Header("Take Damage Anim Gate (Optional)")]
+        [SerializeField] private bool useTakeDamageAnimGate;
+        [SerializeField] private int takeDamageAnimThreshold = 20;
+        private int _takeDamageAnimAccum = 0;
+
         public int MaxHealth => m_maxHealth;
         public int CurrentHealth => m_currentHealth;
         public float HealthPercentage => m_maxHealth > 0 ? (float)m_currentHealth / m_maxHealth : 0f;
@@ -26,9 +31,9 @@ namespace PLAYERTWO.PlatformerProject
         #region === STATE FLAGS ===
 
         [Header("State Flags")]
-        [SerializeField] public int currentPhase = 0;
-        [SerializeField] public bool isTransitioning = false;
-        [SerializeField] public bool isDead = false;
+        [HideInInspector] public int currentPhase = 0;
+        [HideInInspector] public bool isTransitioning = false;
+        [HideInInspector] public bool isDead = false;
 
         #endregion
         //─────────────────────────────────────────────
@@ -100,6 +105,17 @@ namespace PLAYERTWO.PlatformerProject
             isTransitioning = false;
         }
 
+        /// <summary>Bật/tắt cơ chế chỉ play TakeDamage animation khi đủ ngưỡng damage.</summary>
+        public void SetTakeDamageAnimGate(bool enabled, int threshold = 20, bool resetAccum = true)
+        {
+            useTakeDamageAnimGate = enabled;
+            takeDamageAnimThreshold = Mathf.Max(1, threshold);
+
+            if (resetAccum)
+                _takeDamageAnimAccum = 0;
+        }
+
+
         /// <summary>
         /// Boss nhận sát thương
         /// </summary>
@@ -108,13 +124,32 @@ namespace PLAYERTWO.PlatformerProject
             if (isDead || isTransitioning)
                 return;
 
-            m_currentHealth = Mathf.Clamp(m_currentHealth - Mathf.Max(0, amount), 0, m_maxHealth);
+            int dmg = Mathf.Max(0, amount);
+
+            m_currentHealth = Mathf.Clamp(m_currentHealth - dmg, 0, m_maxHealth);
             OnHealthChanged?.Invoke(HealthPercentage);
 
             Flash();
 
+            // ✅ Gate TakeDamage animation (chỉ boss nào bật mới áp dụng)
             if (boss?.BossAnim != null)
-                boss.BossAnim.PlayTakeDamage();
+            {
+                // Hành vi cũ: trúng là play anim ngay
+                if (!useTakeDamageAnimGate)
+                    boss.BossAnim.PlayTakeDamage();
+
+                else
+                {
+                    // Hành vi mới: tích luỹ đủ ngưỡng mới play anim
+                    _takeDamageAnimAccum += dmg;
+
+                    if (_takeDamageAnimAccum >= takeDamageAnimThreshold)
+                    {
+                        _takeDamageAnimAccum = 0;
+                        boss.BossAnim.PlayTakeDamage();
+                    }
+                }
+            }
 
             if (m_currentHealth <= 0)
             {
@@ -122,6 +157,7 @@ namespace PLAYERTWO.PlatformerProject
                 OnBossDefeated?.Invoke();
             }
         }
+
 
         /// <summary>
         /// Boss hồi máu full và thiết lập lại max HP

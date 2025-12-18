@@ -11,78 +11,149 @@ namespace PLAYERTWO.PlatformerProject
     public class DragonRobot : BossCore
     {
         //─────────────────────────────────────────────────────────────
-        #region === INSPECTOR FIELDS ===
+        #region === INSPECTOR: REFERENCES ===
 
         [Header("Player Reference")]
         [SerializeField] private new Player player;
         [SerializeField] private bool autoFindPlayer = true;
 
-        [Header("Movement Settings")]
-        [SerializeField] private float baseMoveSpeed = 6f;         // Tốc độ cơ bản (unit/giây)
-        [SerializeField] private float distanceSpeedFactor = 0.6f; // Tốc độ cộng thêm theo khoảng cách
-        [SerializeField] private float minUnitsPerSecond = 5f;     // Tốc độ tối thiểu
-        [SerializeField] private float maxUnitsPerSecond = 25f;    // Tốc độ tối đa
-        [SerializeField] private Ease moveEase = Ease.InOutSine;   // Độ mượt khi bay
-
         [Header("Visual / Facing Settings")]
-        [SerializeField] private Transform visualRoot;             // Gốc hiển thị (model/sprite)
-        [SerializeField] private bool useYRotation = true;         // True = xoay 3D theo Y, False = flip X
-        [SerializeField] private float turnDuration = 0.2f;        // Thời gian xoay mặt
+        [SerializeField] private Transform visualRoot;
+        [SerializeField] private bool useYRotation = true;
+        [SerializeField] private float turnDuration = 0.2f;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: MOVEMENT ===
+
+        [Header("Movement Settings")]
+        [SerializeField] private float baseMoveSpeed = 6f;
+        [SerializeField] private float distanceSpeedFactor = 0.6f;
+        [SerializeField] private float minUnitsPerSecond = 5f;
+        [SerializeField] private float maxUnitsPerSecond = 25f;
+        [SerializeField] private Ease moveEase = Ease.InOutSine;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: ANIMATION ===
 
         [Header("Animation Logic")]
-        [SerializeField] private float horizontalAnimThreshold = 0.1f; // Ngưỡng |deltaX| để tính là đi ngang
+        [SerializeField] private float horizontalAnimThreshold = 0.1f;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: COMBAT FLOW ===
 
         [Header("Attack Settings")]
-        [SerializeField] private int totalSkillCount = 3;          // Số lượng skill để random (0 = Flame, 1 = Blast)
-        [SerializeField] private float attackStartDelay = 1f;      // Delay trước khi bắt đầu tấn công
+        [SerializeField] private int totalSkillCount = 3;
+        [SerializeField] private float attackStartDelay = 1f;
+
+        [Header("Attack Stop Condition")]
+        [SerializeField] private int stopAttackAfterDamage = 20;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: SKILL - FLAME THROWER ===
 
         [Header("Flame Thrower")]
-        [SerializeField] private float flameAttackDuration = 2f;   // Thời gian duy trì Flame Thrower
-        [SerializeField] private float flameMoveDuration = 1.2f;   // Thời gian đi tới / về điểm cast Flame
-        [SerializeField] private GameObject flameEffectObject;     // GameObject effect phun lửa
+        [SerializeField] private float flameAttackDuration = 2f;
+        [SerializeField] private float flameMoveDuration = 1.2f;
+        [SerializeField] private GameObject flameEffectObject;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: SKILL - BLAST ===
 
         [Header("Blast Attack")]
-        [SerializeField] private BossFireball fireballPrefab;      // Prefab cầu lửa
-        [SerializeField] private Transform fireballSpawnPoint;     // Vị trí spawn cầu lửa
-        [SerializeField] private GameObject blastFlashEffect;      // Flash effect khi bắn cầu lửa
-        [SerializeField] private int blastFireballCount = 3;       // Tổng số quả phải bắn
-        [SerializeField] private float blastAimDuration = 0.5f;    // Thời gian ngắm trước mỗi phát
-        [SerializeField] private float blastShotAnimDuration = 0.6f; // Thời gian ước chừng animation 1 phát
+        [SerializeField] private BossFireball fireballPrefab;
+        [SerializeField] private Transform fireballSpawnPoint;
+        [SerializeField] private GameObject blastFlashEffect;
+        [SerializeField] private int blastFireballCount = 3;
+        [SerializeField] private float blastAimDuration = 0.5f;
+        [SerializeField] private float blastShotAnimDuration = 0.6f;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: SKILL - METEOR ===
 
         [Header("Meteor Attack")]
-        [SerializeField] private float meteorMoveDuration = 0.8f;            // Thời gian bay giữa các điểm
-        [SerializeField] private float meteorAttackRadius = 30f;             // Bán kính đứng cách target
-        [SerializeField] private float meteorStrikeAnimDuration = 1.0f;      // Thời gian anim meteor 1 lần
-        [SerializeField] private float meteorBetweenPointsDelay = 1f;        // Delay nghỉ giữa 2 điểm
-        [SerializeField] private GameObject meteorEffectObject;              // Effect VFX cho Meteor (spawn từ trên)
-        [SerializeField] private GameObject meteorWarningEffect;             // Effect cảnh báo vùng rơi Meteor
+        [SerializeField] private float meteorMoveDuration = 0.8f;
+        [SerializeField] private float meteorAttackRadius = 30f;
+        [SerializeField] private float meteorStrikeAnimDuration = 1.0f;
+        [SerializeField] private float meteorBetweenPointsDelay = 1f;
+        [SerializeField] private GameObject meteorEffectObject;
+        [SerializeField] private GameObject meteorWarningEffect;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === INSPECTOR: SKILL - METEOR RAIN ===
 
         [Header("Meteor Rain Attack")]
-        [SerializeField] private float meteorRainMoveDuration = 0.8f;        // Thời gian bay giữa các điểm (Rain)
-        [SerializeField] private float meteorRainAttackRadius = 30f;         // Bán kính đứng cách target (Rain)
-        [SerializeField] private float meteorRainStrikeAnimDuration = 4.0f;  // Thời gian anim mưa meteor 1 lần
-        [SerializeField] private float meteorRainBetweenPointsDelay = 1f;    // Delay nghỉ giữa 2 điểm (Rain)
-        [SerializeField] private GameObject meteorRainEffectObject;          // VFX mưa meteor
-        [SerializeField] private GameObject meteorRainWarningEffect;         // Vòng cảnh báo cho mưa meteor
+        [SerializeField] private float meteorRainMoveDuration = 0.8f;
+        [SerializeField] private float meteorRainAttackRadius = 30f;
+        [SerializeField] private float meteorRainStrikeAnimDuration = 4.0f;
+        [SerializeField] private float meteorRainBetweenPointsDelay = 1f;
+        [SerializeField] private GameObject meteorRainEffectObject;
+        [SerializeField] private GameObject meteorRainWarningEffect;
 
         #endregion
-        //─────────────────────────────────────────────────────────────
+        //────────────────────────────────────────────────────────────-
 
-
-
-        //─────────────────────────────────────────────────────────────
-        #region === RUNTIME STATE ===
+        //────────────────────────────────────────────────────────────-
+        #region === RUNTIME: CACHED REFERENCES ===
 
         private DragonRobotAnimation dragonAnim;
+        private BossShieldController shieldControl;
         private Coroutine attackRoutine;
 
-        // Blast state
-        private bool isBlastSequenceActive = false;   // Đang chạy chuỗi blast hay không
-        private bool isBlastRotLocked = false;        // Có cho xoay về Player trong lúc blast không
-        private int blastShotsDone = 0;               // Đã bắn được bao nhiêu quả trong chuỗi
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === RUNTIME: SKILL CYCLING / ATTACK LOOP ===
+
+        private int _skillIndex;
 
         #endregion
-        //─────────────────────────────────────────────────────────────
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === RUNTIME: STOP ATTACK CONDITION ===
+
+        private int _damageTakenWhileAttacking;
+        private int _lastHpSnapshot;
+        private bool _stopAttackingRequested;
+
+        private bool _isDamageImmuneThisRound;
+        private bool _pendingRetreatAfterTakeDamage;
+        public bool IsDamageImmuneThisRound => _isDamageImmuneThisRound;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === RUNTIME: BLAST STATE ===
+
+        private bool isBlastSequenceActive = false;
+        private bool isBlastRotLocked = false;
+        private int blastShotsDone = 0;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
 
 
 
@@ -97,6 +168,19 @@ namespace PLAYERTWO.PlatformerProject
             InitializeComponents();
             InitializePlayer();
             DisableAllVisualEffects();
+
+            // Cache HP snapshot để tính damage theo delta HP
+            if (BossHealth != null)
+            {
+                _lastHpSnapshot = BossHealth.CurrentHealth;
+                BossHealth.OnHealthChanged += HandleBossHealthChanged;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (BossHealth != null)
+                BossHealth.OnHealthChanged -= HandleBossHealthChanged;
         }
 
         /// <summary>Override behavior boss (hiện chưa dùng).</summary>
@@ -121,9 +205,154 @@ namespace PLAYERTWO.PlatformerProject
         private void InitializeComponents()
         {
             dragonAnim = BossAnim as DragonRobotAnimation;
+            shieldControl = GetComponentInChildren<BossShieldController>(true);
 
             if (visualRoot == null)
                 visualRoot = transform;
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === HEALTH / DAMAGE TRACKING ===
+
+        /// <summary>Tính damage dựa trên thay đổi HP của boss.</summary>
+        private void HandleBossHealthChanged(float hpPercent)
+        {
+            if (BossHealth == null) return;
+
+            // Đã stop rồi thì không xử lý nữa
+            if (_stopAttackingRequested)
+            {
+                _lastHpSnapshot = BossHealth.CurrentHealth;
+                return;
+            }
+
+            if (_isDamageImmuneThisRound)
+            {
+                _lastHpSnapshot = BossHealth.CurrentHealth;
+                return;
+            }
+
+            int currentHp = BossHealth.CurrentHealth;
+
+            if (currentHp < _lastHpSnapshot)
+            {
+                int delta = _lastHpSnapshot - currentHp;
+                _damageTakenWhileAttacking += delta;
+
+                if (_damageTakenWhileAttacking >= stopAttackAfterDamage)
+                    TriggerStaggerAndRetreat();
+            }
+
+            _lastHpSnapshot = currentHp;
+        }
+
+
+        /// <summary>Dừng toàn bộ chuỗi tấn công khi đạt ngưỡng damage.</summary>
+        private void RequestStopAttacking()
+        {
+            if (_stopAttackingRequested) return;
+            _stopAttackingRequested = true;
+
+            // Stop attack coroutine
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+            }
+
+            ResetBlastState();
+            DisableAllVisualEffects();
+        }
+
+        /// <summary>
+        /// Khi đủ ngưỡng damage: dừng attack + play take damage, retreat sẽ do Animation Event gọi.
+        /// </summary>
+        private void TriggerStaggerAndRetreat()
+        {
+            if (_stopAttackingRequested) return;
+
+            _isDamageImmuneThisRound = true;
+            _pendingRetreatAfterTakeDamage = true;
+
+            RequestStopAttacking();
+
+            dragonAnim?.PlayTakeDamage();
+        }
+
+
+        /// <summary>Animation Event: TakeDamage xong thì boss retreat về entry point.</summary>
+        public void OnTakeDamageRetreatFromAnimation()
+        {
+            if (!_pendingRetreatAfterTakeDamage) return;
+
+            _pendingRetreatAfterTakeDamage = false;
+            RetreatToCurrentZoneEntryPoint();
+        }
+
+
+        /// <summary>
+        /// Bay về bossEntryPoint của current zone (KHÔNG tự restart attack).
+        /// </summary>
+        private void RetreatToCurrentZoneEntryPoint()
+        {
+            var zoneManager = PortalZoneManager.Instance;
+            if (zoneManager == null) return;
+
+            Transform entry = zoneManager.GetCurrentZoneBossEntryPoint();
+            if (entry == null) return;
+
+            transform.DOKill();
+            if (visualRoot != null) visualRoot.DOKill();
+
+            Vector3 start = transform.position;
+            Vector3 end = entry.position;
+
+            float distance = Vector3.Distance(start, end);
+            if (distance <= 0.001f) return;
+
+            dragonAnim?.SetMoving(true);
+
+            float unitsPerSecond = baseMoveSpeed + distanceSpeedFactor * distance;
+            unitsPerSecond = Mathf.Clamp(unitsPerSecond, minUnitsPerSecond, maxUnitsPerSecond);
+
+            transform.DOMove(end, unitsPerSecond)
+                     .SetSpeedBased(true)
+                     .SetEase(moveEase)
+                     .OnComplete(() =>
+                     {
+                         dragonAnim?.SetMoving(false);
+
+                         Vector3 lookPoint = zoneManager.GetCurrentZoneFacingPoint();
+                         FaceTowards(lookPoint);
+
+                         BeginShieldRechargeAfterRetreat();
+                     });
+        }
+
+        /// <summary>
+        /// Về tới entry point xong: bật anim shield=true, gọi shield hồi đầy.
+        /// Đầy shield thì anim shield=false.
+        /// </summary>
+        private void BeginShieldRechargeAfterRetreat()
+        {
+            if (shieldControl == null) return;
+
+            // Trong thời gian này vẫn cấm bắn vào boss/shield
+            _isDamageImmuneThisRound = true;
+
+            // Bật animation "đang dựng khiên"
+            dragonAnim?.SetShield(true);
+
+            // Bắt đầu hồi shield; khi đầy -> tắt animation dựng khiên
+            shieldControl.StartRechargeToFull(2f, () =>
+            {
+                dragonAnim?.SetShield(false);
+            });
         }
 
         #endregion
@@ -192,7 +421,7 @@ namespace PLAYERTWO.PlatformerProject
                              Tween rotateTween = FaceTowards(lookPoint);
 
                              // Chỉ gắn attack nếu được phép tấn công
-                             if (shouldAttack)
+                             if (shouldAttack && !_stopAttackingRequested)
                              {
                                  if (rotateTween != null)
                                      rotateTween.OnComplete(StartRandomAttack);
@@ -321,30 +550,47 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private void DisableAllVisualEffects()
         {
+            // Flame
             SetFlameEffectActive(false);
-            SetMeteorEffectActive(false);
-            SetMeteorRainEffectActive(false);
 
+            // Blast (flash)
             if (blastFlashEffect != null)
                 blastFlashEffect.SetActive(false);
 
+            // Meteor
+            SetMeteorEffectActive(false);
             SetMeteorWarningActive(false);
+
+            // Meteor Rain
+            SetMeteorRainEffectActive(false);
             SetMeteorRainWarningActive(false);
         }
-
 
         /// <summary>
         /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy) rồi chạy RandomAttackRoutine.
         /// </summary>
         private void StartRandomAttack()
         {
+            if (_stopAttackingRequested) return;
+
+            // reset stop-condition
+            _damageTakenWhileAttacking = 0;
+            _stopAttackingRequested = false;
+            _isDamageImmuneThisRound = false;
+
+            if (BossHealth != null)
+                _lastHpSnapshot = BossHealth.CurrentHealth;
+
+            // reset cycle
+            _skillIndex = 0;
+
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
                 attackRoutine = null;
             }
 
-            attackRoutine = StartCoroutine(RandomAttackRoutine());
+            attackRoutine = StartCoroutine(AttackLoopRoutine());
         }
 
         /// <summary>
@@ -353,37 +599,61 @@ namespace PLAYERTWO.PlatformerProject
         /// - Random skill dựa trên totalSkillCount.
         /// - Thực thi routine skill tương ứng.
         /// </summary>
-        private IEnumerator RandomAttackRoutine()
+        /// <summary>Boss liên tục dùng skill theo vòng lặp cho đến khi player gây đủ damage.</summary>
+        private IEnumerator AttackLoopRoutine()
         {
             yield return new WaitForSeconds(attackStartDelay);
 
-            int skillCount = Mathf.Max(1, totalSkillCount);
-            int index = 3;
-
-            switch (index)
+            while (!_stopAttackingRequested)
             {
-                case 0:
-                    yield return StartCoroutine(FlameThrowerRoutine());
+                // 1. Lấy số skill hợp lệ theo phase
+                int skillCount = GetAllowedSkillCountByPhase();
+
+                // 2. Random chiêu trong range cho phép
+                int index = Random.Range(0, skillCount);
+
+                switch (index)
+                {
+                    case 0:
+                        yield return StartCoroutine(FlameThrowerRoutine());
+                        break;
+
+                    case 1:
+                        yield return StartCoroutine(BlastAttackRoutine());
+                        break;
+
+                    case 2:
+                        yield return StartCoroutine(MeteorAttackRoutine());
+                        break;
+
+                    case 3:
+                        yield return StartCoroutine(MeteorRainAttackRoutine());
+                        break;
+                }
+
+                // 3. Nếu player gây đủ 20 damage trong lúc đang cast → dừng
+                if (_stopAttackingRequested)
                     break;
 
-                case 1:
-                    yield return StartCoroutine(BlastAttackRoutine());
-                    break;
-
-                case 2:
-                    yield return StartCoroutine(MeteorAttackRoutine());
-                    break;
-
-                case 3:
-                    yield return StartCoroutine(MeteorRainAttackRoutine());
-                    break;
-
-                default:
-                    yield return StartCoroutine(FlameThrowerRoutine());
-                    break;
+                // nghỉ 1 frame cho ổn định
+                yield return null;
             }
 
             attackRoutine = null;
+        }
+
+
+        /// <summary>Giới hạn số skill theo phase (Phase 1 không có MeteorRain).</summary>
+        private int GetAllowedSkillCountByPhase()
+        {
+            // BossHealth.currentPhase là 0-based: 0 = Phase 1, 1 = Phase 2...
+            int phaseIndex = (BossHealth != null) ? BossHealth.currentPhase : 0;
+
+            // Phase 1 (index 0): tối đa 3 skill (Flame, Blast, Meteor)
+            // Phase 2 trở đi: tối đa 4 skill (thêm Meteor Rain)
+            int phaseCap = (phaseIndex >= 1) ? 4 : 3;
+
+            return Mathf.Clamp(totalSkillCount, 1, phaseCap);
         }
 
         #endregion
@@ -444,7 +714,7 @@ namespace PLAYERTWO.PlatformerProject
 
             SetFlameEffectActive(false);
 
-            // 4. Di chuyển về lại bossEntryPoint (nếu có)
+            // 4. Di chuyển về lại BossEntryPoint (nếu có)
             if (bossEntryPoint != null)
             {
                 transform.DOKill();
@@ -464,6 +734,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void StartFlameThrowerFromAnimation()
         {
+            if (_stopAttackingRequested) return;
+
             SetFlameEffectActive(true);
         }
 
@@ -611,6 +883,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void ShootBlastFireballFromAnimation()
         {
+            if (_stopAttackingRequested) return;
+
             if (blastFlashEffect != null)
                 blastFlashEffect.SetActive(true);
 
@@ -674,6 +948,19 @@ namespace PLAYERTWO.PlatformerProject
                 // Setup target = fireballSpawnPoint (BossFireball sẽ dùng target.forward nếu bạn đã bật)
                 fireball.SetupFromPool(fireballSpawnPoint, this);
             }
+        }
+
+        /// <summary>
+        /// Reset toàn bộ state của Blast Attack (chống kẹt).
+        /// </summary>
+        private void ResetBlastState()
+        {
+            isBlastSequenceActive = false;
+            isBlastRotLocked = false;
+            blastShotsDone = 0;
+
+            if (blastFlashEffect != null)
+                blastFlashEffect.SetActive(false);
         }
 
         #endregion
@@ -942,6 +1229,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void StartMeteorFromAnimation()
         {
+            if (_stopAttackingRequested) return;
+
             // Tắt effect cảnh báo sau khi chiêu Meteor của điểm này kết thúc
             SetMeteorWarningActive(false, null);
             SetMeteorEffectActive(true);

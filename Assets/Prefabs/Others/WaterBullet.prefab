@@ -111,6 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b2e5e31b39f45b4e84ca5d1fb747be5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageToBoss: 4
   projectileSpeed: 30
   maxLifeTime: 5
   destroyDelayAfterHit: 1.3

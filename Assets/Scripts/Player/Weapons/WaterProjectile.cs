@@ -1,16 +1,10 @@
-﻿using PLAYERTWO.PlatformerProject;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// Đạn nước bay theo quỹ đạo bomb:
-    /// - Có 2 kiểu:
-    ///   + Launch(target): tính vận tốc để bay từ start → target trong thời gian định trước.
-    ///   + LaunchForward: bay theo hướng forward với tốc độ cố định, cong xuống vì gravity.
-    /// - Trong khi bay: cập nhật VFX (ProjectileVfx.UpdateProjectile).
-    /// - Khi va chạm: gọi ProjectileVfx.PlayHit rồi tự hủy / trả pool.
-    /// - Nếu không va chạm: hết maxLifeTime thì tự despawn, KHÔNG play hit.
+    /// WaterProjectile: đạn nước bay theo hướng + gravity, hit thì play VFX và despawn.
+    /// Logic mới: Shield active thì không trừ máu boss; shield mất thì hit boss sẽ trừ máu.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Collider))]
@@ -18,21 +12,22 @@ namespace PLAYERTWO.PlatformerProject
     public class WaterProjectile : MonoBehaviour
     {
         //────────────────────────────────────────────────────
-        #region === INSPECTOR FIELDS ===
+        #region === INSPECTOR ===
+
+        [Header("Damage")]
+        [SerializeField] private int damageToBoss = 10; // Sát thương lên boss khi KHÔNG còn shield
 
         [Header("Speed Settings")]
-        [SerializeField] private float projectileSpeed = 10f;        // Tốc độ bắn khi dùng LaunchForward
+        [SerializeField] private float projectileSpeed = 10f;
 
         [Header("Lifetime Settings")]
-        [SerializeField] private float maxLifeTime = 5f;             // Sống tối đa nếu không trúng gì
-        [SerializeField] private float destroyDelayAfterHit = 2f;    // Trễ trước khi despawn sau va chạm
+        [SerializeField] private float maxLifeTime = 5f;
+        [SerializeField] private float destroyDelayAfterHit = 2f;
 
         #endregion
-        //────────────────────────────────────────────────────
-
 
         //────────────────────────────────────────────────────
-        #region === RUNTIME STATE ===
+        #region === RUNTIME ===
 
         private Rigidbody _rb;
         private ProjectileVfx _vfx;
@@ -42,41 +37,26 @@ namespace PLAYERTWO.PlatformerProject
         private float _lifeTimer;
 
         #endregion
-        //────────────────────────────────────────────────────
-
 
         //────────────────────────────────────────────────────
-        #region === INITIALIZATION / STATE ===
+        #region === INIT ===
 
-        /// <summary>
-        /// Cache các component cần dùng (gọi lại được nhiều lần, an toàn nếu null).
-        /// </summary>
+        /// <summary>Cache component cần dùng.</summary>
         private void CacheComponents()
         {
-            if (_rb == null)
-                _rb = GetComponent<Rigidbody>();
-
-            if (_vfx == null)
-                _vfx = GetComponent<ProjectileVfx>();
-
-            if (_collider == null)
-                _collider = GetComponent<Collider>();
+            if (_rb == null) _rb = GetComponent<Rigidbody>();
+            if (_vfx == null) _vfx = GetComponent<ProjectileVfx>();
+            if (_collider == null) _collider = GetComponent<Collider>();
         }
 
-        /// <summary>
-        /// Gọi lúc Start: cache component + bật gravity.
-        /// </summary>
+        /// <summary>Start: cache và bật gravity.</summary>
         private void Start()
         {
             CacheComponents();
-
-            if (_rb != null)
-                _rb.useGravity = true;
+            if (_rb != null) _rb.useGravity = true;
         }
 
-        /// <summary>
-        /// Reset trạng thái mỗi lần đạn được bật (spawn lại).
-        /// </summary>
+        /// <summary>OnEnable: reset trạng thái khi spawn lại.</summary>
         private void OnEnable()
         {
             CacheComponents();
@@ -89,42 +69,29 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
-        //────────────────────────────────────────────────────
-
 
         //────────────────────────────────────────────────────
-        #region === UPDATE LOOP ===
+        #region === UPDATE ===
 
-        /// <summary>
-        /// Cập nhật VFX đạn bay + kiểm tra thời gian sống.
-        /// </summary>
+        /// <summary>Update: cập nhật VFX bay + tự despawn khi hết lifetime.</summary>
         private void Update()
         {
-            // Cập nhật VFX đạn bay
             if (_vfx != null && !_hasHit && _rb != null)
                 _vfx.UpdateProjectile(transform.position, _rb.linearVelocity);
 
-            // Tự hủy nếu không trúng gì trong thời gian maxLifeTime
-            if (!_hasHit)
-            {
-                _lifeTimer += Time.deltaTime;
-                if (_lifeTimer >= maxLifeTime)
-                    Despawn();
-            }
+            if (_hasHit) return;
+
+            _lifeTimer += Time.deltaTime;
+            if (_lifeTimer >= maxLifeTime)
+                Despawn();
         }
 
         #endregion
-        //────────────────────────────────────────────────────
-
 
         //────────────────────────────────────────────────────
-        #region === LAUNCH API ===
+        #region === LAUNCH ===
 
-        /// <summary>
-        /// Bắn theo hướng forward:
-        /// - Đạn bay theo direction rồi cong xuống vì gravity.
-        /// - Không cần truyền target, chỉ cần hướng súng.
-        /// </summary>
+        /// <summary>Bắn đạn theo hướng forward.</summary>
         public void LaunchForward(Vector3 startPos, Vector3 direction)
         {
             CacheComponents();
@@ -143,80 +110,105 @@ namespace PLAYERTWO.PlatformerProject
                 direction = transform.forward;
 
             Vector3 velocity = direction.normalized * projectileSpeed;
-
             _rb.linearVelocity = velocity;
 
-            if (_vfx != null)
-                _vfx.StartProjectile(startPos, velocity);
+            _vfx?.StartProjectile(startPos, velocity);
         }
 
         #endregion
-        //────────────────────────────────────────────────────
-
 
         //────────────────────────────────────────────────────
-        #region === COLLISION / DESPAWN ===
+        #region === HIT / DAMAGE ===
 
-        /// <summary>
-        /// Xử lý va chạm trigger:
-        /// - Luôn play hit VFX (dù có phải Boss hay không).
-        /// - Nếu đụng đúng tag Boss, thử lấy DragonRobot và Debug "Hello".
-        /// </summary>
+        /// <summary>OnTriggerEnter: hit thì play VFX, xử lý shield/boss, rồi despawn.</summary>
         private void OnTriggerEnter(Collider other)
         {
-            if (_hasHit)
-                return;
+            if (_hasHit) return;
 
             _hasHit = true;
 
-            // Với trigger không có contact point, dùng vị trí projectile làm hitPoint
             Vector3 hitPoint = transform.position;
-
-            // Normal ước lượng ngược hướng bay, fallback lên Vector3.up
             Vector3 hitNormal =
                 (_rb != null && _rb.linearVelocity.sqrMagnitude > 0.0001f)
                     ? -_rb.linearVelocity.normalized
                     : Vector3.up;
 
-            // Dừng chuyển động vật lý
-            if (_rb != null)
+            StopPhysics();
+
+            // 1) Nếu đang đụng shield active -> absorb, không trừ máu boss
+            if (IsShieldActiveOnHit(other))
             {
-                _rb.linearVelocity = Vector3.zero;
-                _rb.angularVelocity = Vector3.zero;
+                PlayHitVfx(hitPoint, hitNormal);
+                DisableColliderAndDespawn();
+                return;
             }
 
-            // Nếu là Boss thì thử lấy DragonRobot và debug
-            if (other.TryGetComponent(out DragonRobot boss))
-            {
-                Debug.Log("Hello từ WaterProjectile – trúng DragonRobot!");
-                // Sau này bạn có thể gọi boss.TakeDamage(...) tại đây.
-            }
+            // 2) Nếu shield không active -> thử trừ máu boss
+            TryDamageBoss(other);
 
-            // Gọi VFX trúng
-            if (_vfx != null)
-                _vfx.PlayHit(hitPoint, hitNormal);
+            PlayHitVfx(hitPoint, hitNormal);
+            DisableColliderAndDespawn();
+        }
 
-            // Tắt collider để không va chạm thêm
+        /// <summary>Ngừng rigidbody để projectile đứng yên khi hit.</summary>
+        private void StopPhysics()
+        {
+            if (_rb == null) return;
+            _rb.linearVelocity = Vector3.zero;
+            _rb.angularVelocity = Vector3.zero;
+        }
+
+        /// <summary>Kiểm tra shield trong parent có đang active không.</summary>
+        private bool IsShieldActiveOnHit(Collider other)
+        {
+            // BossShieldController là script bạn đã tạo để quản lý shield
+            BossShieldController shield = other.GetComponentInParent<BossShieldController>();
+            return shield != null && shield.IsActive;
+        }
+
+        /// <summary>Nếu trúng boss (hoặc child collider của boss) thì trừ máu.</summary>
+        private void TryDamageBoss(Collider other)
+        {
+            if (damageToBoss <= 0) return;
+
+            // Collider có thể nằm ở child (Skin/Hitbox), nên lấy theo parent
+            BossHealth bossHealth = other.GetComponentInParent<BossHealth>();
+            if (bossHealth == null) return;
+
+            DragonRobot dragon = other.GetComponentInParent<DragonRobot>();
+            if (dragon != null && dragon.IsDamageImmuneThisRound) return;
+
+            bossHealth.TakeDamage(damageToBoss);
+
+        }
+
+        /// <summary>Play VFX khi hit.</summary>
+        private void PlayHitVfx(Vector3 hitPoint, Vector3 hitNormal)
+        {
+            _vfx?.PlayHit(hitPoint, hitNormal);
+        }
+
+        /// <summary>Tắt collider để không hit nhiều lần, rồi despawn sau delay.</summary>
+        private void DisableColliderAndDespawn()
+        {
             if (_collider != null)
                 _collider.enabled = false;
 
-            // Đợi một chút cho VFX chạy rồi despawn
             Invoke(nameof(Despawn), destroyDelayAfterHit);
         }
 
-        /// <summary>
-        /// Dừng VFX và hủy đạn (sau này có thể đổi thành trả về pool).
-        /// </summary>
+        #endregion
+
+        //────────────────────────────────────────────────────
+        #region === DESPAWN ===
+
+        /// <summary>Stop VFX và hủy projectile (hoặc đổi sang pool sau).</summary>
         private void Despawn()
         {
-            if (_vfx != null)
-                _vfx.StopAll();
-
-            // Nếu sau này dùng Pool thì đổi chỗ này thành: gameObject.SetActive(false);
+            _vfx?.StopAll();
             Destroy(gameObject);
         }
 
         #endregion
-        //────────────────────────────────────────────────────
     }
 }

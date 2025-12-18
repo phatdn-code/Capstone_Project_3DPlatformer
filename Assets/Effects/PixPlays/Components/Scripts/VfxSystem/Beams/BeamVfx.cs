@@ -265,10 +265,26 @@ namespace PLAYERTWO.PlatformerProject
             if (hitCollider == null) return;
             if (shieldDamagePerSecond <= 0f) return;
 
-            BossShieldController shield = hitCollider.GetComponentInParent<BossShieldController>();
+            // 1. Lấy shield từ parent chain
+            BossShieldController shield =
+                hitCollider.GetComponentInParent<BossShieldController>();
+
             if (shield == null) return;
+
+            // 2. Lấy boss từ shield (CHA)
+            DragonRobot dragon =
+                shield.GetComponentInParent<DragonRobot>();
+
+            if (dragon != null && dragon.IsDamageImmuneThisRound)
+            {
+                _shieldDamageAccumulator = 0f;
+                return;
+            }
+
+            // 3. Shield phải active
             if (!shield.IsActive) return;
 
+            // 4. DPS tích luỹ
             _shieldDamageAccumulator += shieldDamagePerSecond * dt;
 
             int damageInt = Mathf.FloorToInt(_shieldDamageAccumulator);
