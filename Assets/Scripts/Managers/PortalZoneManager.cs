@@ -14,6 +14,7 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     [Header("Cài đặt Return Portal")]
     [SerializeField] private Portal returnPortal;
+    [SerializeField] private Portal correctPortal;
 
     [Header("Cài đặt Transition")]
     [SerializeField] private float dissolveMoveDuration = 2f;
@@ -30,6 +31,7 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     private PortalZone currentZone;
     private DragonRobot dragonRobot;
+    private Portal currentPortal;
 
     #endregion
     //─────────────────────────────────────────────────────────────
@@ -78,6 +80,24 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     public PortalZone CurrentZone => currentZone;
 
     /// <summary>
+    /// Portal mà player vừa đi qua để kích hoạt zone hiện tại.
+    /// </summary>
+    public Portal CurrentPortal => currentPortal;
+
+    /// <summary>
+    /// Portal được đánh dấu là "đúng".
+    /// </summary>
+    public Portal CorrectPortal => correctPortal;
+
+    /// <summary>
+    /// True nếu portal hiện tại (portal vừa kích hoạt zone) là correctPortal.
+    /// </summary>
+    public bool IsCurrentZoneCorrectPortal()
+    {
+        return currentPortal != null && correctPortal != null && currentPortal == correctPortal;
+    }
+
+    /// <summary>
     /// Player đi qua portal → kích hoạt zone tương ứng.
     /// Dùng cho các Portal bình thường.
     /// </summary>
@@ -106,10 +126,6 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
 
     /// <summary>
     /// Trả về điểm mà Dragon nên quay mặt về trong currentZone.
-    /// Ưu tiên:
-    /// 1) portalTargetPoint
-    /// 2) portal
-    /// 3) transform của zone
     /// Nếu chưa có zone → fallback về Dragon hoặc PortalZoneManager.
     /// </summary>
     public Vector3 GetCurrentZoneFacingPoint()
@@ -150,6 +166,8 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     private void TryActivateZoneByPortal(Portal portal)
     {
         if (portal == null) return;
+
+        currentPortal = portal;
 
         PortalZone targetZone = FindZoneByPortal(portal);
 
@@ -290,6 +308,12 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     {
         if (currentZone == null || returnPortal == null) return false;
         return currentZone.portal == returnPortal;
+    }
+
+    public bool IsCurrentZoneCorrectZone()
+    {
+        if (currentZone == null || correctPortal == null) return false;
+        return currentZone.portal == correctPortal;
     }
 
     /// <summary>Trả về bossEntryPoint của currentZone (có thể null).</summary>

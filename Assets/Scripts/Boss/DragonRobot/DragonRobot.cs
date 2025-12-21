@@ -57,6 +57,10 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Attack Stop Condition")]
         [SerializeField] private int stopAttackAfterDamage = 20;
 
+        [Header("Attack Time Limit By Portal")]
+        [SerializeField] private float attackDurationCorrectPortal = 90f;
+        [SerializeField] private float attackDurationWrongPortal = 60f;
+
         #endregion
         //────────────────────────────────────────────────────────────-
 
@@ -119,14 +123,7 @@ namespace PLAYERTWO.PlatformerProject
         private DragonRobotAnimation dragonAnim;
         private BossShieldController shieldControl;
         private Coroutine attackRoutine;
-
-        #endregion
-        //────────────────────────────────────────────────────────────-
-
-        //────────────────────────────────────────────────────────────-
-        #region === RUNTIME: SKILL CYCLING / ATTACK LOOP ===
-
-        private int _skillIndex;
+        private Coroutine attackTimeLimitRoutine;
 
         #endregion
         //────────────────────────────────────────────────────────────-
@@ -258,6 +255,12 @@ namespace PLAYERTWO.PlatformerProject
             if (_stopAttackingRequested) return;
             _stopAttackingRequested = true;
 
+            if (attackTimeLimitRoutine != null)
+            {
+                StopCoroutine(attackTimeLimitRoutine);
+                attackTimeLimitRoutine = null;
+            }
+
             // Stop attack coroutine
             if (attackRoutine != null)
             {
@@ -330,7 +333,14 @@ namespace PLAYERTWO.PlatformerProject
                          Vector3 lookPoint = zoneManager.GetCurrentZoneFacingPoint();
                          FaceTowards(lookPoint);
 
-                         BeginShieldRechargeAfterRetreat();
+                         bool force = false;
+                         var zm = PortalZoneManager.Instance;
+
+                         if (zm != null && zm.IsCurrentZoneCorrectZone())
+                             force = true;
+
+                         BeginShieldRechargeAfterRetreat(force);
+
                      });
         }
 
@@ -338,22 +348,32 @@ namespace PLAYERTWO.PlatformerProject
         /// Về tới entry point xong: bật anim shield=true, gọi shield hồi đầy.
         /// Đầy shield thì anim shield=false.
         /// </summary>
-        private void BeginShieldRechargeAfterRetreat()
+        private void BeginShieldRechargeAfterRetreat(bool forceRechargeToFull)
         {
             if (shieldControl == null) return;
 
-            // Trong thời gian này vẫn cấm bắn vào boss/shield
-            _isDamageImmuneThisRound = true;
-
-            // Bật animation "đang dựng khiên"
-            dragonAnim?.SetShield(true);
-
-            // Bắt đầu hồi shield; khi đầy -> tắt animation dựng khiên
-            shieldControl.StartRechargeToFull(2f, () =>
+            // Nếu không force và shield đang active + (thường) đã ổn thì khỏi dựng khiên
+            // (Bạn có thể bỏ nhánh này nếu muốn luôn dựng khiên kể cả không force.)
+            if (!forceRechargeToFull && shieldControl.IsActive)
             {
                 dragonAnim?.SetShield(false);
+                _isDamageImmuneThisRound = false;
+                return;
+            }
+
+            _isDamageImmuneThisRound = true;
+            dragonAnim?.SetShield(true);
+
+            shieldControl.StartRechargeToFull(2f, () =>
+            {
+                if (!shieldControl.IsActive)
+                    shieldControl.Enable(false);
+
+                dragonAnim?.SetShield(false);
+                _isDamageImmuneThisRound = false;
             });
         }
+
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -429,6 +449,7 @@ namespace PLAYERTWO.PlatformerProject
                                      StartRandomAttack();
                              }
                          }
+
                          else
                          {
                              // Không có zoneManager → xem như zone thường
@@ -581,9 +602,6 @@ namespace PLAYERTWO.PlatformerProject
             if (BossHealth != null)
                 _lastHpSnapshot = BossHealth.CurrentHealth;
 
-            // reset cycle
-            _skillIndex = 0;
-
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
@@ -591,7 +609,42 @@ namespace PLAYERTWO.PlatformerProject
             }
 
             attackRoutine = StartCoroutine(AttackLoopRoutine());
+            StartAttackTimeLimitByPortal();
         }
+
+        private void StartAttackTimeLimitByPortal()
+        {
+            // Stop timer cũ nếu có
+            if (attackTimeLimitRoutine != null)
+            {
+                StopCoroutine(attackTimeLimitRoutine);
+                attackTimeLimitRoutine = null;
+            }
+
+            float duration = attackDurationWrongPortal;
+
+            var zoneManager = PortalZoneManager.Instance;
+            if (zoneManager != null && zoneManager.IsCurrentZoneCorrectPortal())
+                duration = attackDurationCorrectPortal;
+
+            duration = Mathf.Max(0f, duration);
+            if (duration <= 0f) return;
+
+            attackTimeLimitRoutine = StartCoroutine(AttackTimeLimitRoutine(duration));
+        }
+
+        private IEnumerator AttackTimeLimitRoutine(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+
+            // Nếu đã dừng vì damage trước đó thì thôi
+            if (_stopAttackingRequested) yield break;
+
+            // Dừng tấn công + retreat giống logic take-damage (nhưng không play take damage)
+            RequestStopAttacking();
+            RetreatToCurrentZoneEntryPoint();
+        }
+
 
         /// <summary>
         /// Coroutine random skill:

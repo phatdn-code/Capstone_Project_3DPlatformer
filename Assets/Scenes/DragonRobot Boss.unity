@@ -1004,6 +1004,7 @@ MonoBehaviour:
   - {fileID: 3645197}
   - {fileID: 943188223}
   returnPortal: {fileID: 1903938894}
+  correctPortal: {fileID: 323578286}
   dissolveMoveDuration: 2
   boss: {fileID: 1134816122}
 --- !u!1 &112062124
@@ -7836,6 +7837,8 @@ MonoBehaviour:
   totalSkillCount: 4
   attackStartDelay: 1
   stopAttackAfterDamage: 20
+  attackDurationCorrectPortal: 30
+  attackDurationWrongPortal: 60
   flameAttackDuration: 4
   flameMoveDuration: 1.2
   flameEffectObject: {fileID: 621234998}
