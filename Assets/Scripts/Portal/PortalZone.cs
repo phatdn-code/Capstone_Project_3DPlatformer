@@ -15,7 +15,6 @@ namespace PLAYERTWO.PlatformerProject
         public Transform portalTargetPoint;
 
         [Header("Dissolve Plane Settings")]
-        public Transform dissolvePlane;
         public float dissolveStartY = 24f;
         public float dissolveEndY = -2f;
 

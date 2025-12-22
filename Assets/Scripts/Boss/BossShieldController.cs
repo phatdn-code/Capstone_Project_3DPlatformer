@@ -39,6 +39,7 @@ namespace PLAYERTWO.PlatformerProject
         #region === RUNTIME ===
 
         public bool IsActive { get; private set; }
+        public bool IsFull => shieldValue >= maxShieldValue;
 
         private Transform _shieldTf;
         private Vector3 _originalScale = Vector3.one;
@@ -67,6 +68,11 @@ namespace PLAYERTWO.PlatformerProject
         private void OnDisable()
         {
             KillTween();
+
+            if (_rechargeTween != null && _rechargeTween.IsActive())
+                _rechargeTween.Kill();
+
+            _rechargeTween = null;
         }
 
         #endregion
@@ -131,6 +137,8 @@ namespace PLAYERTWO.PlatformerProject
                 shieldValue = maxShieldValue;
                 SyncShieldUI(true);
 
+                if (!IsActive) Enable(false);
+
                 onFullyRefilled?.Invoke();
                 return;
             }
@@ -153,6 +161,8 @@ namespace PLAYERTWO.PlatformerProject
                 {
                     shieldValue = maxShieldValue;
                     SyncShieldUI(true);
+
+                    if (!IsActive) Enable(false);
 
                     onFullyRefilled?.Invoke();
                 });

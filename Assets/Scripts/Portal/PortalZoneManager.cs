@@ -9,17 +9,18 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     //─────────────────────────────────────────────────────────────
     #region === INSPECTOR FIELDS ===
 
-    [Header("Danh sách tất cả Portal Zone")]
+    [Header("Zones")]
     [SerializeField] private List<PortalZone> zones = new();
 
-    [Header("Cài đặt Return Portal")]
+    [Header("Portals")]
     [SerializeField] private Portal returnPortal;
     [SerializeField] private Portal correctPortal;
 
-    [Header("Cài đặt Transition")]
+    [Header("Transition")]
     [SerializeField] private float dissolveMoveDuration = 2f;
+    [SerializeField] private Transform dissolvePortal;
 
-    [Header("Tham chiếu Boss")]
+    [Header("References")]
     [SerializeField] private BossCore boss;
 
     #endregion
@@ -217,7 +218,7 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
                 if (zone.portal != returnPortal)
                 {
                     zone.portal.transform.position = zone.initialPosition;
-                    zone.portal.transform.rotation = zone.initialRotation;
+                    zone.portal.transform.localRotation = zone.initialRotation;
                 }
 
                 zone.portal.gameObject.SetActive(false);
@@ -267,25 +268,25 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
         int oldPriority = cam.Priority;
         cam.Priority = 100;
 
+        // Bật portal
+        if (currentZone.portal != null)
+            currentZone.portal.gameObject.SetActive(true);
+
         // Di chuyển dissolve-plane từ startY → endY
-        if (currentZone.dissolvePlane != null)
+        if (dissolvePortal != null)
         {
-            Vector3 startPos = currentZone.dissolvePlane.position;
+            Vector3 startPos = dissolvePortal.position;
             startPos.y = currentZone.dissolveStartY;
 
-            currentZone.dissolvePlane.position = startPos;
-            currentZone.dissolvePlane.gameObject.SetActive(true);
+            dissolvePortal.position = startPos;
+            dissolvePortal.gameObject.SetActive(true);
 
-            Tween t = currentZone.dissolvePlane
+            Tween t = dissolvePortal
                 .DOMoveY(currentZone.dissolveEndY, dissolveMoveDuration)
                 .SetEase(Ease.InOutQuad);
 
             yield return t.WaitForCompletion();
         }
-
-        // Dissolve hoàn tất → bật portal
-        if (currentZone.portal != null)
-            currentZone.portal.gameObject.SetActive(true);
 
         // Trả priority camera về giá trị cũ
         cam.Priority = oldPriority;

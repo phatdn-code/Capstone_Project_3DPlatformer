@@ -120,6 +120,7 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────────────-
         #region === RUNTIME: CACHED REFERENCES ===
 
+        private PortalZoneManager zoneManager;
         private DragonRobotAnimation dragonAnim;
         private BossShieldController shieldControl;
         private Coroutine attackRoutine;
@@ -133,10 +134,13 @@ namespace PLAYERTWO.PlatformerProject
 
         private int _damageTakenWhileAttacking;
         private int _lastHpSnapshot;
-        private bool _stopAttackingRequested;
 
+        private bool _stopAttackingRequested;
         private bool _isDamageImmuneThisRound;
         private bool _pendingRetreatAfterTakeDamage;
+        private bool _isShieldRecharging;
+        private bool _isRetreating;
+
         public bool IsDamageImmuneThisRound => _isDamageImmuneThisRound;
 
         #endregion
@@ -202,6 +206,7 @@ namespace PLAYERTWO.PlatformerProject
         private void InitializeComponents()
         {
             dragonAnim = BossAnim as DragonRobotAnimation;
+            zoneManager = PortalZoneManager.Instance;
             shieldControl = GetComponentInChildren<BossShieldController>(true);
 
             if (visualRoot == null)
@@ -270,6 +275,9 @@ namespace PLAYERTWO.PlatformerProject
 
             ResetBlastState();
             DisableAllVisualEffects();
+
+            dragonAnim?.SetFlameThrower(false);
+            dragonAnim?.SetMeteorRain(false);
         }
 
         /// <summary>
@@ -303,8 +311,10 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private void RetreatToCurrentZoneEntryPoint()
         {
-            var zoneManager = PortalZoneManager.Instance;
-            if (zoneManager == null) return;
+            if (_isRetreating) return;
+            _isRetreating = true;
+
+            if (zoneManager == null) { _isRetreating = false; return; }
 
             Transform entry = zoneManager.GetCurrentZoneBossEntryPoint();
             if (entry == null) return;
@@ -334,13 +344,12 @@ namespace PLAYERTWO.PlatformerProject
                          FaceTowards(lookPoint);
 
                          bool force = false;
-                         var zm = PortalZoneManager.Instance;
 
-                         if (zm != null && zm.IsCurrentZoneCorrectZone())
+                         if (zoneManager.IsCurrentZoneCorrectZone())
                              force = true;
 
                          BeginShieldRechargeAfterRetreat(force);
-
+                         _isRetreating = false;
                      });
         }
 
@@ -351,16 +360,24 @@ namespace PLAYERTWO.PlatformerProject
         private void BeginShieldRechargeAfterRetreat(bool forceRechargeToFull)
         {
             if (shieldControl == null) return;
+            if (_isShieldRecharging) return;
 
-            // Nếu không force và shield đang active + (thường) đã ổn thì khỏi dựng khiên
-            // (Bạn có thể bỏ nhánh này nếu muốn luôn dựng khiên kể cả không force.)
-            if (!forceRechargeToFull && shieldControl.IsActive)
+            bool needRecharge = forceRechargeToFull
+                ? !shieldControl.IsFull
+                : !shieldControl.IsActive;
+
+            if (!needRecharge)
             {
                 dragonAnim?.SetShield(false);
                 _isDamageImmuneThisRound = false;
+
+                if (zoneManager != null)
+                    zoneManager.RunZoneTransition();
+
                 return;
             }
 
+            _isShieldRecharging = true;
             _isDamageImmuneThisRound = true;
             dragonAnim?.SetShield(true);
 
@@ -371,9 +388,13 @@ namespace PLAYERTWO.PlatformerProject
 
                 dragonAnim?.SetShield(false);
                 _isDamageImmuneThisRound = false;
+
+                _isShieldRecharging = false;
+
+                if (zoneManager != null)
+                    zoneManager.RunZoneTransition();
             });
         }
-
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -426,8 +447,6 @@ namespace PLAYERTWO.PlatformerProject
                      {
                          // Dừng anim di chuyển
                          dragonAnim?.SetMoving(false);
-
-                         var zoneManager = PortalZoneManager.Instance;
 
                          // Nếu đang ở return zone → không tấn công
                          bool shouldAttack = true;
@@ -594,6 +613,9 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (_stopAttackingRequested) return;
 
+            _isShieldRecharging = false;
+            _isRetreating = false;
+
             // reset stop-condition
             _damageTakenWhileAttacking = 0;
             _stopAttackingRequested = false;
@@ -623,7 +645,6 @@ namespace PLAYERTWO.PlatformerProject
 
             float duration = attackDurationWrongPortal;
 
-            var zoneManager = PortalZoneManager.Instance;
             if (zoneManager != null && zoneManager.IsCurrentZoneCorrectPortal())
                 duration = attackDurationCorrectPortal;
 
@@ -730,7 +751,6 @@ namespace PLAYERTWO.PlatformerProject
             // Lấy point cast + point quay về từ zone hiện tại
             Transform flameCastPoint = null;
             Transform bossEntryPoint = null;
-            var zoneManager = PortalZoneManager.Instance;
 
             if (zoneManager != null)
             {
@@ -819,7 +839,6 @@ namespace PLAYERTWO.PlatformerProject
             // Lấy điểm cast + điểm quay về từ zone hiện tại
             Transform blastCastPoint = null;
             Transform bossEntryPoint = null;
-            var zoneManager = PortalZoneManager.Instance;
 
             if (zoneManager != null)
             {
@@ -1078,7 +1097,6 @@ namespace PLAYERTWO.PlatformerProject
             originalPos = Vector3.zero;
             originalRot = Quaternion.identity;
 
-            var zoneManager = PortalZoneManager.Instance;
             if (zoneManager == null)
                 return false;
 
@@ -1354,7 +1372,6 @@ namespace PLAYERTWO.PlatformerProject
             originalPos = Vector3.zero;
             originalRot = Quaternion.identity;
 
-            var zoneManager = PortalZoneManager.Instance;
             if (zoneManager == null)
                 return false;
 
