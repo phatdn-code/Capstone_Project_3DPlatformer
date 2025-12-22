@@ -606,19 +606,56 @@ namespace PLAYERTWO.PlatformerProject
             SetMeteorRainWarningActive(false);
         }
 
+        public void PrepareForNewZoneAttackCycle()
+        {
+            // Stop timer/attack cũ nếu còn
+            if (attackTimeLimitRoutine != null)
+            {
+                StopCoroutine(attackTimeLimitRoutine);
+                attackTimeLimitRoutine = null;
+            }
+
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+            }
+
+            // Reset các cờ gây kẹt
+            _stopAttackingRequested = false;
+            _pendingRetreatAfterTakeDamage = false;
+            _isShieldRecharging = false;
+            _isRetreating = false;
+
+            // Reset state combat
+            _damageTakenWhileAttacking = 0;
+
+            if (BossHealth != null)
+                _lastHpSnapshot = BossHealth.CurrentHealth;
+
+            ResetBlastState();
+            DisableAllVisualEffects();
+
+            dragonAnim?.SetFlameThrower(false);
+            dragonAnim?.SetMeteorRain(false);
+        }
+
+
         /// <summary>
         /// Bắt đầu chuỗi tấn công: dừng attack cũ (nếu đang chạy) rồi chạy RandomAttackRoutine.
         /// </summary>
         private void StartRandomAttack()
         {
-            if (_stopAttackingRequested) return;
+            // Nếu đang retreat / đang hồi shield thì không bắt đầu đánh
+            if (_isRetreating || _isShieldRecharging) return;
+
+            // Cho phép bắt đầu vòng mới
+            _stopAttackingRequested = false;
 
             _isShieldRecharging = false;
             _isRetreating = false;
 
-            // reset stop-condition
             _damageTakenWhileAttacking = 0;
-            _stopAttackingRequested = false;
             _isDamageImmuneThisRound = false;
 
             if (BossHealth != null)
@@ -633,6 +670,7 @@ namespace PLAYERTWO.PlatformerProject
             attackRoutine = StartCoroutine(AttackLoopRoutine());
             StartAttackTimeLimitByPortal();
         }
+
 
         private void StartAttackTimeLimitByPortal()
         {

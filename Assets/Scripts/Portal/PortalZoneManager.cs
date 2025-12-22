@@ -288,6 +288,8 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
             yield return t.WaitForCompletion();
         }
 
+        currentZone.portalAuxiliary.ShowEnergy();
+
         // Trả priority camera về giá trị cũ
         cam.Priority = oldPriority;
 
@@ -389,6 +391,12 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     {
         if (zone == null || zone.bossEntryPoint == null) return;
         if (dragonRobot == null) return;
+
+        // Nếu là return zone thì chỉ move, không restart attack
+        bool isReturnZone = (zone.portal != null && zone.portal == returnPortal);
+
+        if (!isReturnZone)
+            dragonRobot.PrepareForNewZoneAttackCycle(); // hàm bạn thêm ở DragonRobot
 
         dragonRobot.MoveToEntryPoint(zone.bossEntryPoint);
     }

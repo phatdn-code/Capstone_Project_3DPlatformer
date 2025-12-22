@@ -7,6 +7,7 @@ namespace PLAYERTWO.PlatformerProject
     {
         [Header("Portal Reference")]
         public Portal portal;
+        [HideInInspector] public PortalAuxiliary portalAuxiliary;
 
         [Header("Zone Camera")]
         public CinemachineCamera portalCamera;
@@ -40,6 +41,8 @@ namespace PLAYERTWO.PlatformerProject
         private void Start()
         {
             if (portal == null) return;
+
+            portalAuxiliary = portal.GetComponent<PortalAuxiliary>();
 
             initialPosition = portal.transform.position;
             initialRotation = portal.transform.rotation;
