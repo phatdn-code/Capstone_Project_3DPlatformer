@@ -1,0 +1,88 @@
+﻿using PLAYERTWO.PlatformerProject;
+using UnityEngine;
+
+public class PlayerPuzzleController : PlayerInputManager
+{
+    [SerializeField] private Puzzle02Controller _controller;
+    [SerializeField] private GameObject _selectionUI;
+
+    private Collider _playerCollider;
+    private PlayerObjectGrabber _playerObjectGrabber;
+    private Puzzle02UIController _puzzle02UIController;
+
+    private bool _canSelect = false;
+    private bool _isPuzzlePlaying = false;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        _playerCollider = GetComponent<Collider>();
+        _playerObjectGrabber = GetComponent<PlayerObjectGrabber>();
+        _selectionUI.SetActive(false);
+    }
+
+    private void UpdateSelectionUI()
+    {
+        if (_canSelect && !_isPuzzlePlaying)
+        {
+            _selectionUI.SetActive(true);
+        }
+        else
+        {
+            _selectionUI.SetActive(false);
+        }
+            
+        _playerObjectGrabber.enabled = !_canSelect;
+    }
+
+    public void SelectPuzzle()
+    {
+        if (!_canSelect || !m_player.inputs.GetPickAndDropDown())
+            return;
+
+        _isPuzzlePlaying = !_isPuzzlePlaying;
+        if (_isPuzzlePlaying)
+            EnterPuzzle();
+        else
+            ExitPuzzle();
+    }
+
+    public void EnterPuzzle()
+    {
+        LockCursor(true);
+        _puzzle02UIController?.EnterPuzzle02(this);
+    }
+
+    public void ExitPuzzle()
+    {
+        LockCursor(false);
+        _puzzle02UIController?.ExitPuzzle02();
+    }
+
+    public void LockCursor(bool isLocked)
+    {
+        LockAllInputs(isLocked);
+        Game.LockCursor(!isLocked);
+        UpdateSelectionUI();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("ColliderChecking"))
+            return;
+
+        _canSelect = true;
+        _puzzle02UIController = other.GetComponentInParent<Puzzle02UIController>();
+        UpdateSelectionUI();
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("ColliderChecking"))
+            return;
+
+        _canSelect = false;
+        _puzzle02UIController = null;
+        UpdateSelectionUI();
+    }
+}
