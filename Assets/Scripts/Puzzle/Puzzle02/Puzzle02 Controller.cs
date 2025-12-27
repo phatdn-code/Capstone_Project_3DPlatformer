@@ -1,177 +1,201 @@
-﻿using System;
-using System.Collections;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class Puzzle02Controller : MonoBehaviour
 {
-    [SerializeField] private PieceSO[] _pieces;
-    [SerializeField] private GameObject _puzzleSlotPrefab;
-    [SerializeField] private Puzzle02UIController _uiController;
-    [SerializeField] private GameObject _objPuzzle02;
-    [SerializeField] private GameObject _puzzleCanvas;
-    [SerializeField] private GameObject _objDoor;
+    [SerializeField] private PieceSO[] pieces; // Array of puzzle pieces // Lưu các mảnh ghép của câu đố
+    [SerializeField] private GameObject puzzleSlotPrefab; // Prefab for puzzle slots // Prefab cho ô của mảnh ghép
 
-    [SerializeField, Min(3)] private int _puzzleSize = 3;
+    private int puzzleSize = 3; // Size of the puzzle (e.g., 3x3) // Kích thước của câu đố (ví dụ: 3x3)
+    private PuzzleSlot[,] puzzleSlots= new PuzzleSlot[3,3]; // 2D array to hold puzzle slots // Mảng 2D để giữ các ô mảnh ghép
 
-    private PuzzleSlot[,] _puzzleSlots;
-    private List<PieceSO> _remainingPieces;
-    private PieceSO _removedPiece;
-    private Position _emptySlot;
-    private bool _isCompleted = false;
+    private List<PieceSO> tempPiece = new List<PieceSO>(9); // Temporary list of pieces for random assignment // Danh sách tạm thời của các mảnh ghép để gán ngẫu nhiên
+    private PieceSO removePiece; // Piece removed // Mảnh ghép đã bị loại bỏ
 
+    private Position emptySlot; // Position of the empty slot // Vị trí của ô trống
+
+    private bool isCompleted = false; // Flag to check if the puzzle is completed // Cờ để kiểm tra xem câu đố đã hoàn thành chưa
     private void Start()
     {
-        if (_pieces == null || _pieces.Length == 0) return;
-
-        _remainingPieces = new List<PieceSO>(_pieces);
-        InitializePuzzleSlots();
+        if (pieces.Length == 0) return;
+        tempPiece = new List<PieceSO>(pieces);
+        InitializePuzzleSlot();
     }
 
-    private void InitializePuzzleSlots()
+    private void InitializePuzzleSlot() // Initialize puzzle slots based on size // Khởi tạo các ô mảnh ghép dựa trên kích thước
     {
-        if (_pieces.Length < _puzzleSize * _puzzleSize)
+        if (pieces.Length < puzzleSize * puzzleSize)
         {
-            Debug.LogError("Not enough pieces to fill the puzzle!");
+            Debug.LogError("Not enough pieces to fill the puzzle! // Không đủ mảnh để làm câu đố");
             return;
-        }
-
-        _puzzleSlots = new PuzzleSlot[_puzzleSize, _puzzleSize];
-
-        for (int x = 0; x < _puzzleSize; x++)
+        } 
+        puzzleSlots = new PuzzleSlot[puzzleSize, puzzleSize]; 
+        for (int i= 0; i < puzzleSize; i++)
         {
-            for (int y = 0; y < _puzzleSize; y++)
+            for (int j = 0; j < puzzleSize; j++)
             {
-                GameObject slotObj = Instantiate(_puzzleSlotPrefab, transform.position, Quaternion.identity, transform);
-                _puzzleSlots[x, y] = slotObj.GetComponent<PuzzleSlot>();
-                AssignPieceToSlot(_puzzleSlots[x, y]);
+                GameObject slotObj = Instantiate(puzzleSlotPrefab, transform.position, Quaternion.identity);
+                slotObj.transform.SetParent(this.transform);
+                puzzleSlots[i, j] = slotObj.GetComponent<PuzzleSlot>();
+                SetPiece(puzzleSlots[i, j]);
+                if (puzzleSlots[i, j].IsEmpty)
+                {
+                    emptySlot.x = i;
+                    emptySlot.y = j;
+                }
             }
         }
-
-        CreateEmptySlot();
-        ShufflePuzzle();
+        GetRandomEmptyPiece();
+        RandomMove();
+    }
+    private void SetPiece(PuzzleSlot slot)// Set piece to slot // Gán mảnh ghép vào ô
+    {
+            slot.SetPiece(tempPiece[0]);
+            tempPiece.RemoveAt(0);
     }
 
-    private void AssignPieceToSlot(PuzzleSlot slot)
+    private void GetRandomEmptyPiece() // Get a random piece to be the empty slot // Lấy một mảnh ngẫu nhiên để làm ô trống
     {
-        slot.SetPiece(_remainingPieces[0]);
-        _remainingPieces.RemoveAt(0);
+        int randomX = Random.Range(0, puzzleSize);
+        int randomY = Random.Range(0, puzzleSize);
+        removePiece = puzzleSlots[randomX, randomY].PieceSO;
+        puzzleSlots[randomX, randomY].ResetPiece();
+        emptySlot.x = randomX;
+        emptySlot.y = randomY;
     }
 
-    private void CreateEmptySlot()
+    private void  RandomMove()// Randomly move pieces to shuffle the puzzle // Di chuyển ngẫu nhiên các mảnh để xáo trộn câu đố
     {
-        int x = Random.Range(0, _puzzleSize);
-        int y = Random.Range(0, _puzzleSize);
-
-        _removedPiece = _puzzleSlots[x, y].PieceSO;
-        _puzzleSlots[x, y].ResetPiece();
-        _emptySlot = new Position { x = x, y = y };
-    }
-
-    private void ShufflePuzzle()
-    {
-        int moves = Random.Range(10, 100);
-        for (int i = 0; i < moves; i++)
+        int randomMoves = Random.Range(10, 100);
+        int lastMoveIndex = -1;
+        int randomIndex = -1;
+        for (int i = 0; i < randomMoves; i++)
         {
-            var neighbors = GetAdjacentPositions(_emptySlot);
-            var randomPos = neighbors[Random.Range(0, neighbors.Count)];
-
-            SwapWithEmpty(randomPos);
-        }
-    }
-
-    private void SwapWithEmpty(Position pos)
-    {
-        _puzzleSlots[_emptySlot.x, _emptySlot.y].SetPiece(_puzzleSlots[pos.x, pos.y].PieceSO);
-        _puzzleSlots[pos.x, pos.y].ResetPiece();
-        _emptySlot = pos;
-    }
-
-    public void MovePiece(PieceSO piece)
-    {
-        if (_isCompleted) return;
-
-        var neighbors = GetAdjacentPositions(_emptySlot);
-        foreach (var pos in neighbors)
-        {
-            if (_puzzleSlots[pos.x, pos.y].PieceSO == piece)
+            List<Position> positions = EmptySlotFamily();
+            
+            switch (lastMoveIndex)
             {
-                SwapWithEmpty(pos);
+                case 0:
+                case 1:
+                    if (positions.Count < 4)
+                    {
+                        randomIndex = Random.Range(0, positions.Count);
+                    }
+                    else
+                    {
+                        randomIndex = Random.Range(2, 3);
+                       
+                    }
+                    break;
+                case 2:
+                case 3:
+                    if (positions.Count < 4)
+                    {
+                        randomIndex = Random.Range(0, positions.Count);
+                    }
+                    else
+                    {
+                        randomIndex = Random.Range(0, 1);
+
+                    }
+                    break;
+                default: randomIndex = Random.Range(0, positions.Count); break;
+            }
+            Position pos = positions[randomIndex];
+            puzzleSlots[emptySlot.x, emptySlot.y].SetPiece(puzzleSlots[pos.x, pos.y].PieceSO);
+            puzzleSlots[pos.x, pos.y].ResetPiece();
+            emptySlot = pos;
+            lastMoveIndex = randomIndex;
+        }
+
+    }
+
+    public void PuzzleMove(PieceSO piece)
+    {
+        if(isCompleted) return;
+        //Debug.Log("EmptySlot: "+ emptySlot);
+        if (!puzzleSlots[emptySlot.x, emptySlot.y].IsEmpty) return;
+
+        List<Position> positions = EmptySlotFamily();
+        for (int i = 0; i< positions.Count;++i)
+
+        {
+            if (puzzleSlots[positions[i].x, positions[i].y] != null)
+            if (puzzleSlots[positions[i].x, positions[i].y].PieceSO == piece)
+            {
+                //Debug.Log("Action Move Piece from "+ emptySlot + " to "+ positions[i]);
+                puzzleSlots[emptySlot.x, emptySlot.y].SetPiece(piece);
+                puzzleSlots[positions[i].x, positions[i].y].ResetPiece();
+                emptySlot = positions[i];
                 break;
             }
         }
-
-        CheckCompletion();
+        CheckComplete();
     }
 
-    private void CheckCompletion()
+    private void CheckComplete()
     {
-        for (int x = 0; x < _puzzleSize; x++)
+        if (isCompleted) return;
+        for (int i = 0; i < puzzleSize; i++)
         {
-            for (int y = 0; y < _puzzleSize; y++)
+            for (int j = 0; j < puzzleSize; j++)
             {
-                var slot = _puzzleSlots[x, y];
-                if (slot.IsEmpty)
+                if (puzzleSlots[i, j].IsEmpty)
                 {
-                    if (_removedPiece.x != x || _removedPiece.y != y) return;
+                    if (removePiece.x != i || removePiece.y != j)
+                    {
+                        return;
+                    }
                 }
-                else if (slot.PieceSO.x != x || slot.PieceSO.y != y)
+                else
                 {
-                    return;
+                    if(puzzleSlots[i, j].PieceSO.x != i || puzzleSlots[i, j].PieceSO.y != j)
+                    {
+                        return;
+                    }
                 }
             }
         }
-
-        _isCompleted = true;
-        OnPuzzleCompleted();
+        isCompleted = true;
+        CompletedPuzzle();
     }
 
-    private void OnPuzzleCompleted()
+    private void CompletedPuzzle()
     {
-        _puzzleSlots[_emptySlot.x, _emptySlot.y].SetPiece(_removedPiece);
-        StartCoroutine(WaitOneSecondForDisiablePuzzlePanel());
-        StartCoroutine(WaitOneSecondForDisiablePuzzleObject());
+        if(!isCompleted) return;
+        // Handle puzzle completion logic here // Xử lý logic khi câu đố hoàn thành
     }
 
-    private IEnumerator WaitOneSecondForDisiablePuzzlePanel()
+    private List<Position> EmptySlotFamily() // Get positions adjacent to the empty slot // Lấy vị trí liền kề với ô trống
     {
-        yield return new WaitForSeconds(1f);
-        if (_puzzleCanvas != null)
+        List<Position> validPositions = new List<Position>();
+
+        if (emptySlot.x > 0) // Up // Lên
         {
-            _puzzleCanvas.GetComponent<Canvas>().enabled = false;
+            Position pos = new Position { x = emptySlot.x - 1, y = emptySlot.y };
+            validPositions.Add(pos);
         }
-        if (_objDoor != null)
+        if (emptySlot.x < puzzleSize - 1) // Down // Xuống
         {
-            _objDoor?.SetActive(true);
+            Position pos = new Position { x = emptySlot.x + 1, y = emptySlot.y };
+            validPositions.Add(pos);
         }
-    }
-    private IEnumerator WaitOneSecondForDisiablePuzzleObject()
-    {
-        yield return new WaitForSeconds(1f);
-        _uiController?.OnPuzzleCompleted();
-        if (_objPuzzle02 != null)
+        if (emptySlot.y > 0) // Left // Trái
         {
-            _objPuzzle02?.SetActive(false);
+            Position pos = new Position { x = emptySlot.x, y = emptySlot.y - 1 };
+            validPositions.Add(pos);
         }
-    }
+        if (emptySlot.y < puzzleSize - 1) // Right // Phải
+        {
+            Position pos = new Position { x = emptySlot.x, y = emptySlot.y + 1 };
+            validPositions.Add(pos);
+        }
 
-
-    private List<Position> GetAdjacentPositions(Position pos)
-    {
-        var positions = new List<Position>();
-
-        if (pos.x > 0) positions.Add(new Position { x = pos.x - 1, y = pos.y });
-        if (pos.x < _puzzleSize - 1) positions.Add(new Position { x = pos.x + 1, y = pos.y });
-        if (pos.y > 0) positions.Add(new Position { x = pos.x, y = pos.y - 1 });
-        if (pos.y < _puzzleSize - 1) positions.Add(new Position { x = pos.x, y = pos.y + 1 });
-
-        return positions;
+        return validPositions;
     }
 }
-
-public struct Position
+struct Position
 {
     public int x;
     public int y;
