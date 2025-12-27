@@ -18,7 +18,7 @@ public class PuzzleSlot : MonoBehaviour, IPointerClickHandler
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-        puzzleController.PuzzleMove(pieceSO);
+        puzzleController.MovePiece(pieceSO);
     }
 
     public void SetPiece(PieceSO data)
