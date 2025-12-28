@@ -14,7 +14,7 @@ public class DungeonGenerator : MonoBehaviour
     private CellType[,] dungeons;
     private List<Vector2Int> roomList = new List<Vector2Int>();
 
-    private Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+    private static Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
     void Start()
     {
@@ -46,15 +46,17 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    bool IsBounds(Vector2Int pos)
+    bool InBounds(Vector2Int pos)
     {
         return pos.x >= 0 && pos.x < roomLength 
             && pos.y >= 0 && pos.y < roomLength;
     }
     void RoomGenerate(CellType lastCellType, Vector2Int index, Vector2Int lastIndex)
     {
+        if(!InBounds(lastIndex)) return;
         if (lastCellType != CellType.Road) return;
         Vector2Int availableDirection = 2* index - lastIndex;
+        if(!InBounds(availableDirection)) return;
         SpawnRoom(availableDirection);
         NextGenerate(dungeons[availableDirection.x, availableDirection.y], availableDirection,index); 
     }
@@ -86,7 +88,7 @@ public class DungeonGenerator : MonoBehaviour
         List<Vector2Int> availDirs = new List<Vector2Int>();
         foreach (var dir in directions)
         {
-            if (IsBounds(index + 2 * dir))
+            if (InBounds(index + 2 * dir))
             {
                 if((dungeons[index.x + dir.x, index.y + dir.y] == CellType.Empty) &&
                    (dungeons[index.x + 2 * dir.x, index.y + 2 * dir.y] == CellType.Empty))
@@ -100,6 +102,7 @@ public class DungeonGenerator : MonoBehaviour
     }
     void SpawnRoom(Vector2Int pos)
     {
+        if (!InBounds(pos)) return;
         if (dungeons[pos.x, pos.y] != CellType.Empty) return;
 
         dungeons[pos.x, pos.y] = CellType.Room;
@@ -110,6 +113,8 @@ public class DungeonGenerator : MonoBehaviour
 
     void SpawnRoad(Vector2Int pos, Vector2Int lastPos)
     {
+        if (!InBounds(pos)) return;
+        if (dungeons[pos.x, pos.y] != CellType.Empty) return;
         Quaternion rotation = Quaternion.identity;
         dungeons[pos.x, pos.y] = CellType.Road;
         if(RoadCheck(pos,lastPos))
