@@ -2,6 +2,7 @@
 using UnityEngine.Events;
 using DG.Tweening;
 using System;
+using System.Collections;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -20,6 +21,12 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private bool useTakeDamageAnimGate;
         [SerializeField] private int takeDamageAnimThreshold = 20;
         private int _takeDamageAnimAccum = 0;
+
+        [Header("Phase Break (Phase 1 -> Phase 2)")]
+        [SerializeField] private bool enablePhase1Break = true;
+        [SerializeField, Min(0f)] private float phase1BreakDelay = 1.5f;
+
+        private bool _isPhase1BreakRunning = false;
 
         public int MaxHealth => m_maxHealth;
         public int CurrentHealth => m_currentHealth;
@@ -153,11 +160,37 @@ namespace PLAYERTWO.PlatformerProject
 
             if (m_currentHealth <= 0)
             {
+                // Phase 1 break: play stagger like "20 damage", then transition to Phase 2 with full HP.
+                if (enablePhase1Break && currentPhase == 0 && !_isPhase1BreakRunning
+                    && boss != null && boss.Phases != null && (currentPhase + 1) < boss.Phases.Length)
+                {
+                    StartCoroutine(Phase1BreakAndTransition());
+                    return;
+                }
+
+                // Real defeat (no next phase)
                 isDead = true;
                 OnBossDefeated?.Invoke();
             }
         }
 
+        private IEnumerator Phase1BreakAndTransition()
+        {
+            _isPhase1BreakRunning = true;
+            isTransitioning = true; // block further damage + boss update loop
+
+            // Force stagger on DragonRobot (same behavior as damage >= 20)
+            var dragon = boss as DragonRobot;
+            if (dragon != null)
+                dragon.ForceStaggerAndRetreatForPhaseBreak();
+
+            else boss?.BossAnim?.PlayTakeDamage(); // fallback if this boss isn't DragonRobot
+
+            yield return new WaitForSeconds(phase1BreakDelay);
+
+            isTransitioning = false;
+            OnBossDefeated?.Invoke();
+        }
 
         /// <summary>
         /// Boss hồi máu full và thiết lập lại max HP

@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -125,6 +125,16 @@ namespace PLAYERTWO.PlatformerProject
         private BossShieldController shieldControl;
         private Coroutine attackRoutine;
         private Coroutine attackTimeLimitRoutine;
+
+        #endregion
+        //────────────────────────────────────────────────────────────-
+
+        //────────────────────────────────────────────────────────────-
+        #region === RUNTIME: ATTACK SELECTION (ANTI-REPEAT) ===
+
+        private readonly List<int> _skillBag = new();
+        private int _skillBagCount = -1;
+        private int _lastSkillIndex = -1;
 
         #endregion
         //────────────────────────────────────────────────────────────-
@@ -293,6 +303,17 @@ namespace PLAYERTWO.PlatformerProject
             RequestStopAttacking();
 
             dragonAnim?.PlayTakeDamage();
+        }
+
+        /// <summary>
+        /// Force the same stagger flow as "take 20 damage" — used when Phase 1 HP reaches 0.
+        /// </summary>
+        public void ForceStaggerAndRetreatForPhaseBreak()
+        {
+            if (_stopAttackingRequested) return;
+            if (_isRetreating || _isShieldRecharging) return;
+
+            TriggerStaggerAndRetreat();
         }
 
 
@@ -652,6 +673,11 @@ namespace PLAYERTWO.PlatformerProject
             // Cho phép bắt đầu vòng mới
             _stopAttackingRequested = false;
 
+            // Reset attack selection bag each new cycle (avoid repeats)
+            _skillBag.Clear();
+            _skillBagCount = -1;
+            _lastSkillIndex = -1;
+
             _isShieldRecharging = false;
             _isRetreating = false;
 
@@ -670,6 +696,7 @@ namespace PLAYERTWO.PlatformerProject
             attackRoutine = StartCoroutine(AttackLoopRoutine());
             StartAttackTimeLimitByPortal();
         }
+
 
 
         private void StartAttackTimeLimitByPortal()
@@ -692,6 +719,7 @@ namespace PLAYERTWO.PlatformerProject
             attackTimeLimitRoutine = StartCoroutine(AttackTimeLimitRoutine(duration));
         }
 
+
         private IEnumerator AttackTimeLimitRoutine(float seconds)
         {
             yield return new WaitForSeconds(seconds);
@@ -702,6 +730,38 @@ namespace PLAYERTWO.PlatformerProject
             // Dừng tấn công + retreat giống logic take-damage (nhưng không play take damage)
             RequestStopAttacking();
             RetreatToCurrentZoneEntryPoint();
+        }
+
+
+        private int GetNextSkillIndex(int skillCount)
+        {
+            if (skillCount <= 1) return 0;
+
+            if (_skillBagCount != skillCount || _skillBag.Count == 0)
+            {
+                _skillBag.Clear();
+                for (int i = 0; i < skillCount; i++)
+                    _skillBag.Add(i);
+
+                for (int i = 0; i < _skillBag.Count; i++)
+                {
+                    int j = Random.Range(i, _skillBag.Count);
+                    (_skillBag[i], _skillBag[j]) = (_skillBag[j], _skillBag[i]);
+                }
+
+                if (_skillBag.Count > 1 && _skillBag[0] == _lastSkillIndex)
+                {
+                    int swapIndex = Random.Range(1, _skillBag.Count);
+                    (_skillBag[0], _skillBag[swapIndex]) = (_skillBag[swapIndex], _skillBag[0]);
+                }
+
+                _skillBagCount = skillCount;
+            }
+
+            int next = _skillBag[0];
+            _skillBag.RemoveAt(0);
+            _lastSkillIndex = next;
+            return next;
         }
 
 
@@ -722,7 +782,7 @@ namespace PLAYERTWO.PlatformerProject
                 int skillCount = GetAllowedSkillCountByPhase();
 
                 // 2. Random chiêu trong range cho phép
-                int index = Random.Range(0, skillCount);
+                int index = GetNextSkillIndex(skillCount);
 
                 switch (index)
                 {

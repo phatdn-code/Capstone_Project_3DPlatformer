@@ -118,11 +118,10 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private void OnBossDefeated()
         {
-            if (boss == null || health == null) return;
+            if (health == null || !health.isDead)
+                return;
 
-            bool isLastPhase = health.currentPhase >= boss.Phases.Length - 1;
-            if (isLastPhase)
-                HideCompletely();
+            HideCompletely();
         }
 
         #endregion

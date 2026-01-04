@@ -7638,10 +7638,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2c3d4e5f6789012345678901234abcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_maxHealth: 100
-  m_currentHealth: 100
+  m_maxHealth: 40
+  m_currentHealth: 40
   useTakeDamageAnimGate: 1
   takeDamageAnimThreshold: 20
+  enablePhase1Break: 1
+  phase1BreakDelay: 1.5
   currentPhase: 0
   isTransitioning: 0
   isDead: 0
@@ -7711,6 +7713,11 @@ MonoBehaviour:
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
+  - phaseName: Dragon Robot
+    maxHealth: 100
+    moveSpeed: 5
+    phaseColor: {r: 1, g: 1, b: 1, a: 1}
+    scale: {x: 1, y: 1, z: 1}
   OnBossPhaseStart:
     m_PersistentCalls:
       m_Calls: []
@@ -7731,7 +7738,7 @@ MonoBehaviour:
   totalSkillCount: 4
   attackStartDelay: 1
   stopAttackAfterDamage: 20
-  attackDurationCorrectPortal: 30
+  attackDurationCorrectPortal: 90
   attackDurationWrongPortal: 60
   flameAttackDuration: 4
   flameMoveDuration: 1.2

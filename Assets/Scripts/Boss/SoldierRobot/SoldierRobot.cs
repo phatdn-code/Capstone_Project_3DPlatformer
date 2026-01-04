@@ -234,7 +234,7 @@ namespace PLAYERTWO.PlatformerProject
                     ShootBomb(true);
                     yield return new WaitForSeconds(1f);
                     ShootBomb(false);
-                    yield return new WaitForSeconds(3f);
+                    yield return new WaitForSeconds(2f);
 
                     // ────────────────────────────────
                     // 🔹 BƯỚC 2: Random chọn skill phụ
@@ -245,7 +245,7 @@ namespace PLAYERTWO.PlatformerProject
                 // ────────────────────────────────
                 // 🔹 BƯỚC 3: Nghỉ và di chuyển vị trí mới
                 // ────────────────────────────────
-                yield return new WaitForSeconds(5f);
+                yield return new WaitForSeconds(3f);
                 yield return StartCoroutine(MoveToNewPosition());
             }
         }
@@ -273,7 +273,7 @@ namespace PLAYERTWO.PlatformerProject
             }
 
             // 😴 Không làm gì
-            else yield return new WaitForSeconds(1.5f);
+            else yield return new WaitForSeconds(1f);
         }
 
         #endregion

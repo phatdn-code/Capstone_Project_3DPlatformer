@@ -2653,6 +2653,11 @@ PrefabInstance:
       propertyPath: centerPoint
       value: 
       objectReference: {fileID: 583466119}
+    - target: {fileID: 790409271937353369, guid: b1de0c0a66518e846909001c8c4599d1,
+        type: 3}
+      propertyPath: movementRestTime
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1554781757866288289, guid: b1de0c0a66518e846909001c8c4599d1,
         type: 3}
       propertyPath: m_Name
