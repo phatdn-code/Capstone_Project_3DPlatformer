@@ -12,7 +12,7 @@ public class Puzzle02Controller : MonoBehaviour
     [SerializeField] private Puzzle02UIController _uiController;
     [SerializeField] private GameObject _objPuzzle02;
     [SerializeField] private GameObject _puzzleCanvas;
-    [SerializeField] private GameObject _objDoor;
+    [SerializeField] private GameObject _objBlock;
 
     [SerializeField, Min(3)] private int _puzzleSize = 3;
 
@@ -142,9 +142,9 @@ public class Puzzle02Controller : MonoBehaviour
         {
             _puzzleCanvas.GetComponent<Canvas>().enabled = false;
         }
-        if (_objDoor != null)
+        if (_objBlock != null)
         {
-            _objDoor?.SetActive(true);
+            _objBlock?.SetActive(false);
         }
     }
     private IEnumerator WaitOneSecondForDisiablePuzzleObject()

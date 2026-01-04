@@ -3,79 +3,87 @@ using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
 {
-	[AddComponentMenu("PLAYER TWO/Platformer Project/Level/Level Pauser")]
-	public class LevelPauser : Singleton<LevelPauser>
-	{
-		/// <summary>
-		/// Called when the Level is Paused.
-		/// </summary>
-		public UnityEvent OnPause;
+    [AddComponentMenu("PLAYER TWO/Platformer Project/Level/Level Pauser")]
+    public class LevelPauser : Singleton<LevelPauser>
+    {
 
-		/// <summary>
-		/// Called when the Level is unpaused.
-		/// </summary>
-		public UnityEvent OnUnpause;
+        private PlayerPuzzleController m_playerPuzzleController;
 
-		[Tooltip("The UI Container that will be shown when the Level is paused.")]
-		public UIContainer pauseScreen;
+        /// <summary>
+        /// Called when the Level is Paused.
+        /// </summary>
+        public UnityEvent OnPause;
 
-		protected float m_lastToggleTime;
+        /// <summary>
+        /// Called when the Level is unpaused.
+        /// </summary>
+        public UnityEvent OnUnpause;
 
-		/// <summary>
-		/// Returns true if it's possible to pause the Level.
-		/// </summary>
-		public bool canPause { get; set; }
+        [Tooltip("The UI Container that will be shown when the Level is paused.")]
+        public UIContainer pauseScreen;
 
-		/// <summary>
-		/// Returns true if the Level is paused.
-		/// </summary>
-		public bool paused { get; protected set; }
+        protected float m_lastToggleTime;
 
-		/// <summary>
-		/// Sets the pause state based on a given value.
-		/// </summary>
-		/// <param name="value">The state you want to set the pause to.</param>
-		public virtual void Pause(bool value)
-		{
-			if (paused == value || m_lastToggleTime == Time.unscaledTime)
-				return;
+        /// <summary>
+        /// Returns true if it's possible to pause the Level.
+        /// </summary>
+        public bool canPause { get; set; }
 
-			if (!paused)
-				Pause();
-			else
-				Unpause();
+        /// <summary>
+        /// Returns true if the Level is paused.
+        /// </summary>
+        public bool paused { get; protected set; }
 
-			m_lastToggleTime = Time.unscaledTime;
-		}
+        private void Start()
+        {
+            m_playerPuzzleController = FindFirstObjectByType<PlayerPuzzleController>();
+        }
 
-		protected virtual void Pause()
-		{
-			if (!canPause)
-				return;
+        /// <summary>
+        /// Sets the pause state based on a given value.
+        /// </summary>
+        /// <param name="value">The state you want to set the pause to.</param>
+        public virtual void Pause(bool value)
+        {
+            if (paused == value || m_lastToggleTime == Time.unscaledTime)
+                return;
 
-			Game.LockCursor(false);
-			paused = true;
-			Time.timeScale = 0;
+            if (!paused)
+                Pause();
+            else
+                Unpause();
 
-			if (pauseScreen)
-			{
-				pauseScreen.SetActive(true);
-				pauseScreen.Show();
-			}
+            m_lastToggleTime = Time.unscaledTime;
+        }
 
-			OnPause?.Invoke();
-		}
+        protected virtual void Pause()
+        {
+            if (!canPause)
+                return;
 
-		protected virtual void Unpause()
-		{
-			Game.LockCursor();
-			paused = false;
-			Time.timeScale = 1;
+            Game.LockCursor(false);
+            paused = true;
+            Time.timeScale = 0;
 
-			if (pauseScreen)
-				pauseScreen.Hide();
+            if (pauseScreen)
+            {
+                pauseScreen.SetActive(true);
+                pauseScreen.Show();
+            }
 
-			OnUnpause?.Invoke();
-		}
-	}
+            OnPause?.Invoke();
+        }
+
+        protected virtual void Unpause()
+        {
+            Game.LockCursor();
+            paused = false;
+            Time.timeScale = 1;
+            if (pauseScreen)
+                pauseScreen.Hide();
+            m_playerPuzzleController.ExitPuzzle();
+
+            OnUnpause?.Invoke();
+        }
+    }
 }

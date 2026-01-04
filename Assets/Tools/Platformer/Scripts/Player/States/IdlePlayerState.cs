@@ -17,7 +17,8 @@ namespace PLAYERTWO.PlatformerProject
 			player.Fall();
 			player.Spin();
 			player.PickAndThrow();
-			player.RegularSlopeFactor();
+            player.PuzzleInterface();
+            player.RegularSlopeFactor();
 			player.Friction();
 
 			var inputDirection = player.inputs.GetMovementCameraDirection();

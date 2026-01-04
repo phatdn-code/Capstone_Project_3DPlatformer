@@ -17,7 +17,8 @@ namespace PLAYERTWO.PlatformerProject
 			player.Fall();
 			player.Spin();
 			player.PickAndThrow();
-			player.Dash();
+            player.PuzzleInterface();
+            player.Dash();
 			player.RegularSlopeFactor();
 			player.DecelerateToTopSpeed();
 
