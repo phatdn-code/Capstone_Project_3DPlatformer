@@ -4888,6 +4888,9 @@ MonoBehaviour:
   state: 1
   delay: 0
   multiTrigger: []
+  autoToggle: 0
+  autoToggleActiveDuration: 3
+  autoToggleInactiveDuration: 1
   onActivate:
     m_PersistentCalls:
       m_Calls:
