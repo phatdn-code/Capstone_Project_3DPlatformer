@@ -89,8 +89,6 @@ namespace PLAYERTWO.PlatformerProject
             player.gravityField?.IgnoreCollider(player.controller);
             player.gravityField = null;
 
-            m_camera?.Reset();
-
             var inputDirection = player.inputs.GetMovementCameraDirection();
 
             if (Vector3.Dot(inputDirection, localExitForward) < 0)
@@ -99,6 +97,9 @@ namespace PLAYERTWO.PlatformerProject
             player.transform.position += player.transform.forward * exit.exitOffset;
             player.lateralVelocity = player.localForward * lateralSpeed;
             player.verticalVelocity = Vector3.up * verticalSpeed;
+
+            Physics.SyncTransforms();
+            m_camera?.Reset();
 
             if (useFlash && Flash.instance)
                 Flash.instance.Trigger();

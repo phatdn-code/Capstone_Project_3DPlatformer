@@ -6,7 +6,6 @@ public class PlayerPuzzleController : PlayerInputManager
     [SerializeField] private Puzzle02Controller _controller;
     [SerializeField] private GameObject _selectionUI;
 
-    private Collider _playerCollider;
     private PlayerObjectGrabber _playerObjectGrabber;
     private Puzzle02UIController _puzzle02UIController;
 
@@ -16,22 +15,19 @@ public class PlayerPuzzleController : PlayerInputManager
     protected override void Awake()
     {
         base.Awake();
-        _playerCollider = GetComponent<Collider>();
         _playerObjectGrabber = GetComponent<PlayerObjectGrabber>();
-        _selectionUI.SetActive(false);
+
+        if (_selectionUI != null)
+            _selectionUI.SetActive(false);
     }
 
     private void UpdateSelectionUI()
     {
         if (_canSelect && !_isPuzzlePlaying)
-        {
             _selectionUI.SetActive(true);
-        }
-        else
-        {
-            _selectionUI.SetActive(false);
-        }
-            
+
+        else _selectionUI.SetActive(false);
+
         _playerObjectGrabber.enabled = !_canSelect;
     }
 
@@ -41,10 +37,11 @@ public class PlayerPuzzleController : PlayerInputManager
             return;
 
         _isPuzzlePlaying = !_isPuzzlePlaying;
+
         if (_isPuzzlePlaying)
             EnterPuzzle();
-        else
-            ExitPuzzle();
+
+        else ExitPuzzle();
     }
 
     public void EnterPuzzle()

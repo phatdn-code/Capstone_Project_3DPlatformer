@@ -123,6 +123,7 @@ namespace PLAYERTWO.PlatformerProject
         private PortalZoneManager zoneManager;
         private DragonRobotAnimation dragonAnim;
         private BossShieldController shieldControl;
+        private BossTelegraphGrowFromGround bossTelegraph;
         private Coroutine attackRoutine;
         private Coroutine attackTimeLimitRoutine;
 
@@ -218,6 +219,7 @@ namespace PLAYERTWO.PlatformerProject
             dragonAnim = BossAnim as DragonRobotAnimation;
             zoneManager = PortalZoneManager.Instance;
             shieldControl = GetComponentInChildren<BossShieldController>(true);
+            bossTelegraph = GetComponent<BossTelegraphGrowFromGround>();
 
             if (visualRoot == null)
                 visualRoot = transform;
@@ -876,6 +878,8 @@ namespace PLAYERTWO.PlatformerProject
             if (dragonAnim != null)
                 dragonAnim.SetFlameThrower(true);
 
+            bossTelegraph.PlayTelegraph();
+
             // Thời gian duy trì chiêu (VFX bật bằng Animation Event)
             yield return new WaitForSeconds(flameAttackDuration);
 
@@ -908,6 +912,8 @@ namespace PLAYERTWO.PlatformerProject
             if (_stopAttackingRequested) return;
 
             SetFlameEffectActive(true);
+
+            bossTelegraph.StopTelegraph();
         }
 
         #endregion
