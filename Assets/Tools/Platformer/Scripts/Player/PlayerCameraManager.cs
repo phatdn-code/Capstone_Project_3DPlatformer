@@ -84,5 +84,11 @@ namespace PLAYERTWO.PlatformerProject
 					m_tempPlayerCamera.Reset();
 			}
 		}
-	}
+
+        public void ResetCurrentCamera()
+        {
+            if (m_currentCamera && m_currentCamera.TryGetComponent(out PlayerCamera pc))
+                pc.Reset();
+        }
+    }
 }

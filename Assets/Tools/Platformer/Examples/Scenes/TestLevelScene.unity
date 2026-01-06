@@ -14388,7 +14388,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: b0a292b136471f74fa41ac702c3424c5, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: b0a292b136471f74fa41ac702c3424c5, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.5
@@ -19990,10 +19990,20 @@ PrefabInstance:
       propertyPath: exit
       value: 
       objectReference: {fileID: 922332017}
+    - target: {fileID: 7843370674092939971, guid: 8d538ab94a112034b9022560c83bd62d,
+        type: 3}
+      propertyPath: saveRespawnPoint
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7843370674092939972, guid: 8d538ab94a112034b9022560c83bd62d,
         type: 3}
       propertyPath: m_Name
       value: Portal A
+      objectReference: {fileID: 0}
+    - target: {fileID: 7843370674092939973, guid: 8d538ab94a112034b9022560c83bd62d,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -20008,6 +20018,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1717525852}
     m_Modifications:
+    - target: {fileID: 3010672756662051346, guid: d4fd43fc8f829a341b3d7f907225fd25,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3010672756662051347, guid: d4fd43fc8f829a341b3d7f907225fd25,
         type: 3}
       propertyPath: m_Name
@@ -20018,6 +20033,11 @@ PrefabInstance:
       propertyPath: exit
       value: 
       objectReference: {fileID: 706766941}
+    - target: {fileID: 3010672756662051348, guid: d4fd43fc8f829a341b3d7f907225fd25,
+        type: 3}
+      propertyPath: saveRespawnPoint
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3010672756662051349, guid: d4fd43fc8f829a341b3d7f907225fd25,
         type: 3}
       propertyPath: m_RootOrder

@@ -6,9 +6,10 @@ namespace PLAYERTWO.PlatformerProject
     [AddComponentMenu("PLAYER TWO/Platformer Project/Misc/Portal")]
     public class Portal : MonoBehaviour
     {
-        [Tooltip(
-            "If true, the teleportation will trigger the flash effect form the Flash component."
-        )]
+        //─────────────────────────────────────────────────────────────
+        #region === Inspector Fields ===
+
+        [Tooltip("If true, the teleportation will trigger the flash effect form the Flash component.")]
         public bool useFlash = true;
 
         [Tooltip("The portal to teleport to.")]
@@ -22,39 +23,52 @@ namespace PLAYERTWO.PlatformerProject
 
         [Tooltip(
             "If true, the Player will be rotated to face the opposite direction when exiting the portal."
-                + "Only works when the Player is in side-scroller mode."
+            + "Only works when the Player is in side-scroller mode."
         )]
         public bool invertExitDirection;
 
         [Tooltip("If enabled, the Player will save this portal as the respawn point when entering.")]
         public bool saveRespawnPoint = false;
 
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Runtime References ===
+
         protected Collider m_collider;
         protected AudioSource m_audio;
+
         protected PlayerCamera m_camera;
+        protected PlayerCameraManager m_cameraManager;
+
         protected Player player;
 
-        /// <summary>
-        /// Returns the Portal global position.
-        /// </summary>
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Properties ===
+
+        /// <summary>Returns the Portal global position.</summary>
         public Vector3 position => transform.position;
 
-        /// <summary>
-        /// Returns the Portal local forward direction.
-        /// </summary>
+        /// <summary>Returns the Portal local forward direction.</summary>
         public Vector3 forward => transform.forward;
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Unity Callbacks ===
 
         protected virtual void Start()
         {
-            player = PlayerHub.Instance.Player;
-            m_collider = GetComponent<Collider>();
-            m_audio = GetComponent<AudioSource>();
-#if UNITY_6000_0_OR_NEWER
-            m_camera = FindFirstObjectByType<PlayerCamera>();
-#else
-			m_camera = FindObjectOfType<PlayerCamera>();
-#endif
-            m_collider.isTrigger = true;
+            CacheReferences();
+            EnsureTriggerCollider();
         }
 
         protected virtual void OnTriggerEnter(Collider other)
@@ -70,8 +84,10 @@ namespace PLAYERTWO.PlatformerProject
 
             var offset = player.unsizedPosition - transform.position;
             var yOffset = Vector3.Dot(transform.up, offset);
+
             var localExitForward =
                 Quaternion.FromToRotation(exit.transform.up, Vector3.up) * exit.forward;
+
             var lateralSpeed = player.lateralVelocity.magnitude;
             var verticalSpeed = player.verticalVelocity.y;
 
@@ -90,7 +106,6 @@ namespace PLAYERTWO.PlatformerProject
             player.gravityField = null;
 
             var inputDirection = player.inputs.GetMovementCameraDirection();
-
             if (Vector3.Dot(inputDirection, localExitForward) < 0)
                 player.FaceDirection(-localExitForward);
 
@@ -99,14 +114,47 @@ namespace PLAYERTWO.PlatformerProject
             player.verticalVelocity = Vector3.up * verticalSpeed;
 
             Physics.SyncTransforms();
-            m_camera?.Reset();
+
+            m_cameraManager?.ResetCurrentCamera();
 
             if (useFlash && Flash.instance)
                 Flash.instance.Trigger();
 
             m_audio.PlayOneShot(teleportClip);
 
-            if (saveRespawnPoint) PortalZoneManager.Instance.TryRunReturnPortalCutscene(exit);
+            if (saveRespawnPoint)
+                PortalZoneManager.Instance.TryRunReturnPortalCutscene(exit);
         }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Helpers ===
+
+        private void CacheReferences()
+        {
+            player = PlayerHub.Instance.Player;
+
+            m_collider = GetComponent<Collider>();
+            m_audio = GetComponent<AudioSource>();
+
+#if UNITY_6000_0_OR_NEWER
+            m_camera = FindFirstObjectByType<PlayerCamera>();
+            m_cameraManager = FindFirstObjectByType<PlayerCameraManager>();
+#else
+            m_camera = FindObjectOfType<PlayerCamera>();
+            m_cameraManager = FindObjectOfType<PlayerCameraManager>();
+#endif
+        }
+
+        private void EnsureTriggerCollider()
+        {
+            m_collider.isTrigger = true;
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
     }
 }

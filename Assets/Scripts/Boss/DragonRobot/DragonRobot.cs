@@ -858,6 +858,8 @@ namespace PLAYERTWO.PlatformerProject
                 bossEntryPoint = zoneManager.GetCurrentZoneBossEntryPoint();
             }
 
+            bossTelegraph.PlayTelegraph();
+
             // 1. Di chuyển tới điểm cast flame (nếu có)
             if (flameCastPoint != null)
             {
@@ -877,8 +879,6 @@ namespace PLAYERTWO.PlatformerProject
             // 2. Bật animation Flame
             if (dragonAnim != null)
                 dragonAnim.SetFlameThrower(true);
-
-            bossTelegraph.PlayTelegraph();
 
             // Thời gian duy trì chiêu (VFX bật bằng Animation Event)
             yield return new WaitForSeconds(flameAttackDuration);
