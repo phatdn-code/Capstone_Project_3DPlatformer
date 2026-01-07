@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3423658567682814695}
   - component: {fileID: 3438301286451383970}
   - component: {fileID: 3186432083619399602}
-  - component: {fileID: -4774488051819708589}
   m_Layer: 0
   m_Name: BossTelegraph_Rect
   m_TagString: Untagged
@@ -87,21 +86,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-4774488051819708589
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2254274050457254651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d27f352ee2d488349993c5e41117ad6a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: {r: 0.8509804, g: 0.22352941, b: 0.22352941, a: 1}
-  baseAlpha: 0.75
-  pulse: 1
-  pulseSpeed: 6
-  pulseAmount: 0.25
-  yOffset: 0.03

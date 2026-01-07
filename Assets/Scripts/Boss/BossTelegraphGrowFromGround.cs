@@ -1,142 +1,338 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
+using DG.Tweening;
 
-public class BossTelegraphGrowFromGround : MonoBehaviour
+namespace PLAYERTWO.PlatformerProject
 {
-    [Header("Indicator (Scene Object)")]
-    [SerializeField] private BossTelegraphIndicator indicator;
-
-    [Header("Start Point (on ground)")]
-    [SerializeField] private Transform startPoint;
-
-    [Header("Size (meters)")]
-    [SerializeField] private float targetLength = 10f;
-    [SerializeField] private float width = 3f;
-
-    [Header("Timing")]
-    [SerializeField] private float growTime = 0.25f;
-    [SerializeField] private bool holdUntilStop = true;
-
-    [Header("Ground")]
-    [SerializeField] private LayerMask groundMask;
-    [SerializeField] private float raycastHeight = 6f;
-
-    [Header("Fade In While Growing")]
-    [SerializeField] private bool fadeIn = true;
-    [SerializeField, Range(0f, 1f)] private float minAlphaWhenStart = 0.2f;
-
-    private Coroutine routine;
-
-    // Cache rotation gốc của indicator (giữ y nguyên)
-    private Quaternion initialRotation;
-
-    private void Awake()
+    /// <summary>
+    /// Boss telegraph indicator:
+    /// - Snap indicator Y to ground by raycast.
+    /// - Scale indicator from 0 -> targetLength using DOTween.
+    /// - Optional spell-style FX by pulsing material alpha (URP-friendly).
+    /// </summary>
+    public class BossTelegraphGrowFromGround : MonoBehaviour
     {
-        if (indicator == null)
+        //─────────────────────────────────────────────────────────────
+        #region === Inspector: References ===
+
+        [Header("Indicator Object (enable/disable + scale)")]
+        [SerializeField] private Transform indicator;
+
+        [Header("Spell FX (Optional)")]
+        [SerializeField] private Renderer indicatorRenderer;
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Inspector: Ground Snap (Raycast) ===
+
+        [Header("Ground Snap (Raycast)")]
+        [SerializeField] private LayerMask groundMask;
+
+        [SerializeField, Min(0f)] private float raycastHeight = 2f;
+        [SerializeField, Min(0f)] private float forwardProbeOffset = 0.5f;
+        [SerializeField, Min(0.1f)] private float raycastDistance = 20f;
+        [SerializeField, Min(0f)] private float surfaceOffset = 0.02f;
+
+        [SerializeField] private bool followWhileActive = true;
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Inspector: Scale ===
+
+        [Header("Scale")]
+        [SerializeField] private float targetLength = 40f;
+        [SerializeField] private float width = 12f;
+
+        [SerializeField] private Axis lengthAxis = Axis.Z;
+        [SerializeField] private Axis widthAxis = Axis.X;
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Inspector: Tweens ===
+
+        [Header("Tween (Scale)")]
+        [SerializeField] private float growTime = 0.25f;
+        [SerializeField] private Ease growEase = Ease.OutCubic;
+
+        [Header("Tween (Spell FX - Alpha Pulse)")]
+        [SerializeField] private string colorProperty = "_BaseColor"; // URP Lit/Unlit
+        [SerializeField, Range(0f, 1f)] private float pulseMinAlpha = 0.15f;
+        [SerializeField, Range(0f, 1f)] private float pulseMaxAlpha = 0.75f;
+        [SerializeField, Min(0.01f)] private float pulsePeriod = 0.6f;
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Runtime State ===
+
+        private Tween growTween;
+        private Tween spellFxTween;
+
+        private bool isActive;
+
+        private Vector3 originalLocalScale;
+
+        private MaterialPropertyBlock mpb;
+        private Color cachedBaseColor;
+        private bool fxCached;
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Unity Lifecycle ===
+
+        private void Start()
         {
-            Debug.LogError($"{nameof(BossTelegraphGrowFromGround)}: indicator is NULL.");
-            return;
-        }
-
-        initialRotation = indicator.transform.rotation;
-        indicator.gameObject.SetActive(false);
-    }
-
-    public void PlayTelegraph()
-    {
-        if (indicator == null) return;
-
-        if (routine != null) StopCoroutine(routine);
-        routine = StartCoroutine(CoGrow());
-    }
-
-    public void StopTelegraph()
-    {
-        if (routine != null) StopCoroutine(routine);
-        routine = null;
-
-        if (indicator != null)
-            indicator.gameObject.SetActive(false);
-    }
-
-    private IEnumerator CoGrow()
-    {
-        // đảm bảo rotation đúng ban đầu ngay khi bật
-        indicator.transform.rotation = initialRotation;
-
-        UpdatePoseGrow(0.001f); // set vị trí trước, tránh pop
-        indicator.gameObject.SetActive(true);
-
-        float t = 0f;
-        while (t < growTime)
-        {
-            float k = Mathf.Clamp01(t / growTime);
-            k = EaseOutCubic(k);
-
-            float currentLen = Mathf.Lerp(0f, targetLength, k);
-
-            if (fadeIn)
+            // (VN) Khởi tạo: cache scale gốc và tắt indicator lúc đầu.
+            if (indicator == null)
             {
-                float a = Mathf.Lerp(minAlphaWhenStart, 1f, k);
-                indicator.SetBaseAlpha(a * 0.75f);
+                Debug.LogError($"{nameof(BossTelegraphGrowFromGround)}: indicator is NULL.");
+                enabled = false;
+                return;
             }
 
-            UpdatePoseGrow(currentLen);
-
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        UpdatePoseGrow(targetLength);
-
-        if (!holdUntilStop)
-        {
+            originalLocalScale = indicator.localScale;
             indicator.gameObject.SetActive(false);
-            routine = null;
-            yield break;
         }
 
-        while (true)
+        private void LateUpdate()
         {
-            UpdatePoseGrow(targetLength);
-            yield return null;
+            // (VN) Khi đang active thì bám ground liên tục (nếu bật follow).
+            if (!isActive || !followWhileActive || indicator == null) return;
+            SnapPositionToGroundOnly();
         }
-    }
 
-    private void UpdatePoseGrow(float currentLen)
-    {
-        if (startPoint == null) return;
+        #endregion
+        //─────────────────────────────────────────────────────────────
 
-        // chỉ tính vị trí, KHÔNG động vào rotation
-        Vector3 fwd = startPoint.forward;
-        fwd.y = 0f;
-        if (fwd.sqrMagnitude < 0.0001f) fwd = transform.forward;
-        fwd.Normalize();
 
-        Vector3 startGround = ProjectToGround(startPoint.position);
+        //─────────────────────────────────────────────────────────────
+        #region === Public API ===
 
-        Vector3 centerProbe = startGround + fwd * (currentLen * 0.5f);
-        Vector3 centerGround = ProjectToGround(centerProbe);
+        public void PlayTelegraph()
+        {
+            // (VN) Bật telegraph: hiện indicator, snap ground, scale ra từ từ + bật FX alpha pulse.
+            if (indicator == null) return;
 
-        indicator.SetSize(width, Mathf.Max(0.001f, currentLen));
+            KillGrowTween();
 
-        // set position thôi, giữ nguyên rotation ban đầu
-        indicator.transform.position = centerGround + Vector3.up * 0.03f; // hoặc dùng yOffset của indicator nếu muốn
-        indicator.transform.rotation = initialRotation;
-    }
+            isActive = true;
+            indicator.gameObject.SetActive(true);
 
-    private Vector3 ProjectToGround(Vector3 pos)
-    {
-        Vector3 start = pos + Vector3.up * raycastHeight;
-        if (Physics.Raycast(start, Vector3.down, out RaycastHit hit, raycastHeight * 3f, groundMask))
-            return hit.point;
+            SnapPositionToGroundOnly();
 
-        return pos;
-    }
+            Vector3 start = BuildStartScale();
+            indicator.localScale = start;
 
-    private static float EaseOutCubic(float x)
-    {
-        x = Mathf.Clamp01(x);
-        return 1f - Mathf.Pow(1f - x, 3f);
+            Vector3 end = BuildEndScale(start);
+
+            growTween = indicator
+                .DOScale(end, growTime)
+                .SetEase(growEase)
+                .SetUpdate(UpdateType.Normal, false);
+
+            PlaySpellIndicatorFX();
+        }
+
+        public void StopTelegraph()
+        {
+            // (VN) Tắt telegraph: dừng tween, tắt FX, reset scale, rồi hide indicator.
+            KillGrowTween();
+            StopSpellIndicatorFX();
+
+            isActive = false;
+
+            if (indicator != null)
+            {
+                indicator.localScale = originalLocalScale;
+                indicator.gameObject.SetActive(false);
+            }
+        }
+
+        public void PlaySpellIndicatorFX()
+        {
+            // (VN) FX kiểu spell: nhấp nháy alpha (không đụng tiling/offset).
+            if (!TryResolveRenderer()) return;
+
+            CacheFxStateIfNeeded();
+
+            spellFxTween?.Kill();
+            spellFxTween = null;
+
+            float half = Mathf.Max(0.01f, pulsePeriod * 0.5f);
+            float t = 0f;
+
+            // Dummy tween để có OnUpdate chạy liên tục
+            spellFxTween = DOTween
+                .To(() => 0f, _ => { }, 1f, 999999f)
+                .SetUpdate(UpdateType.Normal, false)
+                .OnUpdate(() =>
+                {
+                    t += Time.deltaTime;
+
+                    float s = 0.5f + 0.5f * Mathf.Sin((t / half) * Mathf.PI); // 0..1
+                    float a = Mathf.Lerp(pulseMinAlpha, pulseMaxAlpha, s);
+
+                    ApplyAlphaOnly(a);
+                });
+        }
+
+        public void StopSpellIndicatorFX()
+        {
+            // (VN) Dừng FX và trả lại alpha gốc.
+            spellFxTween?.Kill();
+            spellFxTween = null;
+
+            if (!fxCached || indicatorRenderer == null) return;
+            ApplyAlphaOnly(cachedBaseColor.a);
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Ground Snap ===
+
+        private void SnapPositionToGroundOnly()
+        {
+            // (VN) Raycast xuống ground để lấy Y; giữ nguyên X/Z để không bị trôi.
+            Vector3 basePos = indicator.position;
+
+            Vector3 rayOrigin = basePos
+                                + indicator.forward * forwardProbeOffset
+                                + Vector3.up * raycastHeight;
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit,
+                                raycastDistance, groundMask, QueryTriggerInteraction.Ignore))
+            {
+                float y = hit.point.y + surfaceOffset;
+                indicator.position = new Vector3(basePos.x, y, basePos.z);
+            }
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Scale Helpers ===
+
+        private Vector3 BuildStartScale()
+        {
+            // (VN) Tạo scale bắt đầu: width đúng, length = 0.
+            Vector3 start = originalLocalScale;
+            SetAxis(ref start, widthAxis, width);
+            SetAxis(ref start, lengthAxis, 0f);
+            return start;
+        }
+
+        private Vector3 BuildEndScale(Vector3 start)
+        {
+            // (VN) Tạo scale kết thúc: width giữ nguyên, length = targetLength.
+            Vector3 end = start;
+            SetAxis(ref end, lengthAxis, Mathf.Max(0.001f, targetLength));
+            return end;
+        }
+
+        private static void SetAxis(ref Vector3 v, Axis axis, float value)
+        {
+            // (VN) Gán giá trị cho 1 trục của Vector3.
+            switch (axis)
+            {
+                case Axis.X: v.x = value; break;
+                case Axis.Y: v.y = value; break;
+                case Axis.Z: v.z = value; break;
+            }
+        }
+
+        private enum Axis { X, Y, Z }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Spell FX Helpers (Alpha Only) ===
+
+        private bool TryResolveRenderer()
+        {
+            // (VN) Tự tìm Renderer nếu chưa gán trong Inspector.
+            if (indicatorRenderer != null) return true;
+
+            if (indicator != null)
+                indicatorRenderer = indicator.GetComponentInChildren<Renderer>();
+
+            return indicatorRenderer != null;
+        }
+
+        private void CacheFxStateIfNeeded()
+        {
+            // (VN) Cache màu gốc để StopFX trả lại đúng.
+            if (fxCached) return;
+
+            mpb ??= new MaterialPropertyBlock();
+
+            cachedBaseColor = Color.white;
+
+            var mat = indicatorRenderer.sharedMaterial;
+            if (mat != null)
+            {
+                // URP ưu tiên _BaseColor, fallback _Color
+                if (mat.HasProperty("_BaseColor")) cachedBaseColor = mat.GetColor("_BaseColor");
+                else if (mat.HasProperty("_Color")) cachedBaseColor = mat.GetColor("_Color");
+            }
+
+            fxCached = true;
+        }
+
+        private void ApplyAlphaOnly(float alpha)
+        {
+            // (VN) Chỉ chỉnh alpha của màu (URP Lit/Unlit), không đụng UV.
+            mpb ??= new MaterialPropertyBlock();
+            indicatorRenderer.GetPropertyBlock(mpb);
+
+            Color c = cachedBaseColor;
+            c.a = alpha;
+
+            // Set cả 2 để shader nào có thì nhận
+            mpb.SetColor("_BaseColor", c);
+            mpb.SetColor("_Color", c);
+
+            // Nếu bạn muốn tôn trọng colorProperty, vẫn set thêm 1 lần:
+            if (!string.IsNullOrEmpty(colorProperty))
+                mpb.SetColor(colorProperty, c);
+
+            indicatorRenderer.SetPropertyBlock(mpb);
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === Tween Utilities ===
+
+        private void KillGrowTween()
+        {
+            // (VN) Dừng tween scale nếu đang chạy.
+            growTween?.Kill();
+            growTween = null;
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
     }
 }
