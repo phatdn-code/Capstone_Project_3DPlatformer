@@ -327,10 +327,56 @@ public class PortalZoneManager : SingletonMonobehaviour<PortalZoneManager>
     }
 
     /// <summary>Trả về Transform flameCastPoint của currentZone (có thể null).</summary>
-    public Transform GetCurrentZoneFlameCastPoint()
+    public Transform GetCurrentZoneFlameCastPoint(int phaseIndex = 0)
     {
         if (currentZone == null) return null;
-        return currentZone.flameCastPoint;
+
+        var points = currentZone.flameCastPoints;
+        if (points == null || points.Length == 0) return null;
+
+        // 0 = Phase 1 -> index 0, 1 = Phase 2 -> index 1 (nếu có), ...
+        int index = Mathf.Clamp(phaseIndex, 0, points.Length - 1);
+        return points[index];
+    }
+
+    public Transform GetRandomCurrentZoneFlameCastPoint()
+    {
+        if (currentZone == null) return null;
+
+        var points = currentZone.flameCastPoints;
+        if (points == null || points.Length == 0) return null;
+
+        // Filter null points để tránh Random ra phần tử rỗng.
+        int validCount = 0;
+
+        for (int i = 0; i < points.Length; i++)
+            if (points[i] != null) validCount++;
+
+        if (validCount == 0) return null;
+
+        // Nếu chỉ có 1 điểm hợp lệ thì trả về luôn.
+        if (validCount == 1)
+        {
+            for (int i = 0; i < points.Length; i++)
+                if (points[i] != null) return points[i];
+        }
+
+        // Random trên tập hợp các điểm hợp lệ.
+        int pick = Random.Range(0, validCount);
+        int cursor = 0;
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (points[i] == null) continue;
+
+            if (cursor == pick)
+                return points[i];
+
+            cursor++;
+        }
+
+        // Fallback an toàn (không nên xảy ra)
+        return points[0];
     }
 
     /// <summary>Trả về Transform blastCastPoint của currentZone (có thể null).</summary>

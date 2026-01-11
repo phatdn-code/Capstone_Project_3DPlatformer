@@ -23,7 +23,7 @@ namespace PLAYERTWO.PlatformerProject
         public Transform bossEntryPoint;
 
         [Header("Boss Skill Points")]
-        public Transform flameCastPoint;          // Điểm thực hiện Flame Thrower
+        public Transform[] flameCastPoints;           // Điểm thực hiện Flame Thrower
         public Transform blastCastPoint;          // Điểm thực hiện Blast Attack
         public Transform[] meteorCastPoints;      // Các điểm di chuyển/strike của Meteor Attack
         public Transform[] meteorRainPoints;      // Các điểm spawn / vùng mưa Meteor

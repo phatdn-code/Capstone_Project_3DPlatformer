@@ -854,7 +854,14 @@ namespace PLAYERTWO.PlatformerProject
 
             if (zoneManager != null)
             {
-                flameCastPoint = zoneManager.GetCurrentZoneFlameCastPoint();
+                int phaseIndex = (BossHealth != null) ? BossHealth.currentPhase : 0;
+
+                // Phase 1 (index 0): luôn dùng flameCastPoints[0].
+                // Phase 2+ (index >= 1): random cast point.
+                flameCastPoint = (phaseIndex <= 0)
+                    ? zoneManager.GetCurrentZoneFlameCastPoint(0)
+                    : zoneManager.GetRandomCurrentZoneFlameCastPoint();
+
                 bossEntryPoint = zoneManager.GetCurrentZoneBossEntryPoint();
             }
 
