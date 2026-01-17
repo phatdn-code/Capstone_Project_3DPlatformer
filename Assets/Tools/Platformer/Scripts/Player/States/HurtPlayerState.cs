@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -41,19 +41,27 @@ namespace PLAYERTWO.PlatformerProject
 			player.FaceDirection(localDamageDir);
 		}
 
-		protected virtual void ApplyDamagePushBack(Player player)
-		{
-			var verticalForce = player.stats.current.hurtUpwardForce;
-			var lateralForce = player.onWater
-				? player.stats.current.hurtBackwardsWaterForce
-				: player.stats.current.hurtBackwardsForce;
-			player.lateralVelocity = -player.localForward * lateralForce;
+        protected virtual void ApplyDamagePushBack(Player player)
+        {
+            // Nếu đang điều khiển WaterCannon thì không bị lực đẩy lùi
+            if (PlayerHub.Instance != null && PlayerHub.Instance.IsControllingWaterCannon)
+            {
+                player.lateralVelocity = Vector3.zero;
+                return;
+            }
 
-			if (!player.onWater)
-				player.verticalVelocity = Vector3.up * verticalForce;
-		}
+            var verticalForce = player.stats.current.hurtUpwardForce;
+            var lateralForce = player.onWater
+                ? player.stats.current.hurtBackwardsWaterForce
+                : player.stats.current.hurtBackwardsForce;
 
-		protected virtual void ApplyGravity(Player player)
+            player.lateralVelocity = -player.localForward * lateralForce;
+
+            if (!player.onWater)
+                player.verticalVelocity = Vector3.up * verticalForce;
+        }
+
+        protected virtual void ApplyGravity(Player player)
 		{
 			if (player.onWater)
 			{

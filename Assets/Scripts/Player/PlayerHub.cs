@@ -14,7 +14,15 @@ namespace PLAYERTWO.PlatformerProject
     public class PlayerHub : SingletonMonobehaviour<PlayerHub>
     {
         //─────────────────────────────────────────────
-        #region === Cached Subsystems ===
+        #region === Inspector References ===
+
+        [Header("Player Model Root")]
+        [SerializeField] private GameObject playerModelRoot;
+
+        #endregion
+        //─────────────────────────────────────────────
+
+        #region === Cached Subsystems (GetComponent) ===
 
         public PlayerInputManager InputManager { get; private set; }
         public PlayerStatsManager StatsManager { get; private set; }
@@ -25,10 +33,14 @@ namespace PLAYERTWO.PlatformerProject
         public PlayerAnimator Animator { get; private set; }
         public PlayerParticles Particles { get; private set; }
 
-        [Header("Player Model Root")]
-        [SerializeField] private GameObject playerModelRoot;   // chỉ là mesh / rig, KHÔNG phải root Player
-
         private PlayerCamera m_camera;
+
+        #endregion
+        //─────────────────────────────────────────────
+
+        #region === Runtime State ===
+
+        public bool IsControllingWaterCannon { get; private set; }
 
         #endregion
         //─────────────────────────────────────────────
@@ -49,8 +61,42 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
         //─────────────────────────────────────────────
 
-        #region === Core Methods ===
+        #region === Public API ===
 
+        /// <summary>Khóa/mở toàn bộ input + freeze camera (cutscene/pause/death...).</summary>
+        public void LockPlayer(bool locked)
+        {
+            if (InputManager != null)
+                InputManager.LockAllInputs(locked);
+
+            if (m_camera != null)
+                m_camera.SetFreeze(locked);
+        }
+
+        /// <summary>
+        /// Bật/tắt điều khiển player kèm ẩn/hiện model.
+        /// Lưu ý: logic hiện tại dùng "enable=true" để khóa input + ẩn model (khi vào cannon).
+        /// </summary>
+        public void SetPlayerControlAndModel(bool enable)
+        {
+            if (playerModelRoot != null)
+                playerModelRoot.SetActive(!enable);
+
+            LockPlayer(enable);
+        }
+
+        /// <summary>Set cờ trạng thái player đang điều khiển water cannon hay không.</summary>
+        public void SetWaterCannonControl(bool isControlling)
+        {
+            IsControllingWaterCannon = isControlling;
+        }
+
+        #endregion
+        //─────────────────────────────────────────────
+
+        #region === Private Helpers ===
+
+        /// <summary>Cache các component bắt buộc trên Player để truy cập nhanh.</summary>
         private void CacheSubsystems()
         {
             InputManager = GetComponent<PlayerInputManager>();
@@ -63,26 +109,7 @@ namespace PLAYERTWO.PlatformerProject
             Particles = GetComponent<PlayerParticles>();
         }
 
-        /// <summary>Khóa / mở toàn bộ input + camera (dùng cho cutscene, pause, death...).</summary>
-        public void LockPlayer(bool locked)
-        {
-            if (InputManager != null)
-                InputManager.LockAllInputs(locked);
-
-            if (m_camera != null)
-                m_camera.SetFreeze(locked);
-        }
-
-        /// <summary>Chỉ ẩn / hiện model nhân vật, KHÔNG đụng vào input.</summary>
-        public void SetPlayerControlAndModel(bool enable)
-        {
-            // Model
-            if (playerModelRoot != null)
-                playerModelRoot.SetActive(!enable);
-
-            LockPlayer(enable);
-        }
-
         #endregion
+        //─────────────────────────────────────────────
     }
 }

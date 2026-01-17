@@ -6,9 +6,8 @@ using DG.Tweening;
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// WaterCannon: điều khiển xoay + bắn (Projectile/Beam) khi player nhập chế độ cannon.
-    /// Có hệ thống Energy + UI Slider + cơ chế LOCK khi cạn năng lượng.
-    /// Có đổi màu fill theo mức năng lượng (DOTween).
+    /// WaterCannon: xoay + bắn (Projectile/Beam) khi Player vào chế độ cannon.
+    /// Có Energy + UI Slider + cơ chế LOCK khi cạn năng lượng + tween đổi màu fill.
     /// </summary>
     [RequireComponent(typeof(CannonInput))]
     public class WaterCannon : MonoBehaviour
@@ -45,7 +44,7 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private bool showEnergyOnlyWhenControlling = true;
 
         [Header("Energy Fill Color")]
-        [SerializeField] private Image energyFillImage;          // Image dùng để đổi màu fill
+        [SerializeField] private Image energyFillImage;
         [SerializeField] private float colorTweenDuration = 0.25f;
 
         #endregion
@@ -72,7 +71,7 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Energy Settings")]
         [SerializeField] private float maxEnergy = 100f;
         [SerializeField] private float energyRegenPerSecond = 15f;       // hồi bình thường
-        [SerializeField] private float depletedRegenPerSecond = 10f;     // hồi chậm khi LOCK (cạn)
+        [SerializeField] private float depletedRegenPerSecond = 10f;     // hồi chậm khi LOCK
         [SerializeField] private float projectileEnergyCost = 20f;       // tốn mỗi viên
         [SerializeField] private float beamEnergyCostPerSecond = 25f;    // tốn mỗi giây giữ beam
 
@@ -81,49 +80,52 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === RUNTIME STATE ===
 
+        private const float kLookDeadZoneSqr = 0.0001f;
+        private const float kMinBeamStartEnergy = 0.01f;
+
         private PlayerHub _playerHub;
-        private CannonInput _cannonInput;
+        private CannonInput _input;
 
-        private Transform _muzzleTransform;
-        private float _lastFireTime;
+        private Transform _muzzle;
+        private float _nextFireTime;
 
-        private float _currentYaw;
-        private float _currentPitch;
+        private float _yaw;
+        private float _pitch;
 
         private bool _isPlayerInTrigger;
-        private bool _isControllingCannon;
-
+        private bool _isControlling;
         private bool _isBeamFiring;
 
         private float _energy;
         private bool _isDepletedLock;
 
         private Tween _fillColorTween;
-        private Color _currentFillTargetColor;
+        private Color _fillColorTarget;
 
         #endregion
 
         //────────────────────────────────────────────────────
         #region === UNITY LIFECYCLE ===
 
-        /// <summary>Khởi tạo: cache ref, setup UI/camera, init energy.</summary>
         private void Start()
         {
             CacheReferences();
-            InitTutorialVisual();
             CacheInitialAngles();
-            SetCannonCameraPriority(idlePriority);
+
+            SetControlling(false);
+            SetTutorialState(inTrigger: false);
 
             InitEnergy();
-            SyncEnergyUI(true);
+            SyncEnergyUI(force: true);
+
+            SubscribePlayerDie();
         }
 
-        /// <summary>Loop: vào/thoát điều khiển; nếu đang điều khiển thì xoay+bắn; tick energy.</summary>
         private void Update()
         {
             HandleControlToggleInput();
 
-            if (_isControllingCannon)
+            if (_isControlling)
             {
                 HandleRotationInput();
                 HandleFireByMode();
@@ -132,18 +134,24 @@ namespace PLAYERTWO.PlatformerProject
             TickEnergy(Time.deltaTime);
         }
 
-        /// <summary>Khi disable: trả control, tắt beam, reset camera + UI.</summary>
+        private void OnEnable()
+        {
+            _playerHub ??= PlayerHub.Instance;
+            SubscribePlayerDie();
+        }
+
         private void OnDisable()
         {
-            if (_isControllingCannon && _playerHub != null)
-                _playerHub.SetPlayerControlAndModel(false);
+            UnsubscribePlayerDie();
 
-            _isControllingCannon = false;
+            if (_isControlling)
+                ExitCannonControl();
+
             StopBeamIfNeeded();
-            SetCannonCameraPriority(idlePriority);
+            SetCameraPriority(idlePriority);
 
             KillFillColorTween();
-            SyncEnergyUI(true);
+            SyncEnergyUI(force: true);
         }
 
         #endregion
@@ -151,12 +159,12 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === INIT / CACHE ===
 
-        /// <summary>Cache input/playerhub + setup pivot/muzzle.</summary>
+        /// <summary>VN: Cache input/hub/pivot/muzzle để dùng nhanh và tránh null.</summary>
         private void CacheReferences()
         {
-            _cannonInput = GetComponent<CannonInput>();
-            if (_cannonInput == null)
-                Debug.LogError("WaterCannon: Không tìm thấy CannonInput trên cùng GameObject.");
+            _input = GetComponent<CannonInput>();
+            if (_input == null)
+                Debug.LogError("WaterCannon: Không tìm thấy CannonInput.");
 
             _playerHub = PlayerHub.Instance;
             if (_playerHub == null)
@@ -165,45 +173,67 @@ namespace PLAYERTWO.PlatformerProject
             yawPivot ??= transform;
             pitchPivot ??= transform;
 
-            _muzzleTransform = muzzleCastEffect != null ? muzzleCastEffect.transform : pitchPivot;
+            _muzzle = muzzleCastEffect != null ? muzzleCastEffect.transform : pitchPivot;
         }
 
-        /// <summary>Lưu góc ban đầu để clamp yaw/pitch đúng.</summary>
+        /// <summary>VN: Lưu góc ban đầu để clamp yaw/pitch đúng theo local.</summary>
         private void CacheInitialAngles()
         {
-            _currentYaw = NormalizeAngle(yawPivot.localEulerAngles.y);
-            _currentPitch = NormalizeAngle(pitchPivot.localEulerAngles.x);
+            _yaw = NormalizeAngle(yawPivot.localEulerAngles.y);
+            _pitch = NormalizeAngle(pitchPivot.localEulerAngles.x);
         }
 
-        /// <summary>Init trạng thái UI tutorial ban đầu.</summary>
-        private void InitTutorialVisual()
-        {
-            _isPlayerInTrigger = false;
-            _isControllingCannon = false;
-            _isBeamFiring = false;
-
-            if (tutorialUI != null) tutorialUI.SetActive(false);
-            if (tutorialArrow != null) tutorialArrow.SetActive(arrowVisibleByDefault);
-        }
-
-        /// <summary>Khởi tạo energy về full và reset lock.</summary>
+        /// <summary>VN: Khởi tạo Energy về full và reset LOCK + set màu fill ban đầu.</summary>
         private void InitEnergy()
         {
             maxEnergy = Mathf.Max(0f, maxEnergy);
             _energy = maxEnergy;
             _isDepletedLock = false;
 
-            // Set màu fill ban đầu cho đúng ngay lập tức
-            _currentFillTargetColor = GetEnergyColor(1f);
+            _fillColorTarget = GetEnergyColor(1f);
             if (energyFillImage != null)
-                energyFillImage.color = _currentFillTargetColor;
+                energyFillImage.color = _fillColorTarget;
         }
 
-        /// <summary>Set priority camera cannon.</summary>
-        private void SetCannonCameraPriority(int priority)
+        /// <summary>VN: Set priority camera cannon theo trạng thái.</summary>
+        private void SetCameraPriority(int priority)
         {
-            if (cannonCamera == null) return;
-            cannonCamera.Priority = priority;
+            if (cannonCamera != null)
+                cannonCamera.Priority = priority;
+        }
+
+        #endregion
+
+        //────────────────────────────────────────────────────
+        #region === PLAYER DIE EVENT ===
+
+        /// <summary>VN: Đăng ký OnDie của player để auto thoát cannon khi chết.</summary>
+        private void SubscribePlayerDie()
+        {
+            var player = _playerHub != null ? _playerHub.Player : null;
+            var eventsRef = player != null ? player.playerEvents : null;
+            if (eventsRef == null) return;
+
+            // Tránh add trùng.
+            eventsRef.OnDie?.RemoveListener(OnPlayerDied);
+            eventsRef.OnDie?.AddListener(OnPlayerDied);
+        }
+
+        /// <summary>VN: Huỷ đăng ký OnDie để tránh leak/double-call.</summary>
+        private void UnsubscribePlayerDie()
+        {
+            var player = _playerHub != null ? _playerHub.Player : null;
+            var eventsRef = player != null ? player.playerEvents : null;
+            if (eventsRef == null) return;
+
+            eventsRef.OnDie?.RemoveListener(OnPlayerDied);
+        }
+
+        /// <summary>VN: Callback khi player chết (đang điều khiển thì thoát ngay).</summary>
+        private void OnPlayerDied()
+        {
+            if (_isControlling)
+                ExitCannonControl();
         }
 
         #endregion
@@ -211,26 +241,34 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === TRIGGER UI ===
 
-        /// <summary>Vào vùng: hiện tutorial UI, tắt arrow.</summary>
+        /// <summary>VN: Vào vùng trigger thì hiện hướng dẫn, tắt mũi tên.</summary>
         private void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag("Player")) return;
-
-            _isPlayerInTrigger = true;
-
-            if (tutorialUI != null) tutorialUI.SetActive(true);
-            if (tutorialArrow != null) tutorialArrow.SetActive(false);
+            SetTutorialState(inTrigger: true);
         }
 
-        /// <summary>Ra vùng: tắt tutorial UI và bật arrow nếu không điều khiển.</summary>
+        /// <summary>VN: Ra vùng trigger thì ẩn hướng dẫn (nếu không controlling) và bật mũi tên.</summary>
         private void OnTriggerExit(Collider other)
         {
             if (!other.CompareTag("Player")) return;
+            SetTutorialState(inTrigger: false);
+        }
 
-            _isPlayerInTrigger = false;
+        /// <summary>VN: Bật/tắt UI tutorial theo việc player đang đứng trong vùng hay không.</summary>
+        private void SetTutorialState(bool inTrigger)
+        {
+            _isPlayerInTrigger = inTrigger;
 
-            if (_isControllingCannon)
+            if (inTrigger)
+            {
+                if (tutorialUI != null) tutorialUI.SetActive(true);
+                if (tutorialArrow != null) tutorialArrow.SetActive(false);
                 return;
+            }
+
+            // Nếu đang điều khiển thì đừng tắt UI theo trigger exit.
+            if (_isControlling) return;
 
             if (tutorialUI != null) tutorialUI.SetActive(false);
             if (tutorialArrow != null) tutorialArrow.SetActive(arrowVisibleByDefault);
@@ -241,37 +279,30 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === CONTROL TOGGLE ===
 
-        /// <summary>Nhấn Interact để vào/thoát điều khiển cannon.</summary>
+        /// <summary>VN: Nhấn Interact để vào/thoát điều khiển cannon.</summary>
         private void HandleControlToggleInput()
         {
-            if (_cannonInput == null) return;
-            if (!_cannonInput.GetInteractDown()) return;
+            if (_input == null || !_input.GetInteractDown())
+                return;
 
-            if (_isControllingCannon) ExitCannonControl();
+            if (_isControlling) ExitCannonControl();
             else if (_isPlayerInTrigger) EnterCannonControl();
         }
 
-        /// <summary>Vào điều khiển: khóa player, ưu tiên camera cannon.</summary>
+        /// <summary>VN: Vào điều khiển cannon (khóa player, ưu tiên camera, hiện energy).</summary>
         private void EnterCannonControl()
         {
-            if (_playerHub != null)
-                _playerHub.SetPlayerControlAndModel(true);
-
-            _isControllingCannon = true;
-            SetCannonCameraPriority(controllingPriority);
-
-            SyncEnergyUI(true);
+            SetControlling(true);
+            SetCameraPriority(controllingPriority);
+            SyncEnergyUI(force: true);
         }
 
-        /// <summary>Thoát điều khiển: mở khóa player, tắt beam, reset camera + UI.</summary>
+        /// <summary>VN: Thoát điều khiển cannon (mở khóa player, stop beam, reset UI/camera).</summary>
         private void ExitCannonControl()
         {
-            if (_playerHub != null)
-                _playerHub.SetPlayerControlAndModel(false);
-
-            _isControllingCannon = false;
+            SetControlling(false);
             StopBeamIfNeeded();
-            SetCannonCameraPriority(idlePriority);
+            SetCameraPriority(idlePriority);
 
             if (!_isPlayerInTrigger)
             {
@@ -279,7 +310,19 @@ namespace PLAYERTWO.PlatformerProject
                 if (tutorialArrow != null) tutorialArrow.SetActive(arrowVisibleByDefault);
             }
 
-            SyncEnergyUI(true);
+            SyncEnergyUI(force: true);
+        }
+
+        /// <summary>VN: Set trạng thái controlling + đồng bộ PlayerHub (model/control + watercannon flag).</summary>
+        private void SetControlling(bool isControlling)
+        {
+            _isControlling = isControlling;
+
+            if (_playerHub != null)
+            {
+                _playerHub.SetPlayerControlAndModel(isControlling);
+                _playerHub.SetWaterCannonControl(isControlling);
+            }
         }
 
         #endregion
@@ -287,58 +330,47 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === FIRE ===
 
-        /// <summary>Bắn theo mode: Projectile hoặc Beam.</summary>
+        /// <summary>VN: Chọn logic bắn theo mode (Projectile/Beam).</summary>
         private void HandleFireByMode()
         {
-            if (_cannonInput == null) return;
+            if (_input == null) return;
 
-            switch (fireMode)
-            {
-                case CannonFireMode.Projectile:
-                    HandleProjectileFire();
-                    break;
-
-                case CannonFireMode.Beam:
-                    HandleBeamFire();
-                    break;
-            }
+            if (fireMode == CannonFireMode.Projectile) HandleProjectileFire();
+            else HandleBeamFire();
         }
 
-        /// <summary>Projectile: bấm một lần bắn một viên.</summary>
+        /// <summary>VN: Mode Projectile - bấm một lần bắn một viên.</summary>
         private void HandleProjectileFire()
         {
-            if (_cannonInput.GetFireDown())
+            if (_input.GetFireDown())
                 FireProjectile();
         }
 
-        /// <summary>Beam: bấm để start, giữ để update, nhả để stop.</summary>
+        /// <summary>VN: Mode Beam - bấm start, giữ update, nhả stop.</summary>
         private void HandleBeamFire()
         {
-            if (_cannonInput.GetFireDown())
-            {
-                if (!CanFire()) return;            // đang LOCK thì cấm bắn
-                if (!HasEnoughEnergy(0.01f)) return;
+            if (_input.GetFireDown())
+                TryStartBeam();
 
-                _isBeamFiring = true;
-                PlayMuzzleEffect();
+            if (_isBeamFiring && _input.GetFireHeld())
+                beamVfx?.UpdateBeam();
 
-                if (beamVfx != null)
-                    beamVfx.StartBeam();
-            }
-
-            if (_isBeamFiring && _cannonInput.GetFireHeld())
-            {
-                if (beamVfx != null)
-                    beamVfx.UpdateBeam();
-            }
-
-            if (_isBeamFiring && _cannonInput.GetFireUp())
-            {
+            if (_isBeamFiring && _input.GetFireUp())
                 StopBeamIfNeeded();
-            }
         }
 
-        /// <summary>Bắn projectile (có cooldown + tốn energy + có LOCK khi cạn).</summary>
+        /// <summary>VN: Start beam nếu đủ điều kiện (không LOCK + còn năng lượng).</summary>
+        private void TryStartBeam()
+        {
+            if (!CanFire()) return;
+            if (!HasEnoughEnergy(kMinBeamStartEnergy)) return;
+
+            _isBeamFiring = true;
+            PlayMuzzleEffect();
+            beamVfx?.StartBeam();
+        }
+
+        /// <summary>VN: Bắn projectile (cooldown + trừ energy + có thể LOCK khi cạn).</summary>
         public void FireProjectile()
         {
             if (projectilePrefab == null)
@@ -347,44 +379,43 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            if (!CanFire()) return; // đang LOCK thì cấm bắn
-            if (!HasEnoughEnergy(projectileEnergyCost)) return;
-            if (Time.time < _lastFireTime + fireCooldown) return;
+            fireCooldown = Mathf.Max(0f, fireCooldown);
 
-            _lastFireTime = Time.time;
+            if (!CanFire()) return;
+            if (!HasEnoughEnergy(projectileEnergyCost)) return;
+            if (Time.time < _nextFireTime) return;
+
+            _nextFireTime = Time.time + fireCooldown;
 
             ConsumeEnergy(projectileEnergyCost);
-            MarkDepletedIfNeeded(); // nếu cạn -> bật LOCK
+            MarkDepletedIfNeeded();
             SyncEnergyUI();
 
-            Vector3 muzzlePos = _muzzleTransform.position;
-            Vector3 muzzleDir = _muzzleTransform.forward;
+            Vector3 pos = _muzzle.position;
+            Vector3 dir = _muzzle.forward;
 
             PlayMuzzleEffect();
 
-            var projectile = Instantiate(projectilePrefab, muzzlePos, Quaternion.identity);
-            projectile.LaunchForward(muzzlePos, muzzleDir);
+            var projectile = Instantiate(projectilePrefab, pos, Quaternion.identity);
+            projectile.LaunchForward(pos, dir);
         }
 
-        /// <summary>Tắt beam nếu đang bắn.</summary>
+        /// <summary>VN: Stop beam nếu đang bắn (an toàn, gọi nhiều lần cũng không sao).</summary>
         private void StopBeamIfNeeded()
         {
             if (!_isBeamFiring) return;
 
             _isBeamFiring = false;
-
-            if (beamVfx != null)
-                beamVfx.StopAll();
+            beamVfx?.StopAll();
         }
 
-        /// <summary>Play VFX ở miệng súng.</summary>
+        /// <summary>VN: Play VFX ở miệng súng khi bắn.</summary>
         private void PlayMuzzleEffect()
         {
             if (muzzleCastEffect == null) return;
 
             muzzleCastEffect.gameObject.SetActive(true);
-            muzzleCastEffect.transform.position = _muzzleTransform.position;
-            muzzleCastEffect.transform.rotation = _muzzleTransform.rotation;
+            muzzleCastEffect.transform.SetPositionAndRotation(_muzzle.position, _muzzle.rotation);
 
             muzzleCastEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             muzzleCastEffect.Play();
@@ -395,7 +426,7 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === ENERGY ===
 
-        /// <summary>Tick energy: drain khi beam giữ; regen khi không drain; cạn thì LOCK tới khi full.</summary>
+        /// <summary>VN: Tick energy (drain khi beam, regen khi không drain, LOCK khi cạn tới khi full).</summary>
         private void TickEnergy(float dt)
         {
             if (maxEnergy <= 0f)
@@ -407,87 +438,82 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            bool beamHeld = _isBeamFiring && _cannonInput != null && _cannonInput.GetFireHeld();
+            bool isBeamHeld = _isBeamFiring && _input != null && _input.GetFireHeld();
 
-            // 1) Drain beam nếu đang bắn và không bị LOCK
-            if (beamHeld && !_isDepletedLock)
+            // Drain khi giữ beam và không bị LOCK.
+            if (isBeamHeld && !_isDepletedLock)
             {
                 ConsumeEnergy(beamEnergyCostPerSecond * dt);
 
-                // Nếu cạn -> LOCK + stop beam ngay
                 if (_energy <= 0f)
                 {
                     _energy = 0f;
                     _isDepletedLock = true;
                     StopBeamIfNeeded();
                 }
-            }
-            // 2) Regen (bình thường hoặc chậm nếu LOCK)
-            else
-            {
-                float regenRate = _isDepletedLock ? depletedRegenPerSecond : energyRegenPerSecond;
-                RegenerateEnergy(regenRate * dt);
 
-                // Đang LOCK thì chỉ mở lại khi FULL
-                if (_isDepletedLock && _energy >= maxEnergy)
-                {
-                    _energy = maxEnergy;
-                    _isDepletedLock = false;
-                }
+                SyncEnergyUI();
+                return;
+            }
+
+            // Regen khi không drain.
+            float regenRate = _isDepletedLock ? depletedRegenPerSecond : energyRegenPerSecond;
+            RegenerateEnergy(regenRate * dt);
+
+            // LOCK chỉ mở lại khi full.
+            if (_isDepletedLock && _energy >= maxEnergy)
+            {
+                _energy = maxEnergy;
+                _isDepletedLock = false;
             }
 
             SyncEnergyUI();
         }
 
-        /// <summary>Cho phép bắn nếu không bị LOCK.</summary>
-        private bool CanFire()
-        {
-            return !_isDepletedLock;
-        }
+        /// <summary>VN: Cho phép bắn nếu không bị LOCK.</summary>
+        private bool CanFire() => !_isDepletedLock;
 
-        /// <summary>Đủ energy để trả cost không.</summary>
-        private bool HasEnoughEnergy(float cost)
-        {
-            return _energy >= cost;
-        }
+        /// <summary>VN: Kiểm tra đủ năng lượng để trả cost hay không.</summary>
+        private bool HasEnoughEnergy(float cost) => _energy >= Mathf.Max(0f, cost);
 
-        /// <summary>Trừ energy và clamp.</summary>
+        /// <summary>VN: Trừ energy và clamp về [0..max].</summary>
         private void ConsumeEnergy(float amount)
         {
             amount = Mathf.Max(0f, amount);
             _energy = Mathf.Clamp(_energy - amount, 0f, maxEnergy);
         }
 
-        /// <summary>Cộng energy và clamp.</summary>
+        /// <summary>VN: Cộng energy và clamp về [0..max].</summary>
         private void RegenerateEnergy(float amount)
         {
             amount = Mathf.Max(0f, amount);
             _energy = Mathf.Clamp(_energy + amount, 0f, maxEnergy);
         }
 
-        /// <summary>Nếu energy đã cạn thì bật LOCK.</summary>
+        /// <summary>VN: Nếu energy đã cạn thì bật LOCK.</summary>
         private void MarkDepletedIfNeeded()
         {
-            if (_energy <= 0f)
-            {
-                _energy = 0f;
-                _isDepletedLock = true;
-            }
+            if (_energy > 0f) return;
+            _energy = 0f;
+            _isDepletedLock = true;
         }
 
-        /// <summary>Đồng bộ slider (0..1) + show/hide + tween màu fill.</summary>
+        /// <summary>VN: Đồng bộ UI slider + show/hide + tween màu fill.</summary>
         private void SyncEnergyUI(bool force = false)
         {
             if (energySlider == null) return;
 
             float normalized = (maxEnergy <= 0f) ? 0f : (_energy / maxEnergy);
             energySlider.value = normalized;
-            energySlider.gameObject.SetActive(true);
+
+            // Áp dụng đúng option "chỉ hiện khi controlling".
+            bool shouldShow = !showEnergyOnlyWhenControlling || _isControlling;
+            energySlider.gameObject.SetActive(shouldShow);
 
             UpdateEnergyFillColor(normalized, force);
         }
 
-        /// <summary>Update màu fill theo mức năng lượng và tween cho mượt.</summary>
+        /// <summary>VN: Tween đổi màu fill theo mức năng lượng (tránh restart mỗi frame).</summary>
         private void UpdateEnergyFillColor(float normalized, bool force)
         {
             if (energyFillImage == null) return;
@@ -498,15 +524,14 @@ namespace PLAYERTWO.PlatformerProject
             {
                 KillFillColorTween();
                 energyFillImage.color = target;
-                _currentFillTargetColor = target;
+                _fillColorTarget = target;
                 return;
             }
 
-            // Tránh restart tween mỗi frame khi chưa đổi "ngưỡng màu"
-            if (target == _currentFillTargetColor)
+            if (target == _fillColorTarget)
                 return;
 
-            _currentFillTargetColor = target;
+            _fillColorTarget = target;
 
             KillFillColorTween();
             _fillColorTween = energyFillImage
@@ -514,35 +539,31 @@ namespace PLAYERTWO.PlatformerProject
                 .SetEase(Ease.OutQuad);
         }
 
-        /// <summary>Lấy màu theo mức năng lượng: Full (xanh) / ~Half (vàng) / Near empty (đỏ).</summary>
+        /// <summary>VN: Map năng lượng -> màu (xanh/vàng/đỏ theo ngưỡng).</summary>
         private Color GetEnergyColor(float normalized)
         {
-            Color fullColor = HexToColor("72C8FA");
-            Color halfColor = HexToColor("F2E63E");
-            Color lowColor = HexToColor("F2443E");
+            Color full = HexToColor("72C8FA");
+            Color half = HexToColor("F2E63E");
+            Color low = HexToColor("F2443E");
 
-            // Ngưỡng: bạn có thể chỉnh nếu muốn nhạy hơn
-            if (normalized >= 0.66f) return fullColor;
-            if (normalized >= 0.33f) return halfColor;
-            return lowColor;
+            if (normalized >= 0.66f) return full;
+            if (normalized >= 0.33f) return half;
+            return low;
         }
 
-        /// <summary>Chuyển HEX (RRGGBB) sang Color.</summary>
+        /// <summary>VN: Chuyển HEX (RRGGBB) sang Color Unity.</summary>
         private Color HexToColor(string hex)
         {
             if (!hex.StartsWith("#"))
                 hex = "#" + hex;
 
-            if (ColorUtility.TryParseHtmlString(hex, out Color c))
-                return c;
-
-            return Color.white;
+            return ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.white;
         }
 
-        /// <summary>Dọn tween màu fill để tránh chồng tween/leak.</summary>
+        /// <summary>VN: Kill tween đổi màu để tránh chồng tween/leak.</summary>
         private void KillFillColorTween()
         {
-            if (_fillColorTween != null && _fillColorTween.IsActive())
+            if (_fillColorTween != null)
                 _fillColorTween.Kill();
 
             _fillColorTween = null;
@@ -553,36 +574,34 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === ROTATION ===
 
-        /// <summary>Đọc input Look để xoay yaw/pitch (có clamp).</summary>
+        /// <summary>VN: Đọc input Look để xoay yaw/pitch (có clamp).</summary>
         private void HandleRotationInput()
         {
-            if (_cannonInput == null || yawPivot == null || pitchPivot == null)
+            if (_input == null || yawPivot == null || pitchPivot == null)
                 return;
 
-            Vector2 look = _cannonInput.GetLookAxisRaw();
-            if (look.sqrMagnitude < 0.0001f)
+            Vector2 look = _input.GetLookAxisRaw();
+            if (look.sqrMagnitude < kLookDeadZoneSqr)
                 return;
 
             float dt = Time.deltaTime;
 
             // Yaw
-            _currentYaw += look.x * yawSpeed * dt;
+            _yaw += look.x * yawSpeed * dt;
             if (clampYaw)
-                _currentYaw = Mathf.Clamp(_currentYaw, minYaw, maxYaw);
+                _yaw = Mathf.Clamp(_yaw, minYaw, maxYaw);
 
             // Pitch
             float pitchDelta = -look.y * pitchSpeed * dt;
             if (invertY) pitchDelta = -pitchDelta;
 
-            _currentPitch += pitchDelta;
-            _currentPitch = Mathf.Clamp(_currentPitch, minPitch, maxPitch);
+            _pitch = Mathf.Clamp(_pitch + pitchDelta, minPitch, maxPitch);
 
-            // Apply
-            yawPivot.localRotation = Quaternion.Euler(0f, _currentYaw, 0f);
-            pitchPivot.localRotation = Quaternion.Euler(_currentPitch, 0f, 0f);
+            yawPivot.localRotation = Quaternion.Euler(0f, _yaw, 0f);
+            pitchPivot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
         }
 
-        /// <summary>Chuẩn hoá góc về [-180..180].</summary>
+        /// <summary>VN: Chuẩn hoá góc về [-180..180] để clamp ổn định.</summary>
         private float NormalizeAngle(float angle)
         {
             angle %= 360f;
@@ -595,7 +614,7 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === GIZMOS ===
 
-        /// <summary>Vẽ gizmo hướng miệng súng khi chọn object.</summary>
+        /// <summary>VN: Vẽ gizmo hướng miệng súng khi chọn object.</summary>
         private void OnDrawGizmosSelected()
         {
             Transform gizmoMuzzle =

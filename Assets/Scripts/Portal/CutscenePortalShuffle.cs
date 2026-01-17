@@ -4,58 +4,72 @@ using UnityEngine;
 using DG.Tweening;
 using PLAYERTWO.PlatformerProject;
 
+/// <summary>
+/// Handles portal shuffle cutscene logic (highlight → shuffle → drop).
+/// </summary>
 public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffle>
 {
     //─────────────────────────────────────────────────────────────
-    #region === Inspector Fields ===
+    #region === INSPECTOR REFERENCES ===
 
-    [Header("Portal Group Settings")]
-    [SerializeField] private Transform portalGroup;                   // Parent của toàn bộ portal
-    [SerializeField] private List<PortalAuxiliary> portals;           // Danh sách portal
-    [SerializeField] private PortalAuxiliary correctPortal;           // Portal đúng (dùng để highlight)
+    [Header("Portal References")]
+    [SerializeField] private Transform portalGroup;                 // Parent of all portals
+    [SerializeField] private List<PortalAuxiliary> portals;         // All portals
+    [SerializeField] private PortalAuxiliary correctPortal;         // Correct portal (highlighted)
 
-    [Header("Dissolve Plane Settings")]
-    [SerializeField] private Transform dissolvePlane;                 // Plane dùng để cắt/dissolve
-    [SerializeField] private float dissolvePlaneDuration = 5f;        // Thời gian plane rơi từ 24 → -2
+    [Header("Dissolve Plane")]
+    [SerializeField] private Transform dissolvePlane;
+    [SerializeField] private float dissolvePlaneDuration = 5f;
 
     [Header("Shuffle Settings")]
-    [SerializeField] private int shuffleCount = 5;                    // Số lần tráo portal
-    [SerializeField] private float shuffleDuration = 1.2f;            // Thời gian mỗi cú tráo
+    [SerializeField] private int shuffleCount = 5;
+    [SerializeField] private float shuffleDuration = 1.2f;
 
-    [Header("Portal Drop Settings")]
-    [SerializeField] private float moveDuration = 1.0f;               // Thời gian hạ portalGroup xuống ngang player
+    [Header("Portal Drop")]
+    [SerializeField] private float moveDuration = 1.0f;
+
+    [Header("Boss Reference")]
+    [SerializeField] private BossHealth bossHealth;
 
     #endregion
     //─────────────────────────────────────────────────────────────
 
+
     //─────────────────────────────────────────────────────────────
-    #region === Private Fields ===
+    #region === RUNTIME STATE ===
 
     private CameraCutsceneController camController;
 
-    private float originalPortalY;                                    // Y gốc của portalGroup
-    private List<Vector3> originalPositions;                          // Lưu vị trí portal trước shuffle
+    private float originalPortalY;                  // Original Y of portal group
+    private List<Vector3> originalPositions;        // Cached portal positions
 
-    private const float PLANE_START_Y = 24f;
-    private const float PLANE_END_Y = -2f;
-    private const float TRIGGER_Y = 15f;
-
-    private bool hasTriggeredHighlight = false;
+    private bool hasTriggeredHighlight;
 
     #endregion
     //─────────────────────────────────────────────────────────────
 
 
+    //─────────────────────────────────────────────────────────────
+    #region === CONSTANTS ===
+
+    private const float PLANE_START_Y = 24f;
+    private const float PLANE_END_Y = -2f;
+    private const float PLANE_TRIGGER_Y = 15f;
+
+    #endregion
+    //─────────────────────────────────────────────────────────────
+
 
     //─────────────────────────────────────────────────────────────
-    #region === Unity Lifecycle ===
+    #region === UNITY LIFECYCLE ===
 
+    /// <summary>
+    /// Cache references and initial values.
+    /// </summary>
     private void Start()
     {
-        // Lấy camera controller
         camController = CameraCutsceneController.Instance;
 
-        // Lưu vị trí Y của portalGroup
         if (portalGroup != null)
             originalPortalY = portalGroup.position.y;
     }
@@ -64,12 +78,11 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
     //─────────────────────────────────────────────────────────────
 
 
-
     //─────────────────────────────────────────────────────────────
     #region === CUTSCENE FLOW ===
 
     /// <summary>
-    /// Public API để chạy CutsceneFlow từ bên ngoài.
+    /// Public entry point to play the cutscene.
     /// </summary>
     public void StartCutsceneFlow()
     {
@@ -78,38 +91,35 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
     }
 
     /// <summary>
-    /// Chuỗi cutscene chính: khoá player → cam special → dissolve → highlight → shuffle → drop → energy → trả cam → mở player.
+    /// Main cutscene sequence.
     /// </summary>
     private IEnumerator CutsceneFlow()
     {
-        PlayerHub.Instance.LockPlayer(true);                                          // Khoá điều khiển
-        yield return camController.FocusTo(BossCamType.Special);                      // Chuyển camera
+        PlayerHub.Instance.LockPlayer(true);
+        yield return camController.FocusTo(BossCamType.Special);
 
-        yield return LowerDissolvePlane();                                            // Rơi plane + trigger highlight
-        correctPortal.HideHighlight();                                                // Tắt highlight trước shuffle
+        yield return LowerDissolvePlane();
+        correctPortal.HideHighlight();
 
-        yield return ShufflePortals();                                                // Shuffle
+        yield return ShufflePortals();
+        yield return MovePortalGroupToPlayerHeight();
 
-        yield return MovePortalGroupToPlayerHeight();                                 // Hạ group xuống
-
-        foreach (var p in portals)                                                    // Bật hiệu ứng năng lượng
+        foreach (var p in portals)
             p.ShowEnergy();
 
-        yield return camController.ReleaseToPlayer();                                 // Trả camera lại
-
-        PlayerHub.Instance.LockPlayer(false);                                         // Mở điều khiển
+        yield return camController.ReleaseToPlayer();
+        PlayerHub.Instance.LockPlayer(false);
     }
 
     #endregion
     //─────────────────────────────────────────────────────────────
 
 
-
     //─────────────────────────────────────────────────────────────
-    #region === DISSOLVE PLANE LOGIC ===
+    #region === DISSOLVE PLANE ===
 
     /// <summary>
-    /// Hạ plane từ 24 xuống -2, và khi plane chạm Y=15 thì bắt đầu highlight chính xác portal đúng.
+    /// Drops the dissolve plane and triggers portal highlight.
     /// </summary>
     private IEnumerator LowerDissolvePlane()
     {
@@ -121,30 +131,29 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
             dissolvePlane.position.z
         );
 
-        Tween t = dissolvePlane.DOMoveY(PLANE_END_Y, dissolvePlaneDuration)
+        Tween tween = dissolvePlane.DOMoveY(PLANE_END_Y, dissolvePlaneDuration)
             .SetEase(Ease.Linear)
             .OnUpdate(() =>
             {
-                if (!hasTriggeredHighlight && dissolvePlane.position.y <= TRIGGER_Y)
+                if (!hasTriggeredHighlight && dissolvePlane.position.y <= PLANE_TRIGGER_Y)
                 {
                     hasTriggeredHighlight = true;
                     correctPortal.ShowHighlight();
                 }
             });
 
-        yield return t.WaitForCompletion();
+        yield return tween.WaitForCompletion();
     }
 
     #endregion
     //─────────────────────────────────────────────────────────────
 
 
-
     //─────────────────────────────────────────────────────────────
-    #region === PORTAL DROP LOGIC ===
+    #region === PORTAL DROP ===
 
     /// <summary>
-    /// Hạ toàn bộ portalGroup xuống độ cao của player.
+    /// Moves portal group down to player height.
     /// </summary>
     private IEnumerator MovePortalGroupToPlayerHeight()
     {
@@ -152,7 +161,7 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
 
         Vector3 targetPos = new Vector3(
             portalGroup.position.x,
-            playerY + 2,
+            playerY + 2f,
             portalGroup.position.z
         );
 
@@ -166,12 +175,11 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
     //─────────────────────────────────────────────────────────────
 
 
-
     //─────────────────────────────────────────────────────────────
     #region === SHUFFLE LOGIC ===
 
     /// <summary>
-    /// Lưu vị trí portal lúc ban đầu.
+    /// Cache initial portal positions.
     /// </summary>
     private void CacheOriginalPositions()
     {
@@ -182,11 +190,17 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
     }
 
     /// <summary>
-    /// Shuffle portal theo đường cong (1 portal đi lên, 1 portal đi xuống).
+    /// Shuffle portals using curved swap paths.
     /// </summary>
     private IEnumerator ShufflePortals()
     {
         CacheOriginalPositions();
+
+        float duration = shuffleDuration;
+
+        // Faster shuffle in Phase 2+
+        if (bossHealth != null && bossHealth.currentPhase >= 1)
+            duration *= 0.75f;
 
         for (int i = 0; i < shuffleCount; i++)
         {
@@ -194,79 +208,71 @@ public class CutscenePortalShuffle : SingletonMonobehaviour<CutscenePortalShuffl
             int b = Random.Range(0, portals.Count);
             while (b == a) b = Random.Range(0, portals.Count);
 
-            PortalAuxiliary portalA = portals[a];
-            PortalAuxiliary portalB = portals[b];
+            SwapPortals(portals[a], portals[b], duration);
+            yield return new WaitForSeconds(duration);
 
-            Vector3 posA = portalA.transform.position;
-            Vector3 posB = portalB.transform.position;
-
-            Vector3 dir = (posB - posA).normalized;
-            Vector3 perp = Vector3.Cross(dir, Vector3.forward).normalized;
-
-            float arcWidth = 2.5f;
-            float arcHeight = 1.8f;
-
-            Vector3 center = (posA + posB) * 0.5f;
-            Vector3 midUp = center + perp * arcWidth + Vector3.up * arcHeight;
-            Vector3 midDown = center - perp * arcWidth + Vector3.down * arcHeight;
-
-            Vector3[] pathA = { posA, midUp, posB };
-            Vector3[] pathB = { posB, midDown, posA };
-
-            Tween tA = portalA.transform.DOPath(pathA, shuffleDuration, PathType.CatmullRom)
-                                        .SetEase(Ease.InOutQuad);
-
-            Tween tB = portalB.transform.DOPath(pathB, shuffleDuration, PathType.CatmullRom)
-                                        .SetEase(Ease.InOutQuad);
-
-            yield return tA.WaitForCompletion();
-
-            // Swap vị trí trong list
-            portals[a] = portalB;
-            portals[b] = portalA;
+            (portals[a], portals[b]) = (portals[b], portals[a]);
         }
+    }
+
+    /// <summary>
+    /// Animate a curved swap between two portals.
+    /// </summary>
+    private void SwapPortals(PortalAuxiliary a, PortalAuxiliary b, float duration)
+    {
+        Vector3 posA = a.transform.position;
+        Vector3 posB = b.transform.position;
+
+        Vector3 dir = (posB - posA).normalized;
+        Vector3 perp = Vector3.Cross(dir, Vector3.forward).normalized;
+
+        Vector3 center = (posA + posB) * 0.5f;
+
+        Vector3 midUp = center + perp * 2.5f + Vector3.up * 1.8f;
+        Vector3 midDown = center - perp * 2.5f + Vector3.down * 1.8f;
+
+        a.transform.DOPath(new[] { posA, midUp, posB }, duration, PathType.CatmullRom)
+                   .SetEase(Ease.InOutQuad);
+
+        b.transform.DOPath(new[] { posB, midDown, posA }, duration, PathType.CatmullRom)
+                   .SetEase(Ease.InOutQuad);
     }
 
     #endregion
     //─────────────────────────────────────────────────────────────
 
-    #region === RESET LOGIC ===
+
+    //─────────────────────────────────────────────────────────────
+    #region === RESET ===
 
     /// <summary>
-    /// Reset toàn bộ hệ thống portal về trạng thái ban đầu để chạy lại cutscene.
+    /// Reset portals and cutscene state.
     /// </summary>
     public void ResetAll()
     {
-        // 1) Reset Y của PortalGroup
         if (portalGroup != null)
         {
             Vector3 pos = portalGroup.position;
             portalGroup.position = new Vector3(pos.x, originalPortalY, pos.z);
         }
 
-        // 2) Reset dissolve plane về Y = PLANE_START_Y
         if (dissolvePlane != null)
         {
-            Vector3 dp = dissolvePlane.position;
-            dissolvePlane.position = new Vector3(dp.x, PLANE_START_Y, dp.z);
+            Vector3 pos = dissolvePlane.position;
+            dissolvePlane.position = new Vector3(pos.x, PLANE_START_Y, pos.z);
         }
 
-        // 3) Reset highlight
-        if (correctPortal != null)
-            correctPortal.HideHighlight();
+        correctPortal?.HideHighlight();
 
-        // 4) Tắt energy tất cả portal
         foreach (var p in portals)
             p.HideEnergy();
 
-        // 5) Reset vị trí từng portal
         if (originalPositions != null && originalPositions.Count == portals.Count)
         {
             for (int i = 0; i < portals.Count; i++)
                 portals[i].transform.position = originalPositions[i];
         }
 
-        // 6) Reset lại trigger để highlight lần sau
         hasTriggeredHighlight = false;
     }
 
