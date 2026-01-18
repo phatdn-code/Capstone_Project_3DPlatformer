@@ -2,7 +2,13 @@
 {
     public enum CannonFireMode
     {
-        Projectile,   // bắn đạn nước
-        Beam          // bắn tia nước (giữ nút)
+        Projectile,
+        Beam
+    }
+
+    public enum ParticleDamageMode
+    {
+        SprayTrigger,
+        BulletTrigger
     }
 }

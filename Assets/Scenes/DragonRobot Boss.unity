@@ -318,12 +318,6 @@ MonoBehaviour:
   meteorRainHeightY: 0
   initialPosition: {x: 0, y: 0, z: 0}
   initialRotation: {x: 0, y: 0, z: 0, w: 0}
---- !u!4 &5238353 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6315736039138470002, guid: 7991163288cb15946b0a74466d801d12,
-    type: 3}
-  m_PrefabInstance: {fileID: 1913336418}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &15883019
 GameObject:
   m_ObjectHideFlags: 0
@@ -1435,6 +1429,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &217309409 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1394702443019086240, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
+    type: 3}
+  m_PrefabInstance: {fileID: 1982066933482028606}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &241219113
 GameObject:
   m_ObjectHideFlags: 0
@@ -1919,14 +1919,49 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
         type: 3}
+      propertyPath: TriggerModule.enter
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      propertyPath: TriggerModule.inside
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      propertyPath: TriggerModule.enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      propertyPath: TriggerModule.radiusScale
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
       propertyPath: InitialModule.startSize.scalar
       value: 2.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      propertyPath: TriggerModule.colliderQueryMode
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
         type: 3}
       propertyPath: InitialModule.startSize.minScalar
       value: 2.35
       objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      propertyPath: TriggerModule.primitives.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 649263035891443019, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      propertyPath: 'TriggerModule.primitives.Array.data[0]'
+      value: 
+      objectReference: {fileID: 217309409}
     - target: {fileID: 1666801327230365016, guid: d52480c911dddbf428b8003202dd069d,
         type: 3}
       propertyPath: InitialModule.startSize.scalar
@@ -2020,7 +2055,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3367485168064741230, guid: d52480c911dddbf428b8003202dd069d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 293271132}
   m_SourcePrefab: {fileID: 100100000, guid: d52480c911dddbf428b8003202dd069d, type: 3}
 --- !u!4 &293271122 stripped
 Transform:
@@ -2034,6 +2073,27 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 293271121}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &293271124 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3367485168064741230, guid: d52480c911dddbf428b8003202dd069d,
+    type: 3}
+  m_PrefabInstance: {fileID: 293271121}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &293271132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293271124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1c5e6c73f69d9a478b10b27e28d6a8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  damage: 1
+  hitCooldown: 0.15
 --- !u!1 &297702854
 GameObject:
   m_ObjectHideFlags: 0
@@ -4133,6 +4193,41 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1184284420}
     m_Modifications:
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: TriggerModule.enter
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: TriggerModule.inside
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: TriggerModule.enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: TriggerModule.radiusScale
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: TriggerModule.colliderQueryMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: TriggerModule.primitives.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248036650467480705, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      propertyPath: 'TriggerModule.primitives.Array.data[0]'
+      value: 
+      objectReference: {fileID: 217309409}
     - target: {fileID: 6506333175272818538, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
         type: 3}
       propertyPath: m_Name
@@ -4216,7 +4311,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1041973715052336821, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1206404372}
   m_SourcePrefab: {fileID: 100100000, guid: 0ee2b2dfef37e024caf5f842ac4e6d10, type: 3}
 --- !u!4 &621234997 stripped
 Transform:
@@ -4967,6 +5066,56 @@ PrefabInstance:
       propertyPath: stopAction
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: TriggerModule.enter
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: CollisionModule.type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: TriggerModule.inside
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: TriggerModule.enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: CollisionModule.enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: TriggerModule.radiusScale
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: TriggerModule.colliderQueryMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: CollisionModule.collisionMessages
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: TriggerModule.primitives.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7994855665934023056, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      propertyPath: 'TriggerModule.primitives.Array.data[0]'
+      value: 
+      objectReference: {fileID: 217309409}
     - target: {fileID: 8042724303822277395, guid: bcff754cfe92ff64583d2035c9c4689d,
         type: 3}
       propertyPath: looping
@@ -5025,7 +5174,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 714438733787145693, guid: bcff754cfe92ff64583d2035c9c4689d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1146939008}
   m_SourcePrefab: {fileID: 100100000, guid: bcff754cfe92ff64583d2035c9c4689d, type: 3}
 --- !u!4 &750766924 stripped
 Transform:
@@ -7424,6 +7577,21 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 750766923}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1146939008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1146939003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1c5e6c73f69d9a478b10b27e28d6a8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  damage: 1
+  hitCooldown: 0.15
 --- !u!1 &1159522402
 GameObject:
   m_ObjectHideFlags: 0
@@ -12934,6 +13102,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1205215003}
   m_CullTransparentMesh: 1
+--- !u!1 &1206404368 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1041973715052336821, guid: 0ee2b2dfef37e024caf5f842ac4e6d10,
+    type: 3}
+  m_PrefabInstance: {fileID: 621234996}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1206404372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1206404368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1c5e6c73f69d9a478b10b27e28d6a8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+  damage: 1
+  hitCooldown: 0.15
 --- !u!1 &1208640342
 GameObject:
   m_ObjectHideFlags: 0
@@ -13149,13 +13338,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shieldObject: {fileID: 935698568484544408}
+  shieldSlider: {fileID: 549532177}
   maxShieldValue: 100
   shieldValue: 100
-  shieldSlider: {fileID: 549532177}
   enableOnStart: 1
   scaleTweenDuration: 0.3
   enableEase: 27
   disableEase: 26
+  loopMaxFactor: 0.9
+  loopMinFactor: 0.7
+  loopStepDuration: 0.2
+  settleDuration: 0.2
 --- !u!1 &1276357222
 GameObject:
   m_ObjectHideFlags: 0
@@ -16673,11 +16866,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1646852430}
     m_Modifications:
-    - target: {fileID: 2842397877948668716, guid: 7991163288cb15946b0a74466d801d12,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.025
-      objectReference: {fileID: 0}
     - target: {fileID: 2927307018972412363, guid: 7991163288cb15946b0a74466d801d12,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -16733,11 +16921,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: WaterBeam
       objectReference: {fileID: 0}
-    - target: {fileID: 8369116964179515067, guid: 7991163288cb15946b0a74466d801d12,
-        type: 3}
-      propertyPath: bodyRoot
-      value: 
-      objectReference: {fileID: 5238353}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

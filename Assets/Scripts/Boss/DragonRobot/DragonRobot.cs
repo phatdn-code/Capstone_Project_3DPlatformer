@@ -126,6 +126,7 @@ namespace PLAYERTWO.PlatformerProject
         private BossTelegraphGrowFromGround bossTelegraph;
         private Coroutine attackRoutine;
         private Coroutine attackTimeLimitRoutine;
+        private Coroutine _blastAimRoutine;
 
         #endregion
         //────────────────────────────────────────────────────────────-
@@ -272,25 +273,46 @@ namespace PLAYERTWO.PlatformerProject
             if (_stopAttackingRequested) return;
             _stopAttackingRequested = true;
 
+            // 1) Stop timer giới hạn thời gian đánh
             if (attackTimeLimitRoutine != null)
             {
                 StopCoroutine(attackTimeLimitRoutine);
                 attackTimeLimitRoutine = null;
             }
 
-            // Stop attack coroutine
+            // 2) Stop vòng attack chính
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
                 attackRoutine = null;
             }
 
+            // 3) Stop coroutine aim của Blast (coroutine con chạy độc lập)
+            if (_blastAimRoutine != null)
+            {
+                StopCoroutine(_blastAimRoutine);
+                _blastAimRoutine = null;
+            }
+
+            // 4) Kill tween đang chạy (tránh tween “kéo” boss trong lúc retreat/recharge)
+            transform.DOKill();
+            if (visualRoot != null) visualRoot.DOKill();
+
+            // 5) Stop telegraph nếu đang bật (tránh kẹt do chưa tới Animation Event)
+            bossTelegraph?.StopTelegraph();
+
+            // 6) Reset state + tắt VFX
             ResetBlastState();
             DisableAllVisualEffects();
 
+            // 7) Tắt các trạng thái animation liên quan skill
             dragonAnim?.SetFlameThrower(false);
             dragonAnim?.SetMeteorRain(false);
+
+            // 8) (khuyên thêm) đảm bảo không bị kẹt anim di chuyển
+            dragonAnim?.SetMoving(false);
         }
+
 
         /// <summary>
         /// Khi đủ ngưỡng damage: dừng attack + play take damage, retreat sẽ do Animation Event gọi.
@@ -337,10 +359,18 @@ namespace PLAYERTWO.PlatformerProject
             if (_isRetreating) return;
             _isRetreating = true;
 
-            if (zoneManager == null) { _isRetreating = false; return; }
+            if (zoneManager == null)
+            {
+                _isRetreating = false;
+                return;
+            }
 
             Transform entry = zoneManager.GetCurrentZoneBossEntryPoint();
-            if (entry == null) return;
+            if (entry == null)
+            {
+                _isRetreating = false;
+                return;
+            }
 
             transform.DOKill();
             if (visualRoot != null) visualRoot.DOKill();
@@ -349,7 +379,11 @@ namespace PLAYERTWO.PlatformerProject
             Vector3 end = entry.position;
 
             float distance = Vector3.Distance(start, end);
-            if (distance <= 0.001f) return;
+            if (distance <= 0.001f)
+            {
+                FinishRetreat();
+                return;
+            }
 
             dragonAnim?.SetMoving(true);
 
@@ -359,26 +393,35 @@ namespace PLAYERTWO.PlatformerProject
             transform.DOMove(end, unitsPerSecond)
                      .SetSpeedBased(true)
                      .SetEase(moveEase)
-                     .OnComplete(() =>
-                     {
-                         dragonAnim?.SetMoving(false);
-
-                         Vector3 lookPoint = zoneManager.GetCurrentZoneFacingPoint();
-                         FaceTowards(lookPoint);
-
-                         bool force = false;
-
-                         if (zoneManager.IsCurrentZoneCorrectZone())
-                             force = true;
-
-                         BeginShieldRechargeAfterRetreat(force);
-                         _isRetreating = false;
-                     });
+                     .OnComplete(FinishRetreat);
         }
+
+
+        /// <summary>
+        /// VN: Kết thúc retreat (tắt moving, quay về facing point, bắt đầu hồi shield, mở cờ retreat).
+        /// </summary>
+        private void FinishRetreat()
+        {
+            dragonAnim?.SetMoving(false);
+
+            if (zoneManager == null)
+            {
+                _isRetreating = false;
+                return;
+            }
+
+            Vector3 lookPoint = zoneManager.GetCurrentZoneFacingPoint();
+            FaceTowards(lookPoint);
+
+            bool force = zoneManager.IsCurrentZoneCorrectZone();
+            BeginShieldRechargeAfterRetreat(force);
+
+            _isRetreating = false;
+        }
+
 
         /// <summary>
         /// Về tới entry point xong: bật anim shield=true, gọi shield hồi đầy.
-        /// Đầy shield thì anim shield=false.
         /// </summary>
         private void BeginShieldRechargeAfterRetreat(bool forceRechargeToFull)
         {
@@ -402,22 +445,33 @@ namespace PLAYERTWO.PlatformerProject
 
             _isShieldRecharging = true;
             _isDamageImmuneThisRound = true;
+
+            // VN: Bật anim shield + cho shield VFX loop scale khi đang hồi
             dragonAnim?.SetShield(true);
+
+            // VN: đảm bảo shield object đang active rồi bắt đầu loop 0.7 <-> 0.5
+            shieldControl.Enable(false);
+            shieldControl.StartRechargeLoop(false);
 
             shieldControl.StartRechargeToFull(2f, () =>
             {
+                // VN: Đầy shield -> dừng loop và về scale gốc
+                shieldControl.StopRechargeLoopToOriginal(false);
+
                 if (!shieldControl.IsActive)
                     shieldControl.Enable(false);
 
+                // VN: Tắt trạng thái shield trên animator
                 dragonAnim?.SetShield(false);
-                _isDamageImmuneThisRound = false;
 
+                _isDamageImmuneThisRound = false;
                 _isShieldRecharging = false;
 
                 if (zoneManager != null)
                     zoneManager.RunZoneTransition();
             });
         }
+
 
         #endregion
         //─────────────────────────────────────────────────────────────
@@ -789,19 +843,19 @@ namespace PLAYERTWO.PlatformerProject
                 switch (index)
                 {
                     case 0:
-                        yield return StartCoroutine(FlameThrowerRoutine());
+                        yield return FlameThrowerRoutine();
                         break;
 
                     case 1:
-                        yield return StartCoroutine(BlastAttackRoutine());
+                        yield return BlastAttackRoutine();
                         break;
 
                     case 2:
-                        yield return StartCoroutine(MeteorAttackRoutine());
+                        yield return MeteorAttackRoutine();
                         break;
 
                     case 3:
-                        yield return StartCoroutine(MeteorRainAttackRoutine());
+                        yield return MeteorRainAttackRoutine();
                         break;
                 }
 
@@ -1011,19 +1065,23 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private void BeginNextBlastShot()
         {
-            if (!isBlastSequenceActive)
-                return;
+            if (!isBlastSequenceActive) return;
 
             if (blastShotsDone >= blastFireballCount)
             {
-                // Đã đủ số phát → kết thúc chuỗi blast
                 isBlastSequenceActive = false;
                 return;
             }
 
-            // Bắt đầu 1 vòng: ngắm → anim → event bắn
-            StartCoroutine(BeginBlastShotAfterAim());
+            if (_blastAimRoutine != null)
+            {
+                StopCoroutine(_blastAimRoutine);
+                _blastAimRoutine = null;
+            }
+
+            _blastAimRoutine = StartCoroutine(BeginBlastShotAfterAim());
         }
+
 
         /// <summary>
         /// Pha "ngắm": xoay theo Player trong blastAimDuration,
@@ -1033,7 +1091,6 @@ namespace PLAYERTWO.PlatformerProject
         {
             float timer = 0f;
 
-            // Pha ngắm – cho phép xoay về Player
             while (timer < blastAimDuration && isBlastSequenceActive)
             {
                 if (!isBlastRotLocked && player != null)
@@ -1043,22 +1100,20 @@ namespace PLAYERTWO.PlatformerProject
                 yield return null;
             }
 
-            if (!isBlastSequenceActive)
-                yield break;
+            if (!isBlastSequenceActive) yield break;
+            if (_stopAttackingRequested) yield break;   // <-- thêm dòng này
 
-            // Bắt đầu animation Blast cho phát này: từ đây không cho xoay nữa
             isBlastRotLocked = true;
             dragonAnim?.PlayBlastAttack();
 
-            // Optional: chờ ước chừng thời gian animation 1 phát
             float animTimer = 0f;
             while (animTimer < blastShotAnimDuration && isBlastSequenceActive)
             {
-                // Trong lúc anim: không xoay vì isBlastRotLocked = true
                 animTimer += Time.deltaTime;
                 yield return null;
             }
         }
+
 
         /// <summary>
         /// Animation Event: bắn ra 1 quả cầu lửa cho Blast,

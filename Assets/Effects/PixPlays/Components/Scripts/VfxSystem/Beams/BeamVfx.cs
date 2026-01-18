@@ -40,7 +40,6 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Hit Detection")]
         [Tooltip("Độ dày của tia beam (SphereCast).")]
         [SerializeField] private float hitRadius = 0.35f;
-
         [SerializeField] private LayerMask hitMask = ~0;
 
         [Header("Anti Penetration (VFX)")]
