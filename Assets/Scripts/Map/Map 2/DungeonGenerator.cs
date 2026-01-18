@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 public class DungeonGenerator : MonoBehaviour
 {
     public int roomLength = 10; // số phòng theo chiều dài
-    public float roomSize = 30f; // đúng bằng size prefab
+    public float roomSize = 59.05f; // đúng bằng size prefab
     public int maxRoomCount = 30;
     public GameObject roomPrefab;
     public enum CellType { Empty, Room}
