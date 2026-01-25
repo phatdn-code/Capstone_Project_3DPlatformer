@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using System.Collections;
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class DungeonGenerator : MonoBehaviour
     public enum CellType { Empty, Room}
     [SerializeField] private DungeonSO dungeonDataSO;
 
-    private int minRoomCount = 4;
+    private int minRoomCount = 10;
     private int roomCount = 0;
     private CellType[,] dungeons;
     private List<Vector2Int> roomList = new List<Vector2Int>();
@@ -52,13 +53,13 @@ public class DungeonGenerator : MonoBehaviour
         int indexX = Random.Range(0, roomLength);
         int indexY = Random.Range(0, roomLength);
         dungeonDataSO.startIndex = new Vector2Int(indexX, indexY);
-        SpawnRoom(dungeonDataSO.startIndex);
+        GameObject room = SpawnRoom(dungeonDataSO.startIndex);
         roomCount--;
-        NextGenerate(dungeons[indexX, indexY], dungeonDataSO.startIndex);
+        StartCoroutine(NextGenerateCoroutine(dungeonDataSO.startIndex,room));
     }
 
 
-    void NextGenerate(CellType lastCellType, Vector2Int index)
+    void NextGenerate(Vector2Int index, GameObject room)
     {
         if (roomCount <= 0) return;
         Vector2Int[] availableDirection = CheckDirection(index);
@@ -66,22 +67,41 @@ public class DungeonGenerator : MonoBehaviour
         else
         {
             int count = Random.Range(1, availableDirection.Length + 1);
-            if (count <= availableDirection.Length)
+            for (int i = availableDirection.Length - 1; i > 0; i--) //shuffle
             {
-                for (int i = availableDirection.Length - 1; i > 0; i--) //shuffle
-                {
-                    int j = Random.Range(0, i + 1);
-                    (availableDirection[i], availableDirection[j]) = (availableDirection[j], availableDirection[i]);
-                }
+                int j = Random.Range(0, i + 1);
+                (availableDirection[i], availableDirection[j]) = (availableDirection[j], availableDirection[i]);
             }
             for (int i = 0; i < count; i++)
             {
                 roomCount--;
                 if (roomCount < 0) return;
-                SpawnRoom(availableDirection[i]);
-                NextGenerate(dungeons[availableDirection[i].x, availableDirection[i].y], availableDirection[i]);
+                SetDirectionDoorActive(room, availableDirection[i] - index);
+                GameObject newRoom = SpawnRoom(availableDirection[i]);
+                SetDirectionDoorActive(newRoom, index - availableDirection[i]);
+                StartCoroutine(NextGenerateCoroutine(availableDirection[i], newRoom));
             }
         }
+    }
+
+    IEnumerator NextGenerateCoroutine(Vector2Int index, GameObject room)
+    {
+        yield return new WaitForSeconds(0.5f);
+        NextGenerate(index,room);
+    }
+
+    void SetDirectionDoorActive(GameObject room,Vector2Int dir )
+    {
+        if ((room == null) || (dir == Vector2Int.zero)) return;
+        room.GetComponent<RoomGenerator>().AddActiveDoor(DoorDir(dir));
+    }
+    int DoorDir(Vector2Int dir)
+    {
+        if(dir == Vector2Int.up) return 0;
+        else if (dir == Vector2Int.down) return 1;
+        else if (dir == Vector2Int.left) return 2;
+        else if (dir == Vector2Int.right) return 3;
+        else return -1;
     }
 
     bool InBounds(Vector2Int pos)
@@ -103,17 +123,16 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         Vector2Int[] availableDirection = availDirs.ToArray();
-
         return availableDirection;
     }
-    void SpawnRoom(Vector2Int pos)
+    GameObject SpawnRoom(Vector2Int pos)
     {
-        if (!InBounds(pos)) return;
-        if (dungeons[pos.x, pos.y] != CellType.Empty) return;
+        if (!InBounds(pos)) return null;
+        if (dungeons[pos.x, pos.y] != CellType.Empty) return null;
 
         dungeons[pos.x, pos.y] = CellType.Room;
         roomList.Add(pos);
 
-        Instantiate(roomPrefab, new Vector3(pos.x * roomSize, 0, pos.y * roomSize), Quaternion.identity, transform);
+        return Instantiate(roomPrefab, new Vector3(pos.x * roomSize, 0, pos.y * roomSize), Quaternion.identity, transform);
     }
 }
