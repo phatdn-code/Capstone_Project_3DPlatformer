@@ -186,14 +186,19 @@ namespace PLAYERTWO.PlatformerProject
             if (BossHealth != null)
             {
                 _lastHpSnapshot = BossHealth.CurrentHealth;
+
                 BossHealth.OnHealthChanged += HandleBossHealthChanged;
+                BossHealth.OnBossDefeated.AddListener(HandleBossDefeated);
             }
         }
 
         private void OnDestroy()
         {
             if (BossHealth != null)
+            {
                 BossHealth.OnHealthChanged -= HandleBossHealthChanged;
+                BossHealth.OnBossDefeated.RemoveListener(HandleBossDefeated);
+            }
         }
 
         /// <summary>Override behavior boss (hiện chưa dùng).</summary>
@@ -202,6 +207,18 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
         //─────────────────────────────────────────────────────────────
 
+
+        //─────────────────────────────────────────────────────────────
+        #region === INITIALIZATION ===
+
+        private void HandleBossDefeated()
+        {
+            if (BossHealth != null && BossHealth.isDead)
+                RequestStopAttacking();
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
 
 
         //─────────────────────────────────────────────────────────────
