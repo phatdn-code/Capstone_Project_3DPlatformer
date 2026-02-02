@@ -20,7 +20,7 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private int inactivePriority = 0;
 
         [Header("Smooth Blend Delay")]
-        [SerializeField] private int keepPreviousFrames = 5;     // giữ camera cũ trong X frame
+        [SerializeField] private int keepPreviousFrames = 5;
 
         #endregion
         //─────────────────────────────────────────────
