@@ -112,7 +112,7 @@ namespace PLAYERTWO.PlatformerProject
             CacheReferences();
             CacheInitialAngles();
 
-            SetControlling(false);
+            SetControlling(false, false);
             SetTutorialState(inTrigger: false);
 
             InitEnergy();
@@ -314,16 +314,20 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>VN: Set trạng thái controlling + đồng bộ PlayerHub (model/control + watercannon flag).</summary>
-        private void SetControlling(bool isControlling)
+        private void SetControlling(bool isControlling, bool affectPlayer = true)
         {
             _isControlling = isControlling;
 
-            if (_playerHub != null)
-            {
-                _playerHub.SetPlayerControlAndModel(isControlling);
-                _playerHub.SetWaterCannonControl(isControlling);
-            }
+            if (_playerHub == null)
+                _playerHub = PlayerHub.Instance;
+
+            if (_playerHub == null) return;
+
+            _playerHub.SetWaterCannonControl(isControlling);
+
+            if (affectPlayer) _playerHub.SetPlayerControlAndModel(isControlling);
         }
+
 
         #endregion
 

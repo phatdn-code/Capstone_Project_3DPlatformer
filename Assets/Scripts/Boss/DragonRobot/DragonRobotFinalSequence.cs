@@ -11,6 +11,7 @@ namespace PLAYERTWO.PlatformerProject
     {
         #region Inspector
 
+        // Các tham chiếu cần thiết từ Unity Editor
         [Header("Refs")]
         [SerializeField] private WaterCannon waterCannon;
 
@@ -38,13 +39,18 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float cannonScaleTo = 0.15f;
         [SerializeField, Min(0f)] private float cannonScaleDuration = 0.25f;
 
+        [Header("Explosion Effect on Death")]
+        [SerializeField] private GameObject explosionEffect;
+        [SerializeField] private float explosionDuration = 3f;
+
         [Header("Boss Camera (khi trúng phát cuối)")]
-        [SerializeField, Min(0f)] private float bossCamHoldTime = 5f;
+        [SerializeField, Min(0f)] private float bossCamHoldTime = 3f;
 
         #endregion
 
         #region Runtime Cache
 
+        // Các tham chiếu cần thiết trong runtime
         private BossCore m_boss;
         private DragonRobot m_dragon;
 
@@ -52,6 +58,7 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Runtime State
 
+        // Trạng thái trong runtime
         private int m_cutsceneWaterHitCount;
         private bool m_listenCutsceneWaterHits;
 
@@ -63,14 +70,18 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Unity Callbacks
 
-        /// <summary>VN: Cache component để dùng lại, tránh GetComponent nhiều lần.</summary>
+        /// <summary>
+        /// VN: Cache component để dùng lại, tránh GetComponent nhiều lần.
+        /// </summary>
         private void Start()
         {
             m_boss = GetComponent<BossCore>();
             m_dragon = GetComponent<DragonRobot>();
         }
 
-        /// <summary>VN: An toàn - reset camera/tween/state khi object bị disable giữa chừng.</summary>
+        /// <summary>
+        /// VN: An toàn - reset camera/tween/state khi object bị disable giữa chừng.
+        /// </summary>
         private void OnDisable()
         {
             SetFinalCameraActive(false);
@@ -89,27 +100,28 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Final Sequence Flow
 
-        /// <summary>VN: Luồng chính: disable cannon khác -> fade -> setup -> finalCam -> bắn -> move player -> tắt player.</summary>
+        /// <summary>
+        /// VN: Luồng chính: disable cannon khác -> fade -> setup -> finalCam -> bắn -> move player -> tắt player.
+        /// </summary>
         public override IEnumerator ExecuteFinalSequence()
         {
-            // ✅ Vừa vào FinalSequence: tắt các cannon trong mảng
             DisableCannonsForFinal();
+
+            PlayerHub.Instance?.SetPlayerControlAndModel(true);
 
             if (m_boss != null)
                 m_boss.IsInCutscene = true;
 
-            // Fade để che màn hình khi setup/teleport
+            m_dragon?.EnterFinalSequenceState();
+
             yield return RunFadeAndSetup();
 
-            // Bắn burstShots phát (hit được báo qua NotifyCutsceneWaterHit)
             yield return FireBurstAtDragon();
 
-            // Sau khi boss cam hold xong (nếu có), mới chạy tiếp các đoạn này
             MovePlayerToFinalPose();
             SetFinalCameraActive(false);
 
-            if (PlayerHub.Instance != null)
-                PlayerHub.Instance.SetPlayerControlAndModel(false);
+            PlayerHub.Instance?.SetPlayerControlAndModel(false);
         }
 
         #endregion
@@ -127,35 +139,28 @@ namespace PLAYERTWO.PlatformerProject
             if (fader == null)
             {
                 ActivateWaterCannonAndRepositionBoss();
-
-                // ✅ Không có fade: vẫn bật cam trước rồi tween
                 SetFinalCameraActive(true);
                 yield return null;
                 yield return TweenCannonScaleIfNeeded();
-
                 yield break;
             }
 
             fader.SetAlpha(0f);
 
-            // FadeOut -> alpha lên 1
             yield return FadeOut(fader);
 
-            // Setup lúc đang đen
-            ActivateWaterCannonAndRepositionBoss();
+            SetFinalCameraActive(true);
+            yield return null;
 
-            // FadeIn -> alpha về 0
+            ActivateWaterCannonAndRepositionBoss();
             yield return FadeIn(fader);
 
-            // ✅ Alpha = 0: bật FinalCam trước
-            SetFinalCameraActive(true);
-            yield return null; // cho Cinemachine update 1 frame
-
-            // ✅ rồi mới scale cannon
             yield return TweenCannonScaleIfNeeded();
         }
 
-        /// <summary>VN: FadeOut tới alpha = 1.</summary>
+        /// <summary>
+        /// VN: FadeOut tới alpha = 1.
+        /// </summary>
         private static IEnumerator FadeOut(Fader fader)
         {
             bool done = false;
@@ -163,7 +168,9 @@ namespace PLAYERTWO.PlatformerProject
             yield return new WaitUntil(() => done);
         }
 
-        /// <summary>VN: FadeIn tới alpha = 0.</summary>
+        /// <summary>
+        /// VN: FadeIn tới alpha = 0.
+        /// </summary>
         private static IEnumerator FadeIn(Fader fader)
         {
             bool done = false;
@@ -171,26 +178,26 @@ namespace PLAYERTWO.PlatformerProject
             yield return new WaitUntil(() => done);
         }
 
-        /// <summary>VN: Bật WaterCannon + teleport boss về finalBossPose (thường gọi lúc đang đen).</summary>
+        /// <summary>
+        /// VN: Bật WaterCannon + teleport boss về finalBossPose (thường gọi lúc đang đen).
+        /// </summary>
         private void ActivateWaterCannonAndRepositionBoss()
         {
             if (waterCannon != null)
             {
                 waterCannon.gameObject.SetActive(true);
                 waterCannon.enabled = true;
-
                 waterCannon.transform.DOKill();
-                waterCannon.transform.localScale = Vector3.one * cannonScaleFrom;
+                waterCannon.transform.localScale = new Vector3(cannonScaleFrom, .75f, cannonScaleFrom);
             }
 
-            if (finalBossPose == null)
-                return;
-
-            transform.DOKill();
-            transform.SetPositionAndRotation(finalBossPose.position, finalBossPose.rotation);
+            if (finalBossPose != null)
+                transform.SetPositionAndRotation(finalBossPose.position, finalBossPose.rotation);
         }
 
-        /// <summary>VN: Tween scale cannon khi alpha đã về 0.</summary>
+        /// <summary>
+        /// VN: Tween scale cannon khi alpha đã về 0.
+        /// </summary>
         private IEnumerator TweenCannonScaleIfNeeded()
         {
             if (waterCannon == null)
@@ -199,7 +206,9 @@ namespace PLAYERTWO.PlatformerProject
             var t = waterCannon.transform;
             t.DOKill();
 
-            Tween tw = t.DOScale(Vector3.one * cannonScaleTo, cannonScaleDuration)
+            Vector3 targetScale = new Vector3(cannonScaleTo, 1.5f, cannonScaleTo);
+
+            Tween tw = t.DOScale(targetScale, cannonScaleDuration)
                         .SetUpdate(true);
 
             yield return tw.WaitForCompletion();
@@ -209,10 +218,13 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Camera (Final)
 
-        /// <summary>VN: Bật/tắt camera final bằng priority.</summary>
+        /// <summary>
+        /// VN: Bật/tắt camera final bằng priority.
+        /// </summary>
         private void SetFinalCameraActive(bool active)
         {
             if (finalCam == null) return;
+
             finalCam.Priority = active ? finalCamActivePriority : finalCamInactivePriority;
         }
 
@@ -220,7 +232,9 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Cannon Disable
 
-        /// <summary>VN: Tắt các CannonInput khác để không can thiệp cutscene.</summary>
+        /// <summary>
+        /// VN: Tắt các CannonInput khác để không can thiệp cutscene.
+        /// </summary>
         private void DisableCannonsForFinal()
         {
             if (cannonsToDisable == null || cannonsToDisable.Length == 0)
@@ -284,7 +298,9 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Player
 
-        /// <summary>VN: Đưa Player về finalPlayerPose (PlayerHub nằm trên Player).</summary>
+        /// <summary>
+        /// VN: Đưa Player về finalPlayerPose (PlayerHub nằm trên Player).
+        /// </summary>
         private void MovePlayerToFinalPose()
         {
             if (finalPlayerPose == null || PlayerHub.Instance == null)
@@ -300,7 +316,9 @@ namespace PLAYERTWO.PlatformerProject
 
         #region Boss Camera (Hit cuối)
 
-        /// <summary>VN: Start routine focus BossCam (chỉ chạy 1 lần).</summary>
+        /// <summary>
+        /// VN: Start routine focus BossCam (chỉ chạy 1 lần).
+        /// </summary>
         private void StartBossCamHoldIfNeeded()
         {
             if (m_bossCamHoldRunning) return;
@@ -308,10 +326,13 @@ namespace PLAYERTWO.PlatformerProject
             StartCoroutine(BossCamHoldRoutine());
         }
 
-        /// <summary>VN: Focus camera sang Boss, giữ bossCamHoldTime giây, rồi ReleaseToPlayer và báo done.</summary>
+        /// <summary>
+        /// VN: Focus camera sang Boss, giữ bossCamHoldTime giây, rồi ReleaseToPlayer và báo done.
+        /// </summary>
         private IEnumerator BossCamHoldRoutine()
         {
             var camCtrl = CameraCutsceneController.Instance;
+
             if (camCtrl == null)
             {
                 m_bossCamHoldDone = true;
@@ -320,8 +341,17 @@ namespace PLAYERTWO.PlatformerProject
 
             Transform target = (m_dragon != null) ? m_dragon.transform : transform;
 
+            SetFinalCameraActive(false);
+
             camCtrl.AssignSpecialTarget(target);
             yield return camCtrl.FocusTo(BossCamType.Boss);
+
+            if (explosionEffect != null)
+            {
+                Instantiate(explosionEffect, transform.position, explosionEffect.transform.rotation);
+                m_dragon.DisableColliderAndModel();
+                yield return new WaitForSeconds(explosionDuration);
+            }
 
             if (bossCamHoldTime > 0f)
                 yield return new WaitForSeconds(bossCamHoldTime);
@@ -362,16 +392,11 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            // Hit cuối
             anim.PlayDeath();
 
             m_lastHitTriggered = true;
             m_listenCutsceneWaterHits = false;
 
-            // Tắt final cam để boss cam takeover
-            SetFinalCameraActive(false);
-
-            // Focus boss cam ngay lúc trúng phát cuối
             StartBossCamHoldIfNeeded();
         }
 

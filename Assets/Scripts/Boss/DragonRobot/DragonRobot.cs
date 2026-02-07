@@ -1,7 +1,8 @@
 ﻿using DG.Tweening;
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
+using Unity.Cinemachine;
+using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -60,6 +61,11 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Attack Time Limit By Portal")]
         [SerializeField] private float attackDurationCorrectPortal = 90f;
         [SerializeField] private float attackDurationWrongPortal = 60f;
+
+        [Header("Skill Camera (Meteor Skills)")]
+        [SerializeField] private CinemachineCamera skillBossCam;
+        [SerializeField] private int skillCamActivePriority = 50;
+        [SerializeField] private int skillCamInactivePriority = 0;
 
         #endregion
         //────────────────────────────────────────────────────────────-
@@ -181,6 +187,8 @@ namespace PLAYERTWO.PlatformerProject
             InitializeComponents();
             InitializePlayer();
             DisableAllVisualEffects();
+            SetSkillBossCamActive(false);
+            RemoveUnneededEntityControllerPhysics();
 
             // Cache HP snapshot để tính damage theo delta HP
             if (BossHealth != null)
@@ -190,6 +198,11 @@ namespace PLAYERTWO.PlatformerProject
                 BossHealth.OnHealthChanged += HandleBossHealthChanged;
                 BossHealth.OnBossDefeated.AddListener(HandleBossDefeated);
             }
+        }
+
+        private void OnDisable()
+        {
+            SetSkillBossCamActive(false);
         }
 
         private void OnDestroy()
@@ -243,6 +256,18 @@ namespace PLAYERTWO.PlatformerProject
                 visualRoot = transform;
         }
 
+        private void RemoveUnneededEntityControllerPhysics()
+        {
+            var controller = GetComponent<EntityController>();
+            if (controller) Destroy(controller);
+
+            var rb = GetComponent<Rigidbody>();
+            if (rb) Destroy(rb);
+
+            var cap = GetComponent<CapsuleCollider>();
+            if (cap) Destroy(cap);
+        }
+
         #endregion
         //─────────────────────────────────────────────────────────────
 
@@ -250,6 +275,21 @@ namespace PLAYERTWO.PlatformerProject
 
         //─────────────────────────────────────────────────────────────
         #region === HEALTH / DAMAGE TRACKING ===
+
+        /// <summary>
+        /// Tắt Collider và Model của Boss (DragonRobot).
+        /// </summary>
+        public void DisableColliderAndModel()
+        {
+            BoxCollider collider = GetComponent<BoxCollider>();
+
+            if (collider != null)
+                collider.enabled = false;
+
+            if (visualRoot != null)
+                visualRoot.gameObject.SetActive(false);
+        }
+
 
         /// <summary>Tính damage dựa trên thay đổi HP của boss.</summary>
         private void HandleBossHealthChanged(float hpPercent)
@@ -321,6 +361,7 @@ namespace PLAYERTWO.PlatformerProject
             // 6) Reset state + tắt VFX
             ResetBlastState();
             DisableAllVisualEffects();
+            SetSkillBossCamActive(false);
 
             // 7) Tắt các trạng thái animation liên quan skill
             dragonAnim?.SetFlameThrower(false);
@@ -328,6 +369,23 @@ namespace PLAYERTWO.PlatformerProject
 
             // 8) (khuyên thêm) đảm bảo không bị kẹt anim di chuyển
             dragonAnim?.SetMoving(false);
+        }
+
+
+        /// <summary>
+        /// VN: Dùng khi vào FinalSequence - dừng toàn bộ attack + tắt warning/VFX để tránh bị kẹt.
+        /// </summary>
+        public void EnterFinalSequenceState()
+        {
+            // RequestStopAttacking() đã Stop coroutine + DOKill + DisableAllVisualEffects()
+            RequestStopAttacking();
+
+            // Double-safe (phòng trường hợp warning bị bật ở chỗ nào đó khác)
+            if (meteorWarningEffect != null)
+                meteorWarningEffect.SetActive(false);
+
+            if (meteorRainWarningEffect != null)
+                meteorRainWarningEffect.SetActive(false);
         }
 
 
@@ -1235,6 +1293,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private IEnumerator MeteorAttackRoutine()
         {
+            SetSkillBossCamActive(true);
+
             Transform[] chosenPoints;
             float meteorHeight;
             Vector3 originalPos;
@@ -1260,6 +1320,8 @@ namespace PLAYERTWO.PlatformerProject
 
             // 3) Kết thúc Meteor → bay về vị trí/hướng ban đầu
             yield return ReturnFromMeteor(originalPos, originalRot);
+
+            SetSkillBossCamActive(false);
         }
 
         /// <summary>
@@ -1507,6 +1569,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private IEnumerator MeteorRainAttackRoutine()
         {
+            SetSkillBossCamActive(true);
+
             Transform[] rainPoints;
             float rainHeight;
             Vector3 originalPos;
@@ -1535,6 +1599,8 @@ namespace PLAYERTWO.PlatformerProject
 
             // 3) Kết thúc Meteor Rain → bay về vị trí/hướng ban đầu
             yield return ReturnFromMeteor(originalPos, originalRot);
+
+            SetSkillBossCamActive(false);
         }
 
         /// <summary>
@@ -1711,6 +1777,19 @@ namespace PLAYERTWO.PlatformerProject
 
             // Nghỉ giữa 2 lần tấn công Rain
             yield return new WaitForSeconds(meteorRainBetweenPointsDelay);
+        }
+
+        #endregion
+        //─────────────────────────────────────────────────────────────
+
+
+        //─────────────────────────────────────────────────────────────
+        #region === CAMERA ===
+
+        private void SetSkillBossCamActive(bool active)
+        {
+            if (skillBossCam == null) return;
+            skillBossCam.Priority = active ? skillCamActivePriority : skillCamInactivePriority;
         }
 
         #endregion
