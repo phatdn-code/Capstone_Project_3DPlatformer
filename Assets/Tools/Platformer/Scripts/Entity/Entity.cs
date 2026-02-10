@@ -356,26 +356,31 @@ namespace PLAYERTWO.PlatformerProject
 	public abstract class Entity<T> : Entity
 		where T : Entity<T>
 	{
-		protected IEntityContact[] m_listeners;
+        [SerializeField] protected bool autoCreateController = true;
+        protected IEntityContact[] m_listeners;
 
-		/// <summary>
-		/// Returns the State Manager of this Entity.
-		/// </summary>
-		public EntityStateManager<T> states { get; protected set; }
+        /// <summary>
+        /// Returns the State Manager of this Entity.
+        /// </summary>
+        public EntityStateManager<T> states { get; protected set; }
 
-		protected virtual void InitializeController()
-		{
-			controller = GetComponent<EntityController>();
+        protected virtual void InitializeController()
+        {
+            controller = GetComponent<EntityController>();
 
-			if (!controller)
-			{
-				controller = gameObject.AddComponent<EntityController>();
-			}
+            if (!controller)
+            {
+                if (!autoCreateController)
+                    return;
 
-			originalHeight = controller.height;
-		}
+                controller = gameObject.AddComponent<EntityController>();
+            }
 
-		protected virtual void InitializeRigidbody()
+            originalHeight = controller.height;
+        }
+
+
+        protected virtual void InitializeRigidbody()
 		{
 			m_rigidbody = gameObject.AddComponent<Rigidbody>();
 			m_rigidbody.isKinematic = true;
@@ -853,10 +858,10 @@ namespace PLAYERTWO.PlatformerProject
 
 		public override void EntityUpdate()
 		{
-			if (!controller.enabled)
-				return;
+            if (!controller || !controller.enabled)
+                return;
 
-			HandleGround();
+            HandleGround();
 			HandleCeiling();
 			UpdateGroundRotation();
 			HandleStates();
@@ -868,13 +873,16 @@ namespace PLAYERTWO.PlatformerProject
 			OnUpdate();
 		}
 
-		protected virtual void Awake()
-		{
-			InitializeController();
-			InitializeStateManager();
-		}
+        protected virtual void Awake()
+        {
+            InitializeController();
+            InitializeStateManager();
 
-		protected virtual void Update()
+            if (controller)
+                originalHeight = controller.height;
+        }
+
+        protected virtual void Update()
 		{
 			if (!manualUpdate)
 				EntityUpdate();
@@ -882,10 +890,10 @@ namespace PLAYERTWO.PlatformerProject
 
 		protected virtual void LateUpdate()
 		{
-			if (!controller.enabled)
-				return;
+            if (!controller || !controller.enabled)
+                return;
 
-			HandlePosition();
+            HandlePosition();
 		}
 	}
 }

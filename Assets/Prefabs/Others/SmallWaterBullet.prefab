@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5936790430739315531}
   - component: {fileID: 8375161180900987790}
   m_Layer: 0
-  m_Name: WaterBullet
+  m_Name: SmallWaterBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -303,6 +303,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7291645872269929908, guid: 4c0502167a8ff8b4fa96aca7213cf59b,
+        type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 8150563837669845981, guid: 4c0502167a8ff8b4fa96aca7213cf59b,
         type: 3}
       propertyPath: m_Parameters.alignment
@@ -311,7 +316,7 @@ PrefabInstance:
     - target: {fileID: 8150563837669845981, guid: 4c0502167a8ff8b4fa96aca7213cf59b,
         type: 3}
       propertyPath: m_Parameters.widthMultiplier
-      value: 1.2
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 8150563837669845981, guid: 4c0502167a8ff8b4fa96aca7213cf59b,
         type: 3}

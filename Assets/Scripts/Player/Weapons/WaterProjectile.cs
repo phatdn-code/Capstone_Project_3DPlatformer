@@ -135,6 +135,13 @@ namespace PLAYERTWO.PlatformerProject
 
             StopPhysics();
 
+            if (TryHandleDragonFinalCutsceneHit(other))
+            {
+                PlayHitVfx(hitPoint, hitNormal);
+                DisableColliderAndDespawn();
+                return;
+            }
+
             // 1) Nếu đang đụng shield active -> absorb, không trừ máu boss
             if (IsShieldActiveOnHit(other))
             {
@@ -158,6 +165,22 @@ namespace PLAYERTWO.PlatformerProject
             _rb.angularVelocity = Vector3.zero;
         }
 
+        /// <summary>
+        /// VN: Nếu đạn trúng DragonBoss đang trong final cutscene thì chỉ gọi animation (không trừ máu/logic).
+        /// </summary>
+        private bool TryHandleDragonFinalCutsceneHit(Collider other)
+        {
+            var finalSeq = other.GetComponentInParent<DragonRobotFinalSequence>();
+            if (finalSeq == null) return false;
+
+            var boss = other.GetComponentInParent<BossCore>();
+            if (boss == null || !boss.IsInCutscene) return false;
+
+            finalSeq.NotifyCutsceneWaterHit();
+            return true;
+        }
+
+
         /// <summary>Kiểm tra shield trong parent có đang active không.</summary>
         private bool IsShieldActiveOnHit(Collider other)
         {
@@ -179,7 +202,6 @@ namespace PLAYERTWO.PlatformerProject
             if (dragon != null && dragon.IsDamageImmuneThisRound) return;
 
             bossHealth.TakeDamage(damageToBoss);
-
         }
 
         /// <summary>Play VFX khi hit.</summary>
