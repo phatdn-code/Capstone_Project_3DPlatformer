@@ -7991,8 +7991,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2c3d4e5f6789012345678901234abcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_maxHealth: 100
-  m_currentHealth: 100
+  m_maxHealth: 60
+  m_currentHealth: 60
   useTakeDamageAnimGate: 1
   takeDamageAnimThreshold: 20
   enablePhase1Break: 1
@@ -8038,7 +8038,7 @@ MonoBehaviour:
   rotateToGround: 0
   rotateToPlatforms: 1
   minSpeedToFall: 5
-  maxCeilingAngle: 60
+  maxCeilingAngle: 20
   autoCreateController: 0
   enemyEvents:
     OnPlayerSpotted:
@@ -8063,12 +8063,12 @@ MonoBehaviour:
   bossName: 
   m_phases:
   - phaseName: Dragon Robot
-    maxHealth: 100
+    maxHealth: 60
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
   - phaseName: Dragon Robot
-    maxHealth: 180
+    maxHealth: 120
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
@@ -51746,7 +51746,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 239378781582670930, guid: 0e8bcceb272646a4ca5b92be999e129c, type: 3}
+  - {fileID: 2100000, guid: f075e3c91437852498dc9c3225964b09, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
