@@ -1153,10 +1153,19 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   extraAttackMode: 1
-  extraAttackRange: 1.4
+  extraAttackRange: 1.8
   extraAttackCooldown: 1
   extraUseContactDamage: 1
   extraOverrideDamage: 1
+  attackAnimConfigs:
+  - type: 0
+    mode: 0
+  enableRollAttack: 0
+  rollAttackRange: 4
+  rollTopSpeed: 8
+  rollAcceleration: 40
+  rollStopDistance: 0.4
+  rollCooldown: 2
 --- !u!114 &4568783029078397945
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1178,6 +1187,7 @@ MonoBehaviour:
   isGroundedName: Is Grounded
   onStateChangedName: On State Changed
   attackName: Attack
+  rollAttackName: Roll
   initializedName: Initialized
 --- !u!114 &4492555374647172261
 MonoBehaviour:

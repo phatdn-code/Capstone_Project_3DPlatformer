@@ -68,8 +68,8 @@ AnimatorStateTransition:
     m_ConditionEvent: Health
     m_EventTreshold: 0
   - m_ConditionMode: 3
-    m_ConditionEvent: Lateral Speed
-    m_EventTreshold: 2.5
+    m_ConditionEvent: Speed01
+    m_EventTreshold: 0.9
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -3686810894210076613}
   m_Solo: 0
@@ -96,7 +96,7 @@ AnimatorStateTransition:
     m_ConditionEvent: Health
     m_EventTreshold: 0
   - m_ConditionMode: 3
-    m_ConditionEvent: Lateral Speed
+    m_ConditionEvent: Speed01
     m_EventTreshold: 0.1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 953650485000097201}
@@ -230,6 +230,12 @@ AnimatorController:
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
   - m_Name: Vertical Speed
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
+  - m_Name: Speed01
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -373,8 +379,8 @@ AnimatorStateTransition:
     m_ConditionEvent: Health
     m_EventTreshold: 0
   - m_ConditionMode: 3
-    m_ConditionEvent: Lateral Speed
-    m_EventTreshold: 2.5
+    m_ConditionEvent: Speed01
+    m_EventTreshold: 0.9
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -3686810894210076613}
   m_Solo: 0
@@ -401,8 +407,8 @@ AnimatorStateTransition:
     m_ConditionEvent: Health
     m_EventTreshold: 0
   - m_ConditionMode: 4
-    m_ConditionEvent: Lateral Speed
-    m_EventTreshold: 1.5
+    m_ConditionEvent: Speed01
+    m_EventTreshold: 0.9
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 953650485000097201}
   m_Solo: 0
@@ -429,7 +435,7 @@ AnimatorStateTransition:
     m_ConditionEvent: Health
     m_EventTreshold: 0
   - m_ConditionMode: 4
-    m_ConditionEvent: Lateral Speed
+    m_ConditionEvent: Speed01
     m_EventTreshold: 0.1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -8409454044010430648}
@@ -485,7 +491,7 @@ AnimatorStateTransition:
     m_ConditionEvent: Health
     m_EventTreshold: 0
   - m_ConditionMode: 4
-    m_ConditionEvent: Lateral Speed
+    m_ConditionEvent: Speed01
     m_EventTreshold: 0.1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -8409454044010430648}
