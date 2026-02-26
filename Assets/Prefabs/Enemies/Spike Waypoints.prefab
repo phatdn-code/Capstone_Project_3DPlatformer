@@ -740,7 +740,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats:
-  - {fileID: 11400000, guid: 4498a8de3ba9a8d458987985239838a6, type: 2}
+  - {fileID: 11400000, guid: 40a984fff01091c458d7f75af20ba731, type: 2}
 --- !u!114 &4445458285330159721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -876,6 +876,15 @@ MonoBehaviour:
   extraAttackCooldown: 1
   extraUseContactDamage: 1
   extraOverrideDamage: 1
+  attackAnimConfigs:
+  - type: 0
+    mode: 0
+  enableRollAttack: 0
+  rollAttackRange: 4
+  rollTopSpeed: 8
+  rollAcceleration: 40
+  rollStopDistance: 0.4
+  rollCooldown: 2
 --- !u!114 &2270201375837615540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -897,6 +906,7 @@ MonoBehaviour:
   isGroundedName: Is Grounded
   onStateChangedName: On State Changed
   attackName: Attack
+  rollAttackName: Roll
   initializedName: Initialized
 --- !u!114 &8990920684212783257
 MonoBehaviour:
@@ -1050,7 +1060,7 @@ Transform:
   m_GameObject: {fileID: 5435743373014476655}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.453083, y: 2.5, z: 18.390804}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

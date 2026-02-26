@@ -2,24 +2,29 @@ using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
+    #region ===== DATA TYPES =====
+
+    /// <summary>
+    /// Cấu hình mapping tối giản: chỉ cần Type + Mode.
+    /// - NormalHit + Trigger: đánh thường (Trigger)
+    /// - RollAttack + Bool: roll (Bool)
+    /// </summary>
+    [System.Serializable]
+    public class EnemyAttackAnimConfig
+    {
+        public EnemyAttackType type = EnemyAttackType.NormalHit;
+        public AttackAnimMode mode = AttackAnimMode.Trigger;
+    }
+
+    #endregion
+
     [RequireComponent(typeof(EnemyStatsManager))]
     [RequireComponent(typeof(EnemyStateManager))]
     [RequireComponent(typeof(WaypointManager))]
     [AddComponentMenu("PLAYER TWO/Platformer Project/Enemy/Enemy")]
     public class Enemy : Entity<Enemy>
     {
-        #region ===== ENUM / SETTINGS =====
-
-        /// <summary>
-        /// Chế độ tấn công bổ sung (ngoài ContactAttack).
-        /// None: chỉ chạm là trừ máu
-        /// Animated: có thêm tấn công bằng animation
-        /// </summary>
-        public enum ExtraAttackMode
-        {
-            None,
-            Animated
-        }
+        #region ===== INSPECTOR =====
 
         [Header("Enemy Settings")]
         public EnemyEvents enemyEvents;
@@ -27,23 +32,26 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Extra Attack (Optional)")]
         public ExtraAttackMode extraAttackMode = ExtraAttackMode.None;
 
-        [Min(0.1f)]
-        public float extraAttackRange = 1.4f;
+        [Min(0.1f)] public float extraAttackRange = 1.4f;
+        [Min(0f)] public float extraAttackCooldown = 1.0f;
 
-        [Min(0f)]
-        public float extraAttackCooldown = 1.0f;
         public bool extraUseContactDamage = true;
         public int extraOverrideDamage = 1;
 
+        [Header("Attack Animation Configs")]
+        public EnemyAttackAnimConfig[] attackAnimConfigs;
+
+        [Header("Roll Attack Settings")]
+        public bool enableRollAttack = true;
+        [Min(0.1f)] public float rollAttackRange = 4.0f;
+        [Min(0.1f)] public float rollTopSpeed = 8.0f;
+        [Min(0.1f)] public float rollAcceleration = 40.0f;
+        [Min(0.05f)] public float rollStopDistance = 0.4f;
+        [Min(0f)] public float rollCooldown = 2.0f;
+
         #endregion
 
-        #region ===== RUNTIME STATE / CACHE =====
-
-        protected Collider[] m_sightOverlaps = new Collider[1024];
-
-        // Dùng để đánh dấu đang trong animation attack (để FollowState xử lý đứng lại / không trượt qua player).
-        private bool m_extraAttacking;
-        private float m_nextExtraAttackTime;
+        #region ===== REFERENCES / PROPERTIES =====
 
         /// <summary> Player mà enemy đang nhìn thấy/đang rượt. </summary>
         public Player player { get; protected set; }
@@ -57,56 +65,79 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary> Health component của enemy. </summary>
         public Health health { get; protected set; }
 
+        private EnemyAnimator m_enemyAnimator;
+
+        #endregion
+
+        #region ===== RUNTIME CACHE =====
+
+        private readonly Collider[] m_sightOverlaps = new Collider[1024];
+
+        // Extra attack (attack thường dạng animation)
+        private bool m_extraAttacking;
+        private float m_nextExtraAttackTime;
+
+        // Roll runtime
+        private bool m_rollAttacking;
+        private Vector3 m_rollTargetPos;
+        private float m_nextRollTime;
+
+        // Cache hash cho Bool "Attack" (dùng cho RollAttack + Bool theo yêu cầu)
+        private static readonly int s_attackBoolHash = Animator.StringToHash("Attack");
+
         #endregion
 
         #region ===== INITIALIZE =====
-
-        /// <summary>
-        /// Khởi tạo StatsManager.
-        /// </summary>
-        protected virtual void InitializeStatsManager() => stats = GetComponent<EnemyStatsManager>();
-
-        /// <summary>
-        /// Khởi tạo WaypointManager.
-        /// </summary>
-        protected virtual void InitializeWaypointsManager() => waypoints = GetComponent<WaypointManager>();
-
-        /// <summary>
-        /// Khởi tạo Health.
-        /// </summary>
-        protected virtual void InitializeHealth() => health = GetComponent<Health>();
 
         /// <summary>
         /// Gán tag Enemy theo hệ thống GameTags.
         /// </summary>
         protected virtual void InitializeTag() => tag = GameTags.Enemy;
 
-        #endregion
-
-        #region ===== DAMAGE / LIFE CYCLE =====
+        /// <summary>
+        /// Lấy reference EnemyStatsManager.
+        /// </summary>
+        protected virtual void InitializeStatsManager() => stats = GetComponent<EnemyStatsManager>();
 
         /// <summary>
-        /// Enemy nhận sát thương: giảm máu, gọi event, chết thì disable controller.
+        /// Lấy reference WaypointManager.
+        /// </summary>
+        protected virtual void InitializeWaypointsManager() => waypoints = GetComponent<WaypointManager>();
+
+        /// <summary>
+        /// Lấy reference Health.
+        /// </summary>
+        protected virtual void InitializeHealth() => health = GetComponent<Health>();
+
+        /// <summary>
+        /// Lấy reference EnemyAnimator (cache để khỏi GetComponent lặp).
+        /// </summary>
+        protected virtual void InitializeEnemyAnimator() => m_enemyAnimator = GetComponent<EnemyAnimator>();
+
+        #endregion
+
+        #region ===== LIFE CYCLE / DAMAGE =====
+
+        /// <summary>
+        /// Enemy nhận sát thương: giảm máu, gọi event, chết thì tắt controller.
         /// </summary>
         public override void ApplyDamage(int amount, Vector3 origin)
         {
             if (health == null) return;
+            if (health.isEmpty || health.recovering) return;
 
-            if (!health.isEmpty && !health.recovering)
+            health.Damage(amount);
+            enemyEvents?.OnDamage?.Invoke();
+
+            if (health.isEmpty)
             {
-                health.Damage(amount);
-                enemyEvents?.OnDamage?.Invoke();
-
-                if (health.isEmpty)
-                {
-                    controller.enabled = false;
-                    enemyEvents?.OnDie?.Invoke();
-                }
+                controller.enabled = false;
+                enemyEvents?.OnDie?.Invoke();
             }
         }
 
         /// <summary>
-        /// Hồi sinh enemy: reset máu, bật lại controller.
+        /// Hồi sinh enemy: reset máu và bật lại controller.
         /// </summary>
         public virtual void Revive()
         {
@@ -120,15 +151,15 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
-        #region ===== MOVEMENT HELPERS =====
+        #region ===== MOVEMENT HELPERS (STATS-BASED) =====
 
         /// <summary>
-        /// Tăng tốc theo hướng, dùng stats hiện tại (turningDrag/acceleration/topSpeed).
+        /// Tăng tốc theo hướng, dùng turningDrag/acceleration/topSpeed trong stats hiện tại.
         /// </summary>
         public virtual void Accelerate(Vector3 direction, float acceleration, float topSpeed)
         {
-            if (stats != null && stats.current != null)
-                Accelerate(direction, stats.current.turningDrag, acceleration, topSpeed);
+            if (stats?.current == null) return;
+            Accelerate(direction, stats.current.turningDrag, acceleration, topSpeed);
         }
 
         /// <summary>
@@ -136,8 +167,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public virtual void Decelerate()
         {
-            if (stats != null && stats.current != null)
-                Decelerate(stats.current.deceleration);
+            if (stats?.current == null) return;
+            Decelerate(stats.current.deceleration);
         }
 
         /// <summary>
@@ -145,8 +176,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public virtual void Friction()
         {
-            if (stats != null && stats.current != null)
-                Decelerate(stats.current.friction);
+            if (stats?.current == null) return;
+            Decelerate(stats.current.friction);
         }
 
         /// <summary>
@@ -154,17 +185,17 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public virtual void Gravity()
         {
-            if (stats != null && stats.current != null)
-                Gravity(stats.current.gravity);
+            if (stats?.current == null) return;
+            Gravity(stats.current.gravity);
         }
 
         /// <summary>
-        /// Dính đất: áp lực ép xuống mặt đất theo snapForce trong stats.
+        /// Dính đất: ép xuống mặt đất theo snapForce trong stats.
         /// </summary>
         public virtual void SnapToGround()
         {
-            if (stats != null && stats.current != null)
-                SnapToGround(stats.current.snapForce);
+            if (stats?.current == null) return;
+            SnapToGround(stats.current.snapForce);
         }
 
         /// <summary>
@@ -172,8 +203,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public virtual void FaceDirectionSmooth(Vector3 direction)
         {
-            if (stats != null && stats.current != null)
-                FaceDirection(direction, stats.current.rotationSpeed);
+            if (stats?.current == null) return;
+            FaceDirection(direction, stats.current.rotationSpeed);
         }
 
         #endregion
@@ -181,23 +212,22 @@ namespace PLAYERTWO.PlatformerProject
         #region ===== CONTACT ATTACK (CHẠM LÀ TRỪ MÁU) =====
 
         /// <summary>
-        /// Tấn công khi chạm Player (giữ nguyên cơ chế cũ).
+        /// Tấn công khi chạm Player (cơ chế cũ): chạm là trừ máu, có thể pushback.
         /// </summary>
         public virtual void ContactAttack(Collider other)
         {
             if (!other.CompareTag(GameTags.Player)) return;
-            if (!other.TryGetComponent(out Player player)) return;
-            if (stats == null || stats.current == null) return;
+            if (!other.TryGetComponent(out Player p)) return;
+            if (stats?.current == null) return;
 
             var stepping = controller.bounds.max + Vector3.down * stats.current.contactSteppingTolerance;
 
-            // Nếu player đang grounded HOẶC enemy không đứng "trên đầu" player (tránh đánh kiểu dẫm nhầm)
-            if (player.isGrounded || !BoundsHelper.IsBellowPoint(controller.collider, stepping))
+            if (p.isGrounded || !BoundsHelper.IsBellowPoint(controller.collider, stepping))
             {
                 if (stats.current.contactPushback)
                     lateralVelocity = -localForward * stats.current.contactPushBackForce;
 
-                player.ApplyDamage(stats.current.contactDamage, transform.position);
+                p.ApplyDamage(stats.current.contactDamage, transform.position);
                 enemyEvents?.OnPlayerContact?.Invoke();
             }
         }
@@ -221,7 +251,7 @@ namespace PLAYERTWO.PlatformerProject
         public bool IsExtraAttacking() => m_extraAttacking;
 
         /// <summary>
-        /// Thử bắt đầu đòn đánh bằng animation (check mode/range/cooldown).
+        /// Thử bắt đầu đòn đánh animation (check mode/range/cooldown).
         /// Gọi từ FollowEnemyState khi đủ gần.
         /// </summary>
         public void TryStartExtraAttack()
@@ -231,31 +261,27 @@ namespace PLAYERTWO.PlatformerProject
             if (Time.time < m_nextExtraAttackTime) return;
             if (player == null) return;
 
-            float dist = Vector3.Distance(position, player.position);
+            float dist = Vector3.Distance(transform.position, player.transform.position);
             if (dist > extraAttackRange) return;
 
             m_extraAttacking = true;
             m_nextExtraAttackTime = Time.time + extraAttackCooldown;
 
-            // Trigger animation "Attack"
-            var enemyAnimator = GetComponent<EnemyAnimator>();
-            if (enemyAnimator != null && enemyAnimator.animator != null)
-                enemyAnimator?.TriggerAttack();
+            // NormalHit + Trigger: bắn trigger đánh thường
+            PlayAttack(EnemyAttackType.NormalHit, true);
         }
 
         /// <summary>
-        /// Animation Event: gọi ở frame "trúng đòn" trong clip Attack.
-        /// Lúc này mới trừ máu Player.
+        /// Animation Event: gọi ở frame "trúng đòn" trong clip Attack để trừ máu Player.
         /// </summary>
         public void ExtraAttackHit_AnimationEvent()
         {
-            Debug.Log("AttackHit fired");
             if (player == null) return;
 
-            float dist = Vector3.Distance(position, player.position);
+            float dist = Vector3.Distance(transform.position, player.transform.position);
             if (dist > extraAttackRange + 0.2f) return;
 
-            int dmg = (extraUseContactDamage && stats != null && stats.current != null)
+            int dmg = (extraUseContactDamage && stats?.current != null)
                 ? stats.current.contactDamage
                 : extraOverrideDamage;
 
@@ -267,8 +293,133 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void ExtraAttackEnd_AnimationEvent()
         {
-            Debug.Log("AttackEnd fired");
             m_extraAttacking = false;
+        }
+
+        #endregion
+
+        #region ===== ATTACK DISPATCH (ONE ENTRY) =====
+
+        /// <summary>
+        /// Enemy có đang roll attack không?
+        /// </summary>
+        public bool IsRollAttacking() => m_rollAttacking;
+
+        /// <summary>
+        /// Tìm config tương ứng cho attack type (nếu prefab không cấu hình thì trả null).
+        /// </summary>
+        private EnemyAttackAnimConfig GetAttackConfig(EnemyAttackType type)
+        {
+            if (attackAnimConfigs == null) return null;
+
+            for (int i = 0; i < attackAnimConfigs.Length; i++)
+            {
+                var cfg = attackAnimConfigs[i];
+                if (cfg != null && cfg.type == type) return cfg;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gọi animation theo rule cố định:
+        /// - NormalHit + Trigger: gọi TriggerAttack()
+        /// - RollAttack + Bool: animator.SetBool("Attack", true/false)
+        /// </summary>
+        public void PlayAttack(EnemyAttackType type, bool active)
+        {
+            if (m_enemyAnimator == null || m_enemyAnimator.animator == null) return;
+
+            var cfg = GetAttackConfig(type);
+            if (cfg == null) return;
+
+            // NormalHit + Trigger
+            if (cfg.type == EnemyAttackType.NormalHit && cfg.mode == AttackAnimMode.Trigger)
+            {
+                if (!active) return;
+                m_enemyAnimator.TriggerAttack();
+                return;
+            }
+
+            // RollAttack + Bool => Bool "Attack"
+            if (cfg.type == EnemyAttackType.RollAttack && cfg.mode == AttackAnimMode.Bool)
+            {
+                m_enemyAnimator.animator.SetBool(s_attackBoolHash, active);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Kiểm tra có thể bắt đầu roll attack hay không (bật roll + có player + cooldown + có config RollAttack/Bool).
+        /// </summary>
+        public bool CanStartRollAttack()
+        {
+            if (!enableRollAttack) return false;
+            if (player == null) return false;
+            if (m_rollAttacking) return false;
+            if (Time.time < m_nextRollTime) return false;
+
+            // Prefab không cấu hình RollAttack/Bool thì tuyệt đối không roll
+            var cfg = GetAttackConfig(EnemyAttackType.RollAttack);
+            if (cfg == null || cfg.mode != AttackAnimMode.Bool) return false;
+
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            return dist <= rollAttackRange;
+        }
+
+        /// <summary>
+        /// Bắt đầu roll attack: khóa vị trí player 1 lần và bật Bool "Attack" trong Animator.
+        /// </summary>
+        public void StartRollAttack()
+        {
+            if (!CanStartRollAttack()) return;
+
+            m_rollTargetPos = player.transform.position; // mark 1 lần
+
+            m_rollAttacking = true;
+            m_nextRollTime = Time.time + rollCooldown;
+
+            PlayAttack(EnemyAttackType.RollAttack, true);
+        }
+
+        /// <summary>
+        /// Update roll attack mỗi frame: lao tới điểm đã khóa, tới gần thì kết thúc roll.
+        /// </summary>
+        public void StepRollAttack()
+        {
+            if (!m_rollAttacking) return;
+
+            Vector3 toTarget = m_rollTargetPos - transform.position;
+            toTarget.y = 0f;
+
+            if (toTarget.sqrMagnitude <= rollStopDistance * rollStopDistance)
+            {
+                EndRollAttack();
+                return;
+            }
+
+            Vector3 dir = toTarget.normalized;
+
+            Accelerate(dir, rollAcceleration, rollTopSpeed);
+            FaceDirectionSmooth(dir);
+        }
+
+        /// <summary>
+        /// Kết thúc roll attack: tắt Bool "Attack" và reset trạng thái.
+        /// </summary>
+        public void EndRollAttack()
+        {
+            if (!m_rollAttacking) return;
+
+            m_rollAttacking = false;
+
+            PlayAttack(EnemyAttackType.RollAttack, false);
+
+            if (stats != null && stats.current != null)
+            {
+                float followTop = stats.current.followTopSpeed;
+                lateralVelocity = Vector3.ClampMagnitude(lateralVelocity, followTop);
+            }
         }
 
         #endregion
@@ -276,17 +427,17 @@ namespace PLAYERTWO.PlatformerProject
         #region ===== SIGHT / DETECTION =====
 
         /// <summary>
-        /// Xử lý nhìn thấy player (spot) và mất mục tiêu (escape).
+        /// Xử lý phát hiện player (spot) và mất mục tiêu (escape).
         /// spotRange: khoảng phát hiện
         /// viewRange: khoảng mất mục tiêu
         /// </summary>
         protected virtual void HandleSight()
         {
-            // Chưa có player: quét theo spotRange
-            if (!player && stats != null && stats.current != null && m_sightOverlaps != null)
+            if (!player)
             {
-                var overlaps = Physics.OverlapSphereNonAlloc(position, stats.current.spotRange, m_sightOverlaps);
+                if (stats?.current == null) return;
 
+                int overlaps = Physics.OverlapSphereNonAlloc(transform.position, stats.current.spotRange, m_sightOverlaps);
                 for (int i = 0; i < overlaps; i++)
                 {
                     var col = m_sightOverlaps[i];
@@ -301,13 +452,12 @@ namespace PLAYERTWO.PlatformerProject
                     }
                 }
             }
-            // Đã có player: kiểm tra điều kiện mất mục tiêu
-            else if (player != null)
+            else
             {
-                var distance = Vector3.Distance(position, player.position);
+                float distance = Vector3.Distance(transform.position, player.transform.position);
 
                 bool playerDead = player.health != null && player.health.current == 0;
-                bool tooFar = stats != null && stats.current != null && distance > stats.current.viewRange;
+                bool tooFar = stats?.current != null && distance > stats.current.viewRange;
 
                 if (playerDead || tooFar)
                 {
@@ -318,12 +468,15 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Khi phát hiện player: nếu bật followTargetOnSight thì chuyển sang FollowEnemyState.
+        /// Khi phát hiện player: nếu followTargetOnSight bật thì chuyển sang FollowEnemyState.
         /// </summary>
         protected virtual void OnPlayerSpotted()
         {
-            if (stats != null && stats.current != null && stats.current.followTargetOnSight && states != null)
-                states.Change<FollowEnemyState>();
+            if (stats?.current == null) return;
+            if (!stats.current.followTargetOnSight) return;
+            if (states == null) return;
+
+            states.Change<FollowEnemyState>();
         }
 
         #endregion
@@ -331,7 +484,7 @@ namespace PLAYERTWO.PlatformerProject
         #region ===== UNITY LIFECYCLE =====
 
         /// <summary>
-        /// Update loop của Entity: mỗi frame xử lý sight.
+        /// Vòng update của Entity: mỗi frame xử lý sight.
         /// </summary>
         protected override void OnUpdate()
         {
@@ -339,15 +492,17 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Awake: init các component và tag.
+        /// Awake: init component + tag + cache animator.
         /// </summary>
         protected override void Awake()
         {
             base.Awake();
+
             InitializeTag();
             InitializeStatsManager();
             InitializeWaypointsManager();
             InitializeHealth();
+            InitializeEnemyAnimator();
         }
 
         #endregion
