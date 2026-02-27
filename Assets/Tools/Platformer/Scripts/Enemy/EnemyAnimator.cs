@@ -233,8 +233,6 @@ namespace PLAYERTWO.PlatformerProject
 
             float lateralSpeed01 = Mathf.Clamp01(lateralSpeed / denom);
 
-            Debug.Log(lateralSpeed01);
-
             animator.SetInteger(m_stateHash, m_enemy.states.index);
             animator.SetInteger(m_lastStateHash, m_enemy.states.lastIndex);
 

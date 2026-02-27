@@ -39,6 +39,9 @@ namespace PLAYERTWO.PlatformerProject
             if (TryHandleRollAttack(enemy))
                 return;
 
+            if (TryHandleRangedAttack(enemy))
+                return;
+
             if (TryHandleExtraAttack(enemy))
                 return;
 
@@ -171,6 +174,42 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
+
+
+        #region ===== RANGED ATTACK (PROJECTILE) =====
+
+        /// <summary>
+        /// Xử lý ranged attack:
+        /// - Nếu đang bắn: giảm tốc, xoay mặt về player, kết thúc frame.
+        /// - Nếu đủ điều kiện bắn: đứng lại và TryStartRangedAttack().
+        /// </summary>
+        protected virtual bool TryHandleRangedAttack(Enemy enemy)
+        {
+            if (enemy.player == null) return false;
+            if (enemy.stats == null || enemy.stats.current == null) return false;
+
+            // Nếu Enemy đang trong trạng thái bắn (đang phát anim Attack)
+            if (enemy.IsRangedAttacking())
+            {
+                enemy.Decelerate(enemy.stats.current.deceleration);
+                FacePlayerSmooth(enemy, enemy.player.position);
+                return true;
+            }
+
+            // Nếu đủ điều kiện bắn (range + cooldown + config...)
+            if (enemy.CanStartRangedAttack())
+            {
+                enemy.Decelerate(enemy.stats.current.deceleration);
+                FacePlayerSmooth(enemy, enemy.player.position);
+                enemy.TryStartRangedAttack();
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
 
         #region ===== CHASE =====
 

@@ -21,7 +21,8 @@
     public enum EnemyAttackType
     {
         NormalHit = 0,
-        RollAttack = 1
+        RollAttack = 1,
+        RangedShot = 2
     }
 
     public enum AttackAnimMode

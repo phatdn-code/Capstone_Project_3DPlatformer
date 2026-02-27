@@ -3,287 +3,252 @@
 namespace PLAYERTWO.PlatformerProject
 {
     /// <summary>
-    /// BeamVfx: quản lý VFX beam (cast/body/tip/hit) + detect va chạm + trừ shield theo thời gian.
-    /// Fix xuyên: khi hit gần hơn/rút về -> SNAP length + Clear/Play toàn bộ particle trong beamBodyEffect (kể cả con).
+    /// BeamVfx (3-part): LineRenderer + VFX đầu/cuối + hit detection + trừ shield theo thời gian.
     /// </summary>
+    [DisallowMultipleComponent]
     public class BeamVfx : MonoBehaviour
     {
-        //────────────────────────────────────────────────────
-        #region === INSPECTOR: VFX ===
+        //────────────────────────────────────────────
+        #region ===== INSPECTOR: REFERENCES =====
 
-        [Header("VFX")]
-        [SerializeField] private ParticleSystem beamBodyEffect;
-        [SerializeField] private ParticleSystem castEffect;
-        [SerializeField] private ParticleSystem hitEffect;
-        [SerializeField] private ParticleSystem bodyTip;
+        [Header("Beam Objects (3 parts)")]
+        [SerializeField] private GameObject beamLineRenderer;
+        [SerializeField] private GameObject beamStart;
+        [SerializeField] private GameObject beamEnd;
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === INSPECTOR: BEAM SETTINGS ===
+        //────────────────────────────────────────────
+        #region ===== INSPECTOR: BEAM SETTINGS =====
 
         [Header("Beam Settings")]
         [SerializeField] private float maxDistance = 30f;
-
-        [Tooltip("Tốc độ kéo dài beam (đâm ra).")]
-        [SerializeField] private float extendSpeed = 30f;
-
-        [Tooltip("Tốc độ rút beam về (nên lớn hơn extendSpeed).")]
-        [SerializeField] private float retractSpeed = 120f;
-
-        [Tooltip("Offset hit effect ra khỏi bề mặt (tránh z-fighting).")]
-        [SerializeField] private float hitOffset = 0.02f;
-
-        [Tooltip("Trừ bớt chiều dài khi hit để body không chạm xuyên bề mặt.")]
-        [SerializeField] private float lengthPadding = 0.03f;
+        [SerializeField] private float beamEndOffset = 0.2f;
 
         [Header("Hit Detection")]
-        [Tooltip("Độ dày của tia beam (SphereCast).")]
-        [SerializeField] private float hitRadius = 0.35f;
+        [SerializeField] private float hitRadius = 0f;           // 0 = Raycast, >0 = SphereCast
         [SerializeField] private LayerMask hitMask = ~0;
 
-        [Header("Anti Penetration (VFX)")]
-        [Tooltip("Khi beam bị clamp/rút về, clear & play lại các particle trong BeamBody để xoá phần 'lố'.")]
-        [SerializeField] private bool clearParticlesOnClamp = true;
-
-        [Tooltip("Ngưỡng chênh lệch (m) để coi là rút mạnh và clear particle.")]
-        [SerializeField] private float clampClearThreshold = 0.05f;
+        [Header("Texture")]
+        [SerializeField] private float textureScrollSpeed = 8f;
+        [SerializeField] private float textureLengthScale = 3f;
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === INSPECTOR: SHIELD DAMAGE ===
+        //────────────────────────────────────────────
+        #region ===== INSPECTOR: SHIELD DAMAGE =====
 
         [Header("Shield Damage")]
-        [Tooltip("Sát thương lên shield theo giây (DPS).")]
         [SerializeField] private float shieldDamagePerSecond = 25f;
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === RUNTIME STATE ===
+        //────────────────────────────────────────────
+        #region ===== RUNTIME =====
 
+        private const float kDirEpsSqr = 0.000001f;
+
+        private LineRenderer _line;
         private bool _isPlaying;
-        private float _currentLength;
 
-        private Vector3 _baseBodyScale;
-        private bool _cachedScale;
-
-        // Cache tất cả particle nằm trong beam body (kể cả con)
-        private ParticleSystem[] _bodyParticles = System.Array.Empty<ParticleSystem>();
-
-        // Tích luỹ damage để chuyển float -> int trừ dần
         private float _shieldDamageAccumulator;
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === UNITY ===
+        //────────────────────────────────────────────
+        #region ===== UNITY =====
 
-        /// <summary>Khởi tạo cache và tắt beam.</summary>
-        private void Start()
+        private void Awake()
         {
-            CacheBodyBaseScale();
-            CacheBodyParticles();
-            StopAll();
+            CacheLineRenderer();
+            SetActiveAll(false);
         }
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === PUBLIC API ===
+        //────────────────────────────────────────────
+        #region ===== PUBLIC API =====
 
-        /// <summary>Bắt đầu beam (bật VFX + reset trạng thái).</summary>
+        /// <summary>VN: Bắt đầu beam (bật 3 object, reset line + damage).</summary>
         public void StartBeam()
         {
-            CacheBodyBaseScale();
-            CacheBodyParticles();
+            CacheLineRenderer();
 
             _isPlaying = true;
-            _currentLength = 0f;
             _shieldDamageAccumulator = 0f;
 
-            SetActive(castEffect, true);
-            SetActive(beamBodyEffect, true);
-            SetActive(bodyTip, true);
-            SetActive(hitEffect, false);
+            SetActiveAll(true);
 
-            Restart(castEffect);
-            RestartAllBodyParticles(); // ✅ restart cả cụm body
-            Restart(bodyTip);
-
-            ResetBodyLengthToZero();
+            if (_line != null)
+            {
+                _line.positionCount = 2;
+                _line.SetPosition(0, transform.position);
+                _line.SetPosition(1, transform.position);
+            }
         }
 
-        /// <summary>Cập nhật beam mỗi frame (cast hit + update VFX + damage shield).</summary>
+        /// <summary>VN: Update theo transform hiện tại.</summary>
         public void UpdateBeam()
         {
             if (!_isPlaying) return;
-
-            Vector3 source = transform.position;
-            Vector3 dir = transform.forward;
-
-            bool hasHit = CastBeam(source, dir, out RaycastHit hit);
-            float targetLength = GetTargetLength(hasHit, hit);
-
-            // ✅ FIX XUYÊN: nếu targetLength giảm (hit gần hơn) -> SNAP + clear particles
-            ApplyLengthWithClampFix(targetLength);
-
-            UpdateBodyVfx(source);
-            UpdateTipVfx(source, dir);
-            UpdateHitVfxAndDamage(dir, hasHit, hit);
+            UpdateBeam(transform.position, transform.forward);
         }
 
-        /// <summary>Tắt toàn bộ VFX và reset trạng thái.</summary>
+        /// <summary>VN: Update theo nguồn bắn + hướng bắn (dùng cho muzzle).</summary>
+        public void UpdateBeam(Vector3 source, Vector3 dir)
+        {
+            if (!_isPlaying) return;
+
+            dir = NormalizeDir(dir);
+
+            Vector3 end = GetBeamEnd(source, dir, out RaycastHit hit, out bool hasHit);
+
+            ApplyBeamTransforms(source, end, dir);
+            UpdateTexture(source, end);
+
+            ApplyShieldDamageIfNeeded(hasHit ? hit.collider : null, Time.deltaTime);
+        }
+
+        /// <summary>VN: Tắt beam (ẩn 3 object, reset damage).</summary>
         public void StopAll()
         {
             _isPlaying = false;
-            _currentLength = 0f;
             _shieldDamageAccumulator = 0f;
-
-            StopHide(castEffect);
-            StopHide(beamBodyEffect); // tắt root
-            StopHide(bodyTip);
-            StopHide(hitEffect);
+            SetActiveAll(false);
         }
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === CAST / LENGTH ===
+        //────────────────────────────────────────────
+        #region ===== BEAM CORE =====
 
-        /// <summary>Cast beam (SphereCast nếu hitRadius > 0, không thì Raycast).</summary>
-        private bool CastBeam(Vector3 source, Vector3 dir, out RaycastHit hit)
+        /// <summary>VN: Cache LineRenderer để dùng nhanh.</summary>
+        private void CacheLineRenderer()
+        {
+            if (_line != null) return;
+
+            if (beamLineRenderer != null)
+                _line = beamLineRenderer.GetComponent<LineRenderer>();
+
+            if (_line != null)
+                _line.positionCount = 2;
+        }
+
+        /// <summary>VN: Tính điểm cuối theo Raycast/SphereCast.</summary>
+        private Vector3 GetBeamEnd(Vector3 source, Vector3 dir, out RaycastHit hit, out bool hasHit)
         {
             float radius = Mathf.Max(0f, hitRadius);
+            float maxDist = Mathf.Max(0f, maxDistance);
 
             if (radius <= 0f)
             {
-                return Physics.Raycast(
-                    source,
-                    dir,
-                    out hit,
-                    maxDistance,
-                    hitMask,
-                    QueryTriggerInteraction.Collide
+                hasHit = Physics.Raycast(
+                    source, dir, out hit, maxDist, hitMask, QueryTriggerInteraction.Collide
                 );
-            }
-
-            return Physics.SphereCast(
-                source,
-                radius,
-                dir,
-                out hit,
-                maxDistance,
-                hitMask,
-                QueryTriggerInteraction.Collide
-            );
-        }
-
-        /// <summary>Tính target length từ kết quả hit (có padding).</summary>
-        private float GetTargetLength(bool hasHit, RaycastHit hit)
-        {
-            if (!hasHit) return maxDistance;
-
-            float pad = Mathf.Max(0f, lengthPadding);
-            return Mathf.Max(0f, hit.distance - pad);
-        }
-
-        /// <summary>
-        /// Áp chiều dài beam:
-        /// - Extend: MoveTowards bình thường
-        /// - Retract (hit gần hơn): SNAP + clear/play body particles để không còn phần "lố"
-        /// </summary>
-        private void ApplyLengthWithClampFix(float targetLength)
-        {
-            float dt = Time.deltaTime;
-
-            // Nếu targetLength nhỏ hơn -> đang retract / hit gần hơn
-            bool isRetracting = targetLength < _currentLength;
-
-            if (isRetracting)
-            {
-                // SNAP để tránh có frame nào dài hơn hit distance
-                _currentLength = targetLength;
-
-                // Clear/Play để xoá lịch sử particle/trail đã vẽ vượt quá
-                if (clearParticlesOnClamp && (_currentLength - targetLength) > clampClearThreshold)
-                {
-                    // (Lưu ý: đoạn này về logic luôn ~0 vì đã set _currentLength = targetLength,
-                    // nên dùng diff cũ để check)
-                }
-
-                if (clearParticlesOnClamp)
-                    ClearAndPlayAllBodyParticles();
             }
             else
             {
-                // Extend mượt
-                float speed = Mathf.Max(0f, extendSpeed);
-                _currentLength = Mathf.MoveTowards(_currentLength, targetLength, speed * dt);
+                hasHit = Physics.SphereCast(
+                    source, radius, dir, out hit, maxDist, hitMask, QueryTriggerInteraction.Collide
+                );
             }
+
+            if (hasHit)
+            {
+                float offset = Mathf.Max(0f, beamEndOffset);
+                return hit.point - dir * offset;
+            }
+
+            hit = default;
+            return source + dir * maxDist;
+        }
+
+        /// <summary>VN: Set line + start/end VFX (kèm xoay theo hướng).</summary>
+        private void ApplyBeamTransforms(Vector3 start, Vector3 end, Vector3 dir)
+        {
+            if (_line != null)
+            {
+                _line.SetPosition(0, start);
+                _line.SetPosition(1, end);
+            }
+
+            if (beamStart != null)
+            {
+                beamStart.transform.position = start;
+                beamStart.transform.rotation = Quaternion.LookRotation(dir);
+            }
+
+            if (beamEnd != null)
+            {
+                beamEnd.transform.position = end;
+                beamEnd.transform.rotation = Quaternion.LookRotation(-dir);
+            }
+        }
+
+        /// <summary>VN: Scale/scroll UV theo độ dài beam để texture không bị kéo giãn.</summary>
+        private void UpdateTexture(Vector3 start, Vector3 end)
+        {
+            if (_line == null) return;
+
+            float lenScale = Mathf.Max(0.0001f, textureLengthScale);
+            float distance = Vector3.Distance(start, end);
+
+            var mat = _line.sharedMaterial;
+            if (mat == null) return;
+
+            mat.mainTextureScale = new Vector2(distance / lenScale, 1f);
+            mat.mainTextureOffset -= new Vector2(Time.deltaTime * textureScrollSpeed, 0f);
+        }
+
+        /// <summary>VN: Chuẩn hoá hướng (tránh dir = 0).</summary>
+        private Vector3 NormalizeDir(Vector3 dir)
+        {
+            if (dir.sqrMagnitude < kDirEpsSqr)
+                return transform.forward;
+
+            return dir.normalized;
+        }
+
+        /// <summary>VN: Bật/tắt cả 3 object.</summary>
+        private void SetActiveAll(bool active)
+        {
+            if (beamLineRenderer != null) beamLineRenderer.SetActive(active);
+            if (beamStart != null) beamStart.SetActive(active);
+            if (beamEnd != null) beamEnd.SetActive(active);
         }
 
         #endregion
 
-        //────────────────────────────────────────────────────
-        #region === HIT VFX / SHIELD DAMAGE ===
+        //────────────────────────────────────────────
+        #region ===== SHIELD DAMAGE =====
 
-        /// <summary>Update hit effect + apply damage lên shield nếu collider là shield.</summary>
-        private void UpdateHitVfxAndDamage(Vector3 dir, bool hasHit, RaycastHit hit)
+        /// <summary>VN: Trừ shield theo DPS khi collider hit thuộc shield.</summary>
+        private void ApplyShieldDamageIfNeeded(Collider hitCollider, float dt)
         {
-            if (!hasHit)
+            if (hitCollider == null)
             {
-                SetActive(hitEffect, false);
                 _shieldDamageAccumulator = 0f;
                 return;
             }
 
-            ApplyHitEffect(dir, hit);
-            TryDamageShield(hit.collider, Time.deltaTime);
-        }
-
-        /// <summary>Đặt hit effect đúng vị trí va chạm.</summary>
-        private void ApplyHitEffect(Vector3 dir, RaycastHit hit)
-        {
-            if (hitEffect == null) return;
-
-            if (!hitEffect.gameObject.activeSelf)
-            {
-                SetActive(hitEffect, true);
-                Restart(hitEffect);
-            }
-
-            hitEffect.transform.position = hit.point + hit.normal * hitOffset;
-            hitEffect.transform.rotation = Quaternion.LookRotation(-dir);
-        }
-
-        /// <summary>Nếu trúng collider shield thì trừ shield theo thời gian (int).</summary>
-        private void TryDamageShield(Collider hitCollider, float dt)
-        {
-            if (hitCollider == null) return;
             if (shieldDamagePerSecond <= 0f) return;
 
-            // 1. Lấy shield từ parent chain
-            BossShieldController shield =
-                hitCollider.GetComponentInParent<BossShieldController>();
+            BossShieldController shield = hitCollider.GetComponentInParent<BossShieldController>();
+            if (shield == null)
+            {
+                _shieldDamageAccumulator = 0f;
+                return;
+            }
 
-            if (shield == null) return;
-
-            // 2. Lấy boss từ shield (CHA)
-            DragonRobot dragon =
-                shield.GetComponentInParent<DragonRobot>();
-
+            DragonRobot dragon = shield.GetComponentInParent<DragonRobot>();
             if (dragon != null && dragon.IsDamageImmuneThisRound)
             {
                 _shieldDamageAccumulator = 0f;
                 return;
             }
 
-            // 3. Shield phải active
             if (!shield.IsActive) return;
 
-            // 4. DPS tích luỹ
             _shieldDamageAccumulator += shieldDamagePerSecond * dt;
 
             int damageInt = Mathf.FloorToInt(_shieldDamageAccumulator);
@@ -291,120 +256,6 @@ namespace PLAYERTWO.PlatformerProject
 
             _shieldDamageAccumulator -= damageInt;
             shield.ConsumeShield(damageInt);
-        }
-
-        #endregion
-
-        //────────────────────────────────────────────────────
-        #region === VFX UPDATE ===
-
-        /// <summary>Cache scale gốc của body để scale theo chiều dài.</summary>
-        private void CacheBodyBaseScale()
-        {
-            if (_cachedScale) return;
-
-            _baseBodyScale = beamBodyEffect != null
-                ? beamBodyEffect.transform.localScale
-                : Vector3.one;
-
-            _cachedScale = true;
-        }
-
-        /// <summary>Cache toàn bộ ParticleSystem nằm trong beamBodyEffect (kể cả con).</summary>
-        private void CacheBodyParticles()
-        {
-            if (beamBodyEffect == null)
-            {
-                _bodyParticles = System.Array.Empty<ParticleSystem>();
-                return;
-            }
-
-            // Lấy cả root + children (kể cả inactive)
-            _bodyParticles = beamBodyEffect.GetComponentsInChildren<ParticleSystem>(true);
-        }
-
-        /// <summary>Reset chiều dài beam body về 0 khi bắt đầu bắn.</summary>
-        private void ResetBodyLengthToZero()
-        {
-            if (beamBodyEffect == null) return;
-
-            var s = _baseBodyScale;
-            s.z = 0f;
-            beamBodyEffect.transform.localScale = s;
-        }
-
-        /// <summary>Update vị trí/rotation/scale của body theo chiều dài hiện tại.</summary>
-        private void UpdateBodyVfx(Vector3 source)
-        {
-            if (beamBodyEffect == null) return;
-
-            beamBodyEffect.transform.position = source;
-            beamBodyEffect.transform.rotation = transform.rotation;
-
-            var s = _baseBodyScale;
-            s.z = _currentLength;
-            beamBodyEffect.transform.localScale = s;
-        }
-
-        /// <summary>Update tip ở cuối beam.</summary>
-        private void UpdateTipVfx(Vector3 source, Vector3 dir)
-        {
-            if (bodyTip == null) return;
-
-            bodyTip.transform.position = source + dir * _currentLength;
-            bodyTip.transform.rotation = transform.rotation;
-        }
-
-        /// <summary>Restart tất cả particle trong cụm beam body.</summary>
-        private void RestartAllBodyParticles()
-        {
-            if (_bodyParticles == null) return;
-
-            for (int i = 0; i < _bodyParticles.Length; i++)
-                Restart(_bodyParticles[i]);
-        }
-
-        /// <summary>Clear + Play tất cả particle trong cụm beam body (xoá phần lố).</summary>
-        private void ClearAndPlayAllBodyParticles()
-        {
-            if (_bodyParticles == null) return;
-
-            for (int i = 0; i < _bodyParticles.Length; i++)
-            {
-                var ps = _bodyParticles[i];
-                if (ps == null) continue;
-
-                ps.Clear(true);
-                ps.Play(true);
-            }
-        }
-
-        #endregion
-
-        //────────────────────────────────────────────────────
-        #region === PARTICLE HELPERS ===
-
-        /// <summary>Restart particle system.</summary>
-        private static void Restart(ParticleSystem ps)
-        {
-            if (ps == null) return;
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            ps.Play(true);
-        }
-
-        /// <summary>Stop particle system và ẩn GameObject.</summary>
-        private static void StopHide(ParticleSystem ps)
-        {
-            if (ps == null) return;
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            ps.gameObject.SetActive(false);
-        }
-
-        /// <summary>Bật/tắt GameObject chứa particle system.</summary>
-        private static void SetActive(ParticleSystem ps, bool active)
-        {
-            if (ps == null) return;
-            ps.gameObject.SetActive(active);
         }
 
         #endregion
