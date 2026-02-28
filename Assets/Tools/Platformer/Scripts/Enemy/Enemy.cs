@@ -21,10 +21,11 @@ namespace PLAYERTWO.PlatformerProject
         [InfoBox("NormalHit thường để Mode = Trigger (bắn Trigger Attack).", InfoMessageType.Info, "@type == EnemyAttackType.NormalHit")]
         [InfoBox("RollAttack nên để Mode = Bool (bật/tắt Bool Attack).", InfoMessageType.Warning, "@type == EnemyAttackType.RollAttack")]
         [InfoBox("RangedShot nên để Mode = Trigger (vẫn dùng chung Trigger Attack).", InfoMessageType.Info, "@type == EnemyAttackType.RangedShot")]
+        [InfoBox("SprayAttack nên để Mode = Bool (bật/tắt Bool SprayAttack).", InfoMessageType.Warning, "@type == EnemyAttackType.SprayAttack")]
         public AttackAnimMode mode = AttackAnimMode.Trigger;
 
         // ===================== RANGED (PROJECTILE) =====================
-        // Chỉ hiện khi chọn RangedShot
+
         [ShowIf("@type == EnemyAttackType.RangedShot")]
         [BoxGroup("RangedShot Settings")]
         public Transform shootPoint;
@@ -111,6 +112,30 @@ namespace PLAYERTWO.PlatformerProject
         [ShowIf("@enableRollAttack")]
         [Min(0f)] public float rollCooldown = 2.0f;
 
+        [Header("Spray Attack Settings")]
+        public bool enableSprayAttack = true;
+
+        [ShowIf("@enableSprayAttack")]
+        [Min(0.1f)] public float sprayAttackRange = 5.0f;
+
+        [ShowIf("@enableSprayAttack")]
+        [Min(0.1f)] public float sprayTopSpeed = 6.0f;
+
+        [ShowIf("@enableSprayAttack")]
+        [Min(0.1f)] public float sprayAcceleration = 35.0f;
+
+        [ShowIf("@enableSprayAttack")]
+        [Min(0.05f)] public float sprayStandOffDistance = 1.2f;
+
+        [ShowIf("@enableSprayAttack")]
+        [Min(0f)] public float sprayCooldown = 2.5f;
+
+        [ShowIf("@enableSprayAttack")]
+        [Min(0.1f)] public float sprayDuration = 1.2f;
+
+        [ShowIf("@enableSprayAttack")]
+        public GameObject sprayEffectObject;
+
         #endregion
 
         #region ===== REFERENCES / PROPERTIES =====
@@ -148,14 +173,21 @@ namespace PLAYERTWO.PlatformerProject
         private Vector3 m_rollTargetPos;
         private float m_nextRollTime;
 
-        // Bool "Attack" dùng cho RollAttack mode Bool
-        private static readonly int s_attackBoolHash = Animator.StringToHash("Attack");
+        // Spray runtime
+        private bool m_sprayAttacking;
+        private bool m_spraySpraying;
+        private Vector3 m_sprayTargetPos;
+        private float m_nextSprayTime;
+        private float m_sprayEndTime;
+
+        // Spray effect cache
+        private ParticleSystem[] m_sprayParticles;
 
         #endregion
 
         #region ===== UNITY LIFECYCLE =====
 
-        /// <summary>Awake: cache component cần thiết.</summary>
+        /// <summary>Awake: cache component cần thiết + cache spray effect.</summary>
         protected override void Awake()
         {
             base.Awake();
@@ -165,9 +197,12 @@ namespace PLAYERTWO.PlatformerProject
             InitializeWaypointsManager();
             InitializeHealth();
             InitializeEnemyAnimator();
+
+            CacheSprayEffect();
+            SetSprayEffectActive(false);
         }
 
-        /// <summary>Update vòng đời của Entity: chỉ xử lý phát hiện player.</summary>
+        /// <summary>Update: chỉ xử lý phát hiện player.</summary>
         protected override void OnUpdate()
         {
             HandleSight();
@@ -191,6 +226,13 @@ namespace PLAYERTWO.PlatformerProject
 
         /// <summary>Cache EnemyAnimator.</summary>
         protected virtual void InitializeEnemyAnimator() => m_enemyAnimator = GetComponent<EnemyAnimator>();
+
+        /// <summary>Cache ParticleSystem con cho spray effect.</summary>
+        private void CacheSprayEffect()
+        {
+            if (sprayEffectObject == null) return;
+            m_sprayParticles = sprayEffectObject.GetComponentsInChildren<ParticleSystem>(true);
+        }
 
         #endregion
 
@@ -321,6 +363,7 @@ namespace PLAYERTWO.PlatformerProject
         /// - NormalHit + Trigger -> TriggerAttack()
         /// - RangedShot + Trigger -> TriggerAttack() (dùng chung)
         /// - RollAttack + Bool -> Bool "Attack"
+        /// - SprayAttack + Bool -> Bool "SprayAttack"
         /// </summary>
         public void PlayAttack(EnemyAttackType type, bool active)
         {
@@ -338,11 +381,21 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            // RollAttack + Bool => Bool "Attack"
-            if (cfg.type == EnemyAttackType.RollAttack && cfg.mode == AttackAnimMode.Bool)
+            // Bool attacks (RollAttack / SprayAttack)
+            if (cfg.mode == AttackAnimMode.Bool)
             {
-                m_enemyAnimator.animator.SetBool(s_attackBoolHash, active);
-                return;
+                System.Action<bool> setBool = cfg.type switch
+                {
+                    EnemyAttackType.RollAttack => m_enemyAnimator.SetRollAttackBool,
+                    EnemyAttackType.SprayAttack => m_enemyAnimator.SetSprayAttackBool,
+                    _ => null
+                };
+
+                if (setBool != null)
+                {
+                    setBool(active);
+                    return;
+                }
             }
         }
 
@@ -452,7 +505,6 @@ namespace PLAYERTWO.PlatformerProject
             {
                 cfg.muzzleEffect.SetActive(true);
 
-                // Nếu là ParticleSystem thì Play lại cho chắc (tuỳ bạn)
                 if (cfg.muzzleEffect.TryGetComponent<ParticleSystem>(out var ps))
                 {
                     ps.Clear(true);
@@ -481,7 +533,7 @@ namespace PLAYERTWO.PlatformerProject
                 ? stats.current.contactDamage
                 : cfg.rangedOverrideDamage;
 
-            // 5) Init projectile (ưu tiên gọi component)
+            // 5) Init projectile
             if (go.TryGetComponent<EnemyProjectile>(out var proj))
                 proj.Init(dmg);
         }
@@ -565,7 +617,167 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+        #region ===== SPRAY ATTACK =====
+
+        /// <summary>Đang SprayAttack hay không (bao gồm chạy tới điểm + phun).</summary>
+        public bool IsSprayAttacking() => m_sprayAttacking;
+
+        /// <summary>Check điều kiện bắt đầu SprayAttack.</summary>
+        public bool CanStartSprayAttack()
+        {
+            if (!enableSprayAttack) return false;
+            if (player == null) return false;
+            if (m_sprayAttacking) return false;
+            if (Time.time < m_nextSprayTime) return false;
+
+            if (m_rollAttacking || m_rangedAttacking || m_extraAttacking) return false;
+
+            var cfg = GetAttackConfig(EnemyAttackType.SprayAttack);
+            if (cfg == null || cfg.mode != AttackAnimMode.Bool) return false;
+
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            return dist <= sprayAttackRange;
+        }
+
+        /// <summary>Bắt đầu SprayAttack: lock vị trí player và chuẩn bị chạy tới.</summary>
+        public void StartSprayAttack()
+        {
+            if (!CanStartSprayAttack()) return;
+
+            m_sprayTargetPos = player.transform.position;
+
+            m_sprayAttacking = true;
+            m_spraySpraying = false;
+
+            m_nextSprayTime = Time.time + sprayCooldown;
+
+            SetSprayEffectActive(false);
+        }
+
+        /// <summary>Step SprayAttack: chạy tới điểm lock, dừng trước mục tiêu rồi bật SprayAttack.</summary>
+        public void StepSprayAttack()
+        {
+            if (!m_sprayAttacking) return;
+
+            // Phase phun: tự kết thúc theo timer
+            if (m_spraySpraying)
+            {
+                // Khoá trôi ngang (đứng yên)
+                lateralVelocity = Vector3.zero;
+
+                if (Time.time >= m_sprayEndTime)
+                    EndSprayAttack();
+
+                return;
+            }
+
+            // Phase approach: chạy tới vị trí lock nhưng dừng trước 1 khoảng
+            Vector3 toTarget = m_sprayTargetPos - transform.position;
+            toTarget.y = 0f;
+
+            float dist = toTarget.magnitude;
+
+            if (dist <= sprayStandOffDistance)
+            {
+                Decelerate();
+
+                if (player != null)
+                {
+                    Vector3 face = player.transform.position - transform.position;
+                    face.y = 0f;
+
+                    if (face.sqrMagnitude > 0.0001f)
+                        FaceDirectionSmooth(face.normalized);
+                }
+
+                m_spraySpraying = true;
+                lateralVelocity = Vector3.zero;
+
+                PlayAttack(EnemyAttackType.SprayAttack, true);
+
+                SetSprayEffectActive(true);
+
+                m_sprayEndTime = Time.time + sprayDuration;
+                return;
+            }
+
+            Vector3 dir = toTarget.normalized;
+            Accelerate(dir, sprayAcceleration, sprayTopSpeed);
+            FaceDirectionSmooth(dir);
+        }
+
+        /// <summary>Kết thúc SprayAttack: tắt bool, tắt effect và clamp lại tốc độ chase.</summary>
+        public void EndSprayAttack()
+        {
+            if (!m_sprayAttacking) return;
+
+            m_sprayAttacking = false;
+            m_spraySpraying = false;
+
+            PlayAttack(EnemyAttackType.SprayAttack, false);
+            SetSprayEffectActive(false);
+
+            if (stats != null && stats.current != null)
+            {
+                float followTop = stats.current.followTopSpeed;
+                lateralVelocity = Vector3.ClampMagnitude(lateralVelocity, followTop);
+            }
+        }
+
+        /// <summary>Animation Event (tuỳ chọn): nếu muốn kết thúc theo clip thay vì timer.</summary>
+        public void SprayAttackEnd_AnimationEvent()
+        {
+            EndSprayAttack();
+        }
+
+        /// <summary>Bật/tắt effect spray (kèm Play/Stop particle nếu có).</summary>
+        private void SetSprayEffectActive(bool active)
+        {
+            if (sprayEffectObject == null) return;
+
+            sprayEffectObject.SetActive(active);
+
+            if (m_sprayParticles == null) return;
+
+            if (active)
+            {
+                for (int i = 0; i < m_sprayParticles.Length; i++)
+                {
+                    var ps = m_sprayParticles[i];
+                    if (ps == null) continue;
+                    ps.Clear(true);
+                    ps.Play(true);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < m_sprayParticles.Length; i++)
+                {
+                    var ps = m_sprayParticles[i];
+                    if (ps == null) continue;
+                    ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
+            }
+        }
+
+        #endregion
+
         #region ===== SIGHT / DETECTION =====
+
+        /// <summary>VN: Dừng tất cả skill đang chạy khi mất mục tiêu (ra khỏi viewRange / chết).</summary>
+        private void StopAllAttacks()
+        {
+            // VN: Roll đang chạy -> gọi End để tắt bool + reset
+            if (m_rollAttacking)
+                EndRollAttack();
+
+            // VN: Spray đang chạy -> gọi End để tắt bool + tắt effect + reset
+            if (m_sprayAttacking)
+                EndSprayAttack();
+
+            m_rangedAttacking = false;
+            m_extraAttacking = false;
+        }
 
         /// <summary>Phát hiện player (spot) và mất mục tiêu (escape).</summary>
         protected virtual void HandleSight()
@@ -598,6 +810,7 @@ namespace PLAYERTWO.PlatformerProject
 
                 if (playerDead || tooFar)
                 {
+                    StopAllAttacks();
                     player = null;
                     enemyEvents?.OnPlayerScaped?.Invoke();
                 }

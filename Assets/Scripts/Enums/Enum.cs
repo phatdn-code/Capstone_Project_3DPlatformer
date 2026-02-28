@@ -22,7 +22,8 @@
     {
         NormalHit = 0,
         RollAttack = 1,
-        RangedShot = 2
+        RangedShot = 2,
+        SprayAttack = 3
     }
 
     public enum AttackAnimMode

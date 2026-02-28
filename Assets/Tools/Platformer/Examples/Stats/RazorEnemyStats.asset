@@ -28,7 +28,7 @@ MonoBehaviour:
   followTargetOnSight: 1
   returnToLastStateWhenLostTarget: 1
   followAcceleration: 10
-  followTopSpeed: 2.5
+  followTopSpeed: 2.8
   returnToLastStateDelay: 2
   faceWaypoint: 1
   waypointMinDistance: 0.5

@@ -1450,20 +1450,36 @@ MonoBehaviour:
     OnRevive:
       m_PersistentCalls:
         m_Calls: []
+  attackAnimConfigs:
+  - type: 0
+    mode: 0
+    shootPoint: {fileID: 0}
+    projectilePrefab: {fileID: 0}
+    muzzleEffect: {fileID: 0}
+    rangedAttackRange: 6
+    rangedAttackCooldown: 1.2
+    projectileSpeed: 12
+    rangedUseContactDamage: 1
+    rangedOverrideDamage: 1
   extraAttackMode: 1
   extraAttackRange: 2.4
   extraAttackCooldown: 1
   extraUseContactDamage: 1
   extraOverrideDamage: 1
-  attackAnimConfigs:
-  - type: 0
-    mode: 0
   enableRollAttack: 0
   rollAttackRange: 4
   rollTopSpeed: 8
   rollAcceleration: 40
   rollStopDistance: 0.4
   rollCooldown: 2
+  enableSprayAttack: 0
+  sprayAttackRange: 5
+  sprayTopSpeed: 6
+  sprayAcceleration: 35
+  sprayStandOffDistance: 1.2
+  sprayCooldown: 2.5
+  sprayDuration: 1.2
+  sprayEffectObject: {fileID: 0}
 --- !u!114 &6678471831215431203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1487,6 +1503,7 @@ MonoBehaviour:
   onStateChangedName: On State Changed
   attackName: Attack
   rollAttackName: Roll
+  sprayAttackName: SprayAttack
   initializedName: Initialized
 --- !u!114 &3675516250460395799
 MonoBehaviour:

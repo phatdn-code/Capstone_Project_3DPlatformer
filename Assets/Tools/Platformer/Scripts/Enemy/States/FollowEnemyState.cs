@@ -13,22 +13,16 @@ namespace PLAYERTWO.PlatformerProject
 
         #region ===== STATE LIFECYCLE =====
 
-        /// <summary>
-        /// Khi vào state Follow: reset timer dùng cho cơ chế "mất mục tiêu -> quay lại state trước".
-        /// </summary>
+        /// <summary>Vào Follow: reset timer dùng cho cơ chế "mất mục tiêu -> quay lại state trước".</summary>
         protected override void OnEnter(Enemy enemy)
         {
             m_returnStateTimer = 0f;
         }
 
-        /// <summary>
-        /// Khi thoát state Follow: hiện không cần xử lý gì thêm.
-        /// </summary>
+        /// <summary>Thoát Follow: hiện không cần xử lý thêm.</summary>
         protected override void OnExit(Enemy enemy) { }
 
-        /// <summary>
-        /// Mỗi frame: xử lý trọng lực/dính đất, mất mục tiêu, roll attack, extra attack, rồi mới chase.
-        /// </summary>
+        /// <summary>Update mỗi frame: physics cơ bản -> mất mục tiêu -> skill -> chase.</summary>
         protected override void OnStep(Enemy enemy)
         {
             ApplyBasicForces(enemy);
@@ -45,21 +39,21 @@ namespace PLAYERTWO.PlatformerProject
             if (TryHandleExtraAttack(enemy))
                 return;
 
+            // Ưu tiên thấp để không đổi thứ tự logic hiện có
+            if (TryHandleSprayAttack(enemy))
+                return;
+
             HandleChase(enemy);
         }
 
-        /// <summary>
-        /// Va chạm trong Follow state: hiện không cần xử lý gì thêm.
-        /// </summary>
+        /// <summary>Va chạm trong Follow: hiện không xử lý thêm.</summary>
         public override void OnContact(Enemy enemy, Collider other) { }
 
         #endregion
 
         #region ===== BASIC PHYSICS =====
 
-        /// <summary>
-        /// Áp dụng các lực cơ bản cho enemy (trọng lực + dính đất) mỗi frame.
-        /// </summary>
+        /// <summary>Áp dụng trọng lực + dính đất mỗi frame.</summary>
         protected virtual void ApplyBasicForces(Enemy enemy)
         {
             enemy.Gravity();
@@ -70,9 +64,7 @@ namespace PLAYERTWO.PlatformerProject
 
         #region ===== LOST TARGET / RETURN =====
 
-        /// <summary>
-        /// Nếu mất mục tiêu và bật option return: giảm tốc, đếm timer, đủ thời gian thì quay lại state trước.
-        /// </summary>
+        /// <summary>Nếu mất mục tiêu và bật return: giảm tốc + đếm timer, đủ thời gian thì quay lại state trước.</summary>
         protected virtual bool TryReturnToLastStateWhenLostTarget(Enemy enemy)
         {
             if (enemy.stats == null || enemy.stats.current == null) return false;
@@ -96,21 +88,15 @@ namespace PLAYERTWO.PlatformerProject
 
         #region ===== ROLL ATTACK =====
 
-        /// <summary>
-        /// Ưu tiên xử lý roll attack:
-        /// - Nếu đang roll: StepRollAttack và kết thúc frame.
-        /// - Nếu đủ điều kiện bắt đầu roll: StartRollAttack và kết thúc frame.
-        /// </summary>
+        /// <summary>Ưu tiên xử lý roll: đang roll thì step, đủ điều kiện thì start.</summary>
         protected virtual bool TryHandleRollAttack(Enemy enemy)
         {
-            // Đang roll -> chỉ step roll (không chase, không extra attack)
             if (enemy.IsRollAttacking())
             {
                 enemy.StepRollAttack();
                 return true;
             }
 
-            // Chỉ start roll khi đang có player
             if (enemy.player != null && enemy.CanStartRollAttack())
             {
                 enemy.StartRollAttack();
@@ -122,13 +108,37 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+        #region ===== RANGED ATTACK (PROJECTILE) =====
+
+        /// <summary>Xử lý ranged: đang bắn thì đứng lại + nhìn player, đủ điều kiện thì start bắn.</summary>
+        protected virtual bool TryHandleRangedAttack(Enemy enemy)
+        {
+            if (enemy.player == null) return false;
+            if (enemy.stats == null || enemy.stats.current == null) return false;
+
+            if (enemy.IsRangedAttacking())
+            {
+                enemy.Decelerate(enemy.stats.current.deceleration);
+                FacePlayerSmooth(enemy, enemy.player.position);
+                return true;
+            }
+
+            if (enemy.CanStartRangedAttack())
+            {
+                enemy.Decelerate(enemy.stats.current.deceleration);
+                FacePlayerSmooth(enemy, enemy.player.position);
+                enemy.TryStartRangedAttack();
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
         #region ===== EXTRA ATTACK (ANIMATION) =====
 
-        /// <summary>
-        /// Xử lý extra attack dạng animation:
-        /// - Nếu đang đánh: giảm tốc, xoay mặt về player, kết thúc frame.
-        /// - Nếu đủ gần: TryStartExtraAttack và đứng lại đánh ngay.
-        /// </summary>
+        /// <summary>Xử lý extra: đang đánh thì đứng lại + nhìn player, đủ gần thì TryStartExtraAttack.</summary>
         protected virtual bool TryHandleExtraAttack(Enemy enemy)
         {
             if (enemy.player == null) return false;
@@ -148,60 +158,6 @@ namespace PLAYERTWO.PlatformerProject
                 enemy.Decelerate(enemy.stats.current.deceleration);
                 FacePlayerSmooth(enemy, enemy.player.position);
                 enemy.TryStartExtraAttack();
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Xoay enemy nhìn về phía player (chuẩn hoá hướng trên mặt phẳng).
-        /// </summary>
-        protected virtual void FacePlayerSmooth(Enemy enemy, Vector3 targetWorldPos)
-        {
-            var look = targetWorldPos - enemy.position;
-
-            // Loại bỏ thành phần theo trục up để tránh ngước lên/xuống
-            var lookUpOffset = Vector3.Dot(enemy.transform.up, look);
-            var flat = look - enemy.transform.up * lookUpOffset;
-
-            // Đưa về local "up = Vector3.up" để xử lý ổn định
-            var localLook = Quaternion.FromToRotation(enemy.transform.up, Vector3.up) * flat;
-
-            if (localLook.sqrMagnitude > 0.0001f)
-                enemy.FaceDirectionSmooth(localLook.normalized);
-        }
-
-        #endregion
-
-
-        #region ===== RANGED ATTACK (PROJECTILE) =====
-
-        /// <summary>
-        /// Xử lý ranged attack:
-        /// - Nếu đang bắn: giảm tốc, xoay mặt về player, kết thúc frame.
-        /// - Nếu đủ điều kiện bắn: đứng lại và TryStartRangedAttack().
-        /// </summary>
-        protected virtual bool TryHandleRangedAttack(Enemy enemy)
-        {
-            if (enemy.player == null) return false;
-            if (enemy.stats == null || enemy.stats.current == null) return false;
-
-            // Nếu Enemy đang trong trạng thái bắn (đang phát anim Attack)
-            if (enemy.IsRangedAttacking())
-            {
-                enemy.Decelerate(enemy.stats.current.deceleration);
-                FacePlayerSmooth(enemy, enemy.player.position);
-                return true;
-            }
-
-            // Nếu đủ điều kiện bắn (range + cooldown + config...)
-            if (enemy.CanStartRangedAttack())
-            {
-                enemy.Decelerate(enemy.stats.current.deceleration);
-                FacePlayerSmooth(enemy, enemy.player.position);
-                enemy.TryStartRangedAttack();
                 return true;
             }
 
@@ -210,15 +166,34 @@ namespace PLAYERTWO.PlatformerProject
 
         #endregion
 
+        #region ===== SPRAY ATTACK =====
+
+        /// <summary>Xử lý SprayAttack: đang spray thì step, đủ điều kiện thì start.</summary>
+        protected virtual bool TryHandleSprayAttack(Enemy enemy)
+        {
+            // Nếu Enemy.cs chưa có SprayAttack thì bạn xoá region này
+            if (enemy.IsSprayAttacking())
+            {
+                enemy.StepSprayAttack();
+                return true;
+            }
+
+            if (enemy.player != null && enemy.CanStartSprayAttack())
+            {
+                enemy.StartSprayAttack();
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
 
         #region ===== CHASE =====
 
-        /// <summary>
-        /// Đuổi theo player theo followAcceleration/followTopSpeed trong stats.
-        /// </summary>
+        /// <summary>Đuổi theo player theo followAcceleration/followTopSpeed trong stats.</summary>
         protected virtual void HandleChase(Enemy enemy)
         {
-            // Nếu không bật return-to-last mà player bị null thì tránh NullRef
             if (enemy.player == null) return;
             if (enemy.stats == null || enemy.stats.current == null) return;
 
@@ -231,9 +206,25 @@ namespace PLAYERTWO.PlatformerProject
             enemy.FaceDirectionSmooth(localDirection);
         }
 
-        /// <summary>
-        /// Tính hướng đến mục tiêu trên mặt phẳng (loại trục up) và đổi sang hệ local "up = Vector3.up".
-        /// </summary>
+        #endregion
+
+        #region ===== AIM HELPERS =====
+
+        /// <summary>Xoay enemy nhìn về phía mục tiêu (loại trục up, rồi đổi về local up = Vector3.up).</summary>
+        protected virtual void FacePlayerSmooth(Enemy enemy, Vector3 targetWorldPos)
+        {
+            var look = targetWorldPos - enemy.position;
+
+            var upOffset = Vector3.Dot(enemy.transform.up, look);
+            var flat = look - enemy.transform.up * upOffset;
+
+            var localLook = Quaternion.FromToRotation(enemy.transform.up, Vector3.up) * flat;
+
+            if (localLook.sqrMagnitude > 0.0001f)
+                enemy.FaceDirectionSmooth(localLook.normalized);
+        }
+
+        /// <summary>Tính hướng đến mục tiêu trên mặt phẳng và đổi sang hệ local up = Vector3.up.</summary>
         protected virtual Vector3 GetLocalFlatDirectionToTarget(Enemy enemy, Vector3 targetWorldPos)
         {
             var head = targetWorldPos - enemy.position;
