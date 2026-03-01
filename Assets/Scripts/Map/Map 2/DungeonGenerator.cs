@@ -12,10 +12,12 @@ public class DungeonGenerator : MonoBehaviour
     public enum CellType { Empty, Room}
     [SerializeField] private DungeonSO dungeonDataSO;
 
+    [SerializeField] private GameObject[] roomObjArray = new GameObject[4];
     private int minRoomCount = 10;
     private int roomCount = 0;
     private CellType[,] dungeons;
     private List<Vector2Int> roomList = new List<Vector2Int>();
+    
 
     private static Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
@@ -53,7 +55,9 @@ public class DungeonGenerator : MonoBehaviour
         int indexX = Random.Range(0, roomLength);
         int indexY = Random.Range(0, roomLength);
         dungeonDataSO.startIndex = new Vector2Int(indexX, indexY);
-        GameObject room = SpawnRoom(dungeonDataSO.startIndex);
+        GameObject room = SpawnBaseRoom(dungeonDataSO.startIndex);
+        Debug.Log(room.name +" at " + room.GetComponent<RoomManager>().roomSpawnPoint.ToString());
+        SpawnRoom(room, 30);
         roomCount--;
         StartCoroutine(NextGenerateCoroutine(dungeonDataSO.startIndex,room));
     }
@@ -77,7 +81,8 @@ public class DungeonGenerator : MonoBehaviour
                 roomCount--;
                 if (roomCount < 0) return;
                 SetDirectionDoorActive(room, availableDirection[i] - index);
-                GameObject newRoom = SpawnRoom(availableDirection[i]);
+                GameObject newRoom = SpawnBaseRoom(availableDirection[i]);
+                SpawnRoom(newRoom, roomCount);
                 SetDirectionDoorActive(newRoom, index - availableDirection[i]);
                 StartCoroutine(NextGenerateCoroutine(availableDirection[i], newRoom));
             }
@@ -93,7 +98,7 @@ public class DungeonGenerator : MonoBehaviour
     void SetDirectionDoorActive(GameObject room,Vector2Int dir )
     {
         if ((room == null) || (dir == Vector2Int.zero)) return;
-        room.GetComponent<RoomGenerator>().AddActiveDoor(DoorDir(dir));
+        room.GetComponent<RoomManager>().AddActiveDoor(DoorDir(dir));
     }
     int DoorDir(Vector2Int dir)
     {
@@ -125,7 +130,7 @@ public class DungeonGenerator : MonoBehaviour
         Vector2Int[] availableDirection = availDirs.ToArray();
         return availableDirection;
     }
-    GameObject SpawnRoom(Vector2Int pos)
+    GameObject SpawnBaseRoom(Vector2Int pos)
     {
         if (!InBounds(pos)) return null;
         if (dungeons[pos.x, pos.y] != CellType.Empty) return null;
@@ -134,5 +139,26 @@ public class DungeonGenerator : MonoBehaviour
         roomList.Add(pos);
 
         return Instantiate(roomPrefab, new Vector3(pos.x * roomSize, 0, pos.y * roomSize), Quaternion.identity, transform);
+    }
+
+    void SpawnRoom(GameObject location, int value)
+    {
+        GameObject room =null;
+        if (location == null) return;
+        if (value == 30)
+        {
+            if (roomObjArray[0] == null) return;
+            room = roomObjArray[0];
+        }
+
+        if (value == 0)
+        {
+            if (roomObjArray[1] == null) return;
+            room = roomObjArray[1];
+        }
+
+        if(room == null) return;
+        GameObject roomParent = location.GetComponent<RoomManager>().roomSpawnPoint;
+        Instantiate(room, roomParent.transform.position, Quaternion.identity, roomParent.transform);
     }
 }
