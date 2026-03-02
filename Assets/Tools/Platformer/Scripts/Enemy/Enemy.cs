@@ -249,6 +249,7 @@ namespace PLAYERTWO.PlatformerProject
 
             if (health.isEmpty)
             {
+                StopAllAttacks();
                 controller.enabled = false;
                 enemyEvents?.OnDie?.Invoke();
             }
@@ -659,10 +660,9 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (!m_sprayAttacking) return;
 
-            // Phase phun: tự kết thúc theo timer
+            // Phase phun: đứng yên + kết thúc theo timer (KHÔNG xoay theo player)
             if (m_spraySpraying)
             {
-                // Khoá trôi ngang (đứng yên)
                 lateralVelocity = Vector3.zero;
 
                 if (Time.time >= m_sprayEndTime)
@@ -679,28 +679,28 @@ namespace PLAYERTWO.PlatformerProject
 
             if (dist <= sprayStandOffDistance)
             {
+                // Dừng lại trước khi phun
                 Decelerate();
 
-                if (player != null)
-                {
-                    Vector3 face = player.transform.position - transform.position;
-                    face.y = 0f;
+                // VN: Chỉ xoay 1 lần theo hướng đã lock (không bám theo player)
+                Vector3 face = m_sprayTargetPos - transform.position;
+                face.y = 0f;
 
-                    if (face.sqrMagnitude > 0.0001f)
-                        FaceDirectionSmooth(face.normalized);
-                }
+                if (face.sqrMagnitude > 0.0001f)
+                    FaceDirectionSmooth(face.normalized);
 
+                // Bắt đầu phun
                 m_spraySpraying = true;
                 lateralVelocity = Vector3.zero;
 
                 PlayAttack(EnemyAttackType.SprayAttack, true);
-
                 SetSprayEffectActive(true);
 
                 m_sprayEndTime = Time.time + sprayDuration;
                 return;
             }
 
+            // Tiếp tục chạy tới điểm lock
             Vector3 dir = toTarget.normalized;
             Accelerate(dir, sprayAcceleration, sprayTopSpeed);
             FaceDirectionSmooth(dir);

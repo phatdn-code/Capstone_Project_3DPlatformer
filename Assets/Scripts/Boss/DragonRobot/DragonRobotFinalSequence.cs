@@ -39,6 +39,9 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float cannonScaleTo = 0.15f;
         [SerializeField, Min(0f)] private float cannonScaleDuration = 0.25f;
 
+        [Header("Cannon Grow Effect")]
+        [SerializeField] private GameObject cannonGrowEffect;
+
         [Header("Explosion Effect on Death")]
         [SerializeField] private GameObject explosionEffect;
         [SerializeField] private float explosionDuration = 3f;
@@ -130,10 +133,13 @@ namespace PLAYERTWO.PlatformerProject
 
         /// <summary>
         /// VN: Fade Out -> setup -> Fade In.
-        /// Khi alpha về 0: bật FinalCam trước rồi mới tween scale cannon.
+        /// Sau khi FadeIn xong thì bật effect pháo lớn lên, rồi mới scale cannon.
         /// </summary>
         private IEnumerator RunFadeAndSetup()
         {
+            if (cannonGrowEffect != null)
+                cannonGrowEffect.SetActive(false);
+
             var fader = Fader.instance;
 
             if (fader == null)
@@ -141,6 +147,8 @@ namespace PLAYERTWO.PlatformerProject
                 ActivateWaterCannonAndRepositionBoss();
                 SetFinalCameraActive(true);
                 yield return null;
+
+                ActivateCannonGrowEffect();
                 yield return TweenCannonScaleIfNeeded();
                 yield break;
             }
@@ -153,8 +161,10 @@ namespace PLAYERTWO.PlatformerProject
             yield return null;
 
             ActivateWaterCannonAndRepositionBoss();
+
             yield return FadeIn(fader);
 
+            ActivateCannonGrowEffect();
             yield return TweenCannonScaleIfNeeded();
         }
 
@@ -193,6 +203,15 @@ namespace PLAYERTWO.PlatformerProject
 
             if (finalBossPose != null)
                 transform.SetPositionAndRotation(finalBossPose.position, finalBossPose.rotation);
+        }
+
+        /// <summary>
+        /// VN: Bật hiệu ứng hỗ trợ cảm giác pháo lớn lên.
+        /// </summary>
+        private void ActivateCannonGrowEffect()
+        {
+            if (cannonGrowEffect != null)
+                cannonGrowEffect.SetActive(true);
         }
 
         /// <summary>

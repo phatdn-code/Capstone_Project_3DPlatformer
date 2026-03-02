@@ -905,6 +905,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1996273795}
+  - {fileID: 1686240443}
   m_Father: {fileID: 1410819629}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &87327665
@@ -2633,6 +2634,7 @@ MonoBehaviour:
   mode: 1
   damage: 1
   hitCooldown: 0.15
+  autoBindPlayerOnEnable: 1
 --- !u!1 &297702854
 GameObject:
   m_ObjectHideFlags: 0
@@ -3830,6 +3832,136 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
+--- !u!1001 &465396336
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1686240443}
+    m_Modifications:
+    - target: {fileID: 1922326949066838705, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863388124386285763, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4719164689337802338, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8947658124144170195, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8949710538052390116, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9121138648736978407, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173867421, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Name
+      value: CFXR Magic Poof + Text Pop
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173867421, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.46
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265192252157, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: stopAction
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265192340317, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9139305265192340319, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6f105a576857cfa4da8f9a65ac1f80fe, type: 3}
+--- !u!4 &465396337 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9139305265173903293, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+    type: 3}
+  m_PrefabInstance: {fileID: 465396336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &465396338 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9139305265173867421, guid: 6f105a576857cfa4da8f9a65ac1f80fe,
+    type: 3}
+  m_PrefabInstance: {fileID: 465396336}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &483179332
 GameObject:
   m_ObjectHideFlags: 0
@@ -8171,16 +8303,24 @@ MonoBehaviour:
   rollAcceleration: 40
   rollStopDistance: 0.4
   rollCooldown: 2
+  enableSprayAttack: 1
+  sprayAttackRange: 5
+  sprayTopSpeed: 6
+  sprayAcceleration: 35
+  sprayStandOffDistance: 1.2
+  sprayCooldown: 2.5
+  sprayDuration: 1.2
+  sprayEffectObject: {fileID: 0}
   startInactive: 1
   bossName: 
   m_phases:
   - phaseName: Dragon Robot
-    maxHealth: 60
+    maxHealth: 50
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
   - phaseName: Dragon Robot
-    maxHealth: 120
+    maxHealth: 80
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
@@ -8321,6 +8461,7 @@ MonoBehaviour:
   cannonScaleFrom: 0.075
   cannonScaleTo: 0.15
   cannonScaleDuration: 0.25
+  cannonGrowEffect: {fileID: 465396338}
   explosionEffect: {fileID: 2398608829508964987, guid: f387ac791007951459ed6a93dfa675bf,
     type: 3}
   explosionDuration: 2.5
@@ -8385,6 +8526,7 @@ MonoBehaviour:
   mode: 1
   damage: 1
   hitCooldown: 0.15
+  autoBindPlayerOnEnable: 1
 --- !u!1 &1159522402
 GameObject:
   m_ObjectHideFlags: 0
@@ -13916,6 +14058,7 @@ MonoBehaviour:
   mode: 0
   damage: 1
   hitCooldown: 0.15
+  autoBindPlayerOnEnable: 1
 --- !u!1 &1208640342
 GameObject:
   m_ObjectHideFlags: 0
@@ -14132,8 +14275,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shieldObject: {fileID: 935698568484544408}
   shieldSlider: {fileID: 549532177}
-  maxShieldValue: 10
-  shieldValue: 10
+  maxShieldValue: 100
+  shieldValue: 100
   enableOnStart: 1
   scaleTweenDuration: 0.3
   enableEase: 27
@@ -16259,6 +16402,38 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &1686240442
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1686240443}
+  m_Layer: 0
+  m_Name: Effects
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1686240443
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686240442}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 465396337}
+  m_Father: {fileID: 87327664}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1711553704
 GameObject:
   m_ObjectHideFlags: 0
@@ -24983,8 +25158,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a84c9fd6072e17c46b93dd9cf28a0904, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotateVector: {x: 0, y: 0, z: 180}
-  rotateSpace: 0
 --- !u!4 &335268182082210096
 Transform:
   m_ObjectHideFlags: 0
