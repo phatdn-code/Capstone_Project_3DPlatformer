@@ -14,8 +14,8 @@ namespace PLAYERTWO.PlatformerProject
         #region === HEALTH SETTINGS ===
 
         [Header("Health Settings")]
-        [SerializeField] private int m_maxHealth = 100;
-        [SerializeField] private int m_currentHealth = 100;
+        [SerializeField, HideInInspector] private int m_maxHealth = 100;
+        [SerializeField, HideInInspector] private int m_currentHealth = 100;
 
         [Header("Take Damage Anim Gate (Optional)")]
         [SerializeField] private bool useTakeDamageAnimGate;

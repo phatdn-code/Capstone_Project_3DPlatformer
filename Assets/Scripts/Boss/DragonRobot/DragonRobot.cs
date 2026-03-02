@@ -369,6 +369,9 @@ namespace PLAYERTWO.PlatformerProject
 
             // 8) (khuyên thêm) đảm bảo không bị kẹt anim di chuyển
             dragonAnim?.SetMoving(false);
+
+            // 9) Ép animator thoát hẳn khỏi các state skill
+            dragonAnim?.ForceStopSkillAnimations();
         }
 
 

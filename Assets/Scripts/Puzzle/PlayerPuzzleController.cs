@@ -23,6 +23,8 @@ public class PlayerPuzzleController : PlayerInputManager
 
     private void UpdateSelectionUI()
     {
+        if (_selectionUI == null) return;
+
         if (_canSelect && !_isPuzzlePlaying)
             _selectionUI.SetActive(true);
 

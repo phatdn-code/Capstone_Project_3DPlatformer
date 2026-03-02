@@ -117,16 +117,21 @@ namespace PLAYERTWO.PlatformerProject
             InitializeBoss();
             InitializeDefaultPhasesIfNeeded();
             HookHealthEvents();
+
+            // ✅ Preload HP theo Phase 0 dù chưa start battle
+            ApplyPhaseVisual(0, instant: true);
+            m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
+
             m_bossUI.Bind(this);
 
             if (!startInactive)
             {
-                // Khởi động boss ngay lập tức nếu không phải cinematic
-                ApplyPhaseVisual(0, instant: true);
-                m_bossHealth.InitializePhase(0, m_phases[0].maxHealth);
                 OnBossPhaseStart.Invoke(0);
                 isEncounterActive = true;
             }
+
+            // vẫn cinematic/inactive, nhưng HP đã đúng theo phase
+            else isEncounterActive = false;
         }
 
         protected override void OnUpdate()

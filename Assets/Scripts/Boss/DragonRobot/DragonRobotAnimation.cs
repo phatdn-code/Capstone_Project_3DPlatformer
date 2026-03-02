@@ -61,5 +61,23 @@ namespace PLAYERTWO.PlatformerProject
             animator.ResetTrigger("TakeDamage");
             animator.SetBool("IsShieldOn", isOn);
         }
+
+        /// <summary>
+        /// Ép thoát toàn bộ trạng thái skill và chuyển ngay về Idle.
+        /// </summary>
+        public void ForceStopSkillAnimations()
+        {
+            if (animator == null) return;
+
+            animator.ResetTrigger("TakeDamage");
+            animator.ResetTrigger("BlastAttack");
+            animator.ResetTrigger("MeteorAttack");
+
+            animator.SetBool("IsFlameThrowing", false);
+            animator.SetBool("IsMeteorRaining", false);
+            animator.SetBool("IsShieldOn", false);
+
+            animator.CrossFade("Idle", 0.05f, 0);
+        }
     }
 }
