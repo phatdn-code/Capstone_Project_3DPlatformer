@@ -10,6 +10,9 @@ public class RoomManager : MonoBehaviour
     [SerializeField] private GameObject[] roads;
     [SerializeField] private GameObject[] walls;
     [SerializeField] private GameObject baseCamera;
+    [SerializeField] private GameObject roomblank;
+    [SerializeField] private BoxCollider roomTrigerCollider;
+
     [SerializeField] private bool isRoomCleared = false;
 
     private List<GameObject> activeDoors = new List<GameObject>();
@@ -41,5 +44,27 @@ public class RoomManager : MonoBehaviour
             //door.GetComponent<Door>().CloseDoor();
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            baseCamera.SetActive(true);
+            roomblank.SetActive(false);
+            if (!isRoomCleared)
+            {
+                CloseAllDoors();
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.CompareTag("Player"))
+        {
+            baseCamera.SetActive(false);
+        }
+    }
+
 
 }

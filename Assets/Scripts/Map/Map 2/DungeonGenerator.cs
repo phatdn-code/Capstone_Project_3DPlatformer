@@ -56,7 +56,6 @@ public class DungeonGenerator : MonoBehaviour
         int indexY = Random.Range(0, roomLength);
         dungeonDataSO.startIndex = new Vector2Int(indexX, indexY);
         GameObject room = SpawnBaseRoom(dungeonDataSO.startIndex);
-        Debug.Log(room.name +" at " + room.GetComponent<RoomManager>().roomSpawnPoint.ToString());
         SpawnRoom(room, 30);
         roomCount--;
         StartCoroutine(NextGenerateCoroutine(dungeonDataSO.startIndex,room));
