@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 85475303f0b548449ba501f9de347216
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 259457
+  packageName: 'Better Fog: Height Fog, Light Scattering & More'
+  packageVersion: 1.3
+  assetPath: Assets/INab Studio/Post Processing Assets/Better Fog/Common URP/Volumes/Learn/Learn
+    2.asset
+  uploadId: 696366

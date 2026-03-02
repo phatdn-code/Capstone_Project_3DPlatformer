@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 7a4a79a4c18a4e744b5c607a01372af3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 259457
+  packageName: 'Better Fog: Height Fog, Light Scattering & More'
+  packageVersion: 1.3
+  assetPath: Assets/INab Studio/Post Processing Assets/Better Fog/Common URP/Volumes/TerrainDemo/Gradients/Gradient
+    6.asset
+  uploadId: 696366

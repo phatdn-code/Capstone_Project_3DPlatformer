@@ -1,0 +1,3178 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8181862751112911570
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66f335fb1ffd8684294ad653bf1c7564, type: 3}
+  m_Name: ColorAdjustments
+  m_EditorClassIdentifier: 
+  active: 0
+  postExposure:
+    m_OverrideState: 1
+    m_Value: 0
+  contrast:
+    m_OverrideState: 1
+    m_Value: 0
+  colorFilter:
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  hueShift:
+    m_OverrideState: 0
+    m_Value: 0
+  saturation:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &-8148806682889724950
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &-7741820202504648545
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &-7465753169536601502
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81180773991d8724ab7f2d216912b564, type: 3}
+  m_Name: ChromaticAberration
+  m_EditorClassIdentifier: 
+  active: 0
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.07
+--- !u!114 &-6668466429677749367
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &-5748761446273443465
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &-5360917630440571482
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 1
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 1
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 1
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 54.28
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 2800000, guid: 290fe48d3bcb0b44a9d875023c609fb5, type: 3}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 1
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 1
+    m_Value: 1
+  _FogType:
+    m_OverrideState: 1
+    m_Value: 2
+  _DistanceFogOffset:
+    m_OverrideState: 1
+    m_Value: 0
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 1
+    m_Value: 0.0202
+  _UseSkyboxHeightFog:
+    m_OverrideState: 1
+    m_Value: 1
+  _SkyboxFogOffset:
+    m_OverrideState: 1
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 1
+    m_Value: 0
+  _SkyboxFogIntensity:
+    m_OverrideState: 1
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 1
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 1
+    m_Value: 0.418
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 1
+    m_Value: 1
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: -0.816
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 2.77
+  _Radius:
+    m_OverrideState: 1
+    m_Value: 3.61
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 44
+  _Intensity:
+    m_OverrideState: 1
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 1
+    m_Value: {fileID: 2800000, guid: fb7f8a612167c1044a99d1f906499de3, type: 3}
+    dimension: 1
+--- !u!114 &-4718904345963505407
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &-4105489783845021450
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97c23e3b12dc18c42a140437e53d3951, type: 3}
+  m_Name: Tonemapping
+  m_EditorClassIdentifier: 
+  active: 0
+  mode:
+    m_OverrideState: 1
+    m_Value: 2
+  neutralHDRRangeReductionMode:
+    m_OverrideState: 0
+    m_Value: 2
+  acesPreset:
+    m_OverrideState: 0
+    m_Value: 3
+  hueShiftAmount:
+    m_OverrideState: 0
+    m_Value: 0
+  detectPaperWhite:
+    m_OverrideState: 0
+    m_Value: 0
+  paperWhite:
+    m_OverrideState: 0
+    m_Value: 300
+  detectBrightnessLimits:
+    m_OverrideState: 0
+    m_Value: 1
+  minNits:
+    m_OverrideState: 0
+    m_Value: 0.005
+  maxNits:
+    m_OverrideState: 0
+    m_Value: 1000
+--- !u!114 &-2336225202249386775
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &-2313665198374203626
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c01700fd266d6914ababb731e09af2eb, type: 3}
+  m_Name: DepthOfField
+  m_EditorClassIdentifier: 
+  active: 0
+  mode:
+    m_OverrideState: 1
+    m_Value: 2
+  gaussianStart:
+    m_OverrideState: 1
+    m_Value: 0
+  gaussianEnd:
+    m_OverrideState: 1
+    m_Value: 2
+  gaussianMaxRadius:
+    m_OverrideState: 1
+    m_Value: 1
+  highQualitySampling:
+    m_OverrideState: 1
+    m_Value: 0
+  focusDistance:
+    m_OverrideState: 1
+    m_Value: 100
+  aperture:
+    m_OverrideState: 1
+    m_Value: 1
+  focalLength:
+    m_OverrideState: 1
+    m_Value: 35
+  bladeCount:
+    m_OverrideState: 1
+    m_Value: 5
+  bladeCurvature:
+    m_OverrideState: 1
+    m_Value: 1
+  bladeRotation:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &-1582981216653054771
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: Learn 6
+  m_EditorClassIdentifier: 
+  components:
+  - {fileID: -4105489783845021450}
+  - {fileID: 7804920074520926876}
+  - {fileID: -8181862751112911570}
+  - {fileID: 974915898123294377}
+  - {fileID: 8363940448736756376}
+  - {fileID: 9080048897101591047}
+  - {fileID: -2313665198374203626}
+  - {fileID: 6264791973784435014}
+  - {fileID: -7465753169536601502}
+  - {fileID: -5360917630440571482}
+--- !u!114 &974915898123294377
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
+  m_Name: Vignette
+  m_EditorClassIdentifier: 
+  active: 0
+  color:
+    m_OverrideState: 0
+    m_Value: {r: 0, g: 0, b: 0, a: 1}
+  center:
+    m_OverrideState: 0
+    m_Value: {x: 0.5, y: 0.5}
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.41
+  smoothness:
+    m_OverrideState: 0
+    m_Value: 0.2
+  rounded:
+    m_OverrideState: 0
+    m_Value: 0
+--- !u!114 &1042677526042838289
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &2003968060446241327
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &2108911953400898663
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &3990515263936849911
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &5032005335980762374
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &5048582455685590259
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &5612717673197871727
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &6143530491436147005
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &6264791973784435014
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 221518ef91623a7438a71fef23660601, type: 3}
+  m_Name: WhiteBalance
+  m_EditorClassIdentifier: 
+  active: 0
+  temperature:
+    m_OverrideState: 1
+    m_Value: 15
+  tint:
+    m_OverrideState: 1
+    m_Value: 10
+--- !u!114 &6781247504381010728
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &7458836284034005469
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &7804920074520926876
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5485954d14dfb9a4c8ead8edb0ded5b1, type: 3}
+  m_Name: LiftGammaGain
+  m_EditorClassIdentifier: 
+  active: 0
+  lift:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: -0.018231539}
+  gamma:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 0.10938923}
+  gain:
+    m_OverrideState: 0
+    m_Value: {x: 1, y: 1, z: 1, w: 0}
+--- !u!114 &8363940448736756376
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb60a22f311433c4c962b888d1393f88, type: 3}
+  m_Name: PaniniProjection
+  m_EditorClassIdentifier: 
+  active: 0
+  distance:
+    m_OverrideState: 1
+    m_Value: 0.1
+  cropToFit:
+    m_OverrideState: 1
+    m_Value: 1
+--- !u!114 &8881439160672559423
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd05c3d9e2dde840807ee2df7b4f57e, type: 3}
+  m_Name: BetterFogVolumeComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  _FogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _EnergyLoss:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseGradient:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  _GradientStart:
+    m_OverrideState: 0
+    m_Value: 0
+  _GradientEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _GradientTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+    LerpValue: 0
+    FromTexture: {fileID: 0}
+  _UseSunLight:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunColor:
+    m_OverrideState: 0
+    m_Value: {r: 0.9, g: 0.85, b: 0.8, a: 1}
+  _SunIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _SunPower:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseDistanceFog:
+    m_OverrideState: 0
+    m_Value: 1
+  _UseRadialDistance:
+    m_OverrideState: 0
+    m_Value: 0
+  _FogType:
+    m_OverrideState: 0
+    m_Value: 3
+  _DistanceFogOffset:
+    m_OverrideState: 0
+    m_Value: -20
+  _SceneStart:
+    m_OverrideState: 0
+    m_Value: 10
+  _SceneEnd:
+    m_OverrideState: 0
+    m_Value: 100
+  _FogDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseSkyboxHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogOffset:
+    m_OverrideState: 0
+    m_Value: 0
+  _SkyboxFogHardness:
+    m_OverrideState: 0
+    m_Value: 0.75
+  _SkyboxFogIntensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _SkyboxFill:
+    m_OverrideState: 0
+    m_Value: 0
+  _UseHeightFog:
+    m_OverrideState: 0
+    m_Value: 0
+  _Height:
+    m_OverrideState: 0
+    m_Value: 4
+  _HeightDensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _HeightFogType:
+    m_OverrideState: 0
+    m_Value: 2
+  _UseNoise:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseAffect:
+    m_OverrideState: 0
+    m_Value: 2
+  _NoiseIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+  _NoiseDistanceEnd:
+    m_OverrideState: 0
+    m_Value: 80
+  _NoiseEndHardness:
+    m_OverrideState: 0
+    m_Value: 0.35
+  _Scale1:
+    m_OverrideState: 0
+    m_Value: 40
+  _Lerp1:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _NoiseSpeed1:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
+  _NoiseTimeScale1:
+    m_OverrideState: 0
+    m_Value: 0.1
+  _UseSSMS:
+    m_OverrideState: 0
+    m_Value: 0
+  _Threshold:
+    m_OverrideState: 0
+    m_Value: 0
+  _SoftKnee:
+    m_OverrideState: 0
+    m_Value: 0.5
+  _Radius:
+    m_OverrideState: 0
+    m_Value: 7
+  _BlurWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  _Intensity:
+    m_OverrideState: 0
+    m_Value: 1
+  _HighQuality:
+    m_OverrideState: 0
+    m_Value: 0
+  _AntiFlicker:
+    m_OverrideState: 0
+    m_Value: 0
+  _FadeRamp:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+--- !u!114 &9080048897101591047
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: 
+  active: 1
+  skipIterations:
+    m_OverrideState: 0
+    m_Value: 4
+  threshold:
+    m_OverrideState: 0
+    m_Value: 6.99
+  intensity:
+    m_OverrideState: 1
+    m_Value: 1
+  scatter:
+    m_OverrideState: 0
+    m_Value: 0
+  clamp:
+    m_OverrideState: 0
+    m_Value: 65472
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 0.8254717, b: 0.8669497, a: 1}
+  highQualityFiltering:
+    m_OverrideState: 0
+    m_Value: 1
+  downscale:
+    m_OverrideState: 0
+    m_Value: 0
+  maxIterations:
+    m_OverrideState: 0
+    m_Value: 6
+  dirtTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+  dirtIntensity:
+    m_OverrideState: 0
+    m_Value: 0
