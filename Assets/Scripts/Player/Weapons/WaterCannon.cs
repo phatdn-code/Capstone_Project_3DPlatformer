@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -13,38 +14,73 @@ namespace PLAYERTWO.PlatformerProject
     public class WaterCannon : MonoBehaviour
     {
         //────────────────────────────────────────────────────
+        #region === ODIN HELPERS ===
+
+        private bool IsProjectileMode() => fireMode == CannonFireMode.Projectile;
+        private bool IsBeamMode() => fireMode == CannonFireMode.Beam;
+
+        #endregion
+
+        //────────────────────────────────────────────────────
+        #region === INSPECTOR: FIRE MODE ===
+
+        [TitleGroup("Fire Mode", Alignment = TitleAlignments.Centered)]
+        [EnumToggleButtons]
+        [HideLabel]
+        [SerializeField] private CannonFireMode fireMode = CannonFireMode.Projectile;
+
+        #endregion
+
+        //────────────────────────────────────────────────────
         #region === INSPECTOR: REFERENCES ===
 
-        [Header("Projectile")]
+        [TitleGroup("References", Alignment = TitleAlignments.Centered)]
+
+        [ShowIf(nameof(IsProjectileMode))]
+        [FoldoutGroup("References/Projectile", Expanded = true)]
         [SerializeField] private WaterProjectile projectilePrefab;
 
-        [Header("Beam")]
+        [ShowIf(nameof(IsBeamMode))]
+        [FoldoutGroup("References/Beam", Expanded = true)]
         [SerializeField] private BeamVfx beamVfx;
 
-        [Header("Muzzle VFX")]
+        [FoldoutGroup("References/Muzzle VFX", Expanded = true)]
         [SerializeField] private ParticleSystem muzzleCastEffect;
 
-        [Header("Rotation Pivots")]
+        [FoldoutGroup("References/Rotation Pivots", Expanded = true)]
         [SerializeField] private Transform yawPivot;
+
+        [FoldoutGroup("References/Rotation Pivots", Expanded = true)]
         [SerializeField] private Transform pitchPivot;
 
-        [Header("Cinemachine Camera")]
-        [Tooltip("VirtualCamera dùng khi điều khiển cannon.")]
+        [FoldoutGroup("References/Cinemachine Camera", Expanded = true)]
         [SerializeField] private CinemachineVirtualCameraBase cannonCamera;
+
+        [FoldoutGroup("References/Cinemachine Camera", Expanded = true)]
         [SerializeField] private int controllingPriority = 100;
+
+        [FoldoutGroup("References/Cinemachine Camera", Expanded = true)]
         [SerializeField] private int idlePriority = 0;
 
-        [Header("Tutorial (Trigger UI)")]
+        [FoldoutGroup("References/Tutorial UI", Expanded = true)]
         [SerializeField] private GameObject tutorialArrow;
+
+        [FoldoutGroup("References/Tutorial UI", Expanded = true)]
         [SerializeField] private GameObject tutorialUI;
+
+        [FoldoutGroup("References/Tutorial UI", Expanded = true)]
         [SerializeField] private bool arrowVisibleByDefault = true;
 
-        [Header("Energy UI")]
+        [FoldoutGroup("References/Energy UI", Expanded = true)]
         [SerializeField] private Slider energySlider;
+
+        [FoldoutGroup("References/Energy UI", Expanded = true)]
         [SerializeField] private bool showEnergyOnlyWhenControlling = true;
 
-        [Header("Energy Fill Color")]
+        [FoldoutGroup("References/Energy UI", Expanded = true)]
         [SerializeField] private Image energyFillImage;
+
+        [FoldoutGroup("References/Energy UI", Expanded = true)]
         [SerializeField] private float colorTweenDuration = 0.25f;
 
         #endregion
@@ -52,27 +88,53 @@ namespace PLAYERTWO.PlatformerProject
         //────────────────────────────────────────────────────
         #region === INSPECTOR: SETTINGS ===
 
-        [Header("Fire Settings")]
-        [SerializeField] private CannonFireMode fireMode = CannonFireMode.Projectile;
+        [TitleGroup("Settings", Alignment = TitleAlignments.Centered)]
+
+        [ShowIf(nameof(IsProjectileMode))]
+        [FoldoutGroup("Settings/Fire", Expanded = true)]
         [SerializeField] private float fireCooldown = 1.0f;
 
-        [Header("Rotation Settings")]
+        [FoldoutGroup("Settings/Rotation", Expanded = true)]
         [SerializeField] private float yawSpeed = 90f;
+
+        [FoldoutGroup("Settings/Rotation", Expanded = true)]
         [SerializeField] private float pitchSpeed = 60f;
-        [SerializeField] private float minPitch = -5f;
+
+        [FoldoutGroup("Settings/Rotation", Expanded = true)]
+        [SerializeField] private float minPitch = -15f;
+
+        [FoldoutGroup("Settings/Rotation", Expanded = true)]
         [SerializeField] private float maxPitch = 45f;
+
+        [FoldoutGroup("Settings/Rotation", Expanded = true)]
         [SerializeField] private bool invertY = true;
 
-        [Header("Yaw Clamp")]
+        [FoldoutGroup("Settings/Yaw Clamp", Expanded = true)]
         [SerializeField] private bool clampYaw = true;
+
+        [ShowIf(nameof(clampYaw))]
+        [FoldoutGroup("Settings/Yaw Clamp", Expanded = true)]
         [SerializeField] private float minYaw = -120f;
+
+        [ShowIf(nameof(clampYaw))]
+        [FoldoutGroup("Settings/Yaw Clamp", Expanded = true)]
         [SerializeField] private float maxYaw = 120f;
 
-        [Header("Energy Settings")]
+        [FoldoutGroup("Settings/Energy", Expanded = true)]
         [SerializeField] private float maxEnergy = 100f;
+
+        [FoldoutGroup("Settings/Energy", Expanded = true)]
         [SerializeField] private float energyRegenPerSecond = 15f;       // hồi bình thường
+
+        [FoldoutGroup("Settings/Energy", Expanded = true)]
         [SerializeField] private float depletedRegenPerSecond = 10f;     // hồi chậm khi LOCK
+
+        [ShowIf(nameof(IsProjectileMode))]
+        [FoldoutGroup("Settings/Energy", Expanded = true)]
         [SerializeField] private float projectileEnergyCost = 20f;       // tốn mỗi viên
+
+        [ShowIf(nameof(IsBeamMode))]
+        [FoldoutGroup("Settings/Energy", Expanded = true)]
         [SerializeField] private float beamEnergyCostPerSecond = 25f;    // tốn mỗi giây giữ beam
 
         #endregion
@@ -327,7 +389,6 @@ namespace PLAYERTWO.PlatformerProject
 
             if (affectPlayer) _playerHub.SetPlayerControlAndModel(isControlling);
         }
-
 
         #endregion
 

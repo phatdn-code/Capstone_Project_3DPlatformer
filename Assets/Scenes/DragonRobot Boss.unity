@@ -920,6 +920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8080eb055db85c4f87f55c73b7f2e9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fireMode: 0
   projectilePrefab: {fileID: 8375161180900987790, guid: f54c5ada2c68c384f9e14ede51d002a7,
     type: 3}
   beamVfx: {fileID: 0}
@@ -936,7 +937,6 @@ MonoBehaviour:
   showEnergyOnlyWhenControlling: 1
   energyFillImage: {fileID: 0}
   colorTweenDuration: 0.25
-  fireMode: 0
   fireCooldown: 1
   yawSpeed: 90
   pitchSpeed: 60
@@ -14275,8 +14275,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shieldObject: {fileID: 935698568484544408}
   shieldSlider: {fileID: 549532177}
-  maxShieldValue: 100
-  shieldValue: 100
+  maxShieldValue: 200
+  shieldValue: 200
   enableOnStart: 1
   scaleTweenDuration: 0.3
   enableEase: 27
@@ -19382,6 +19382,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8080eb055db85c4f87f55c73b7f2e9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fireMode: 1
   projectilePrefab: {fileID: 8375161180900987790, guid: fbaf6fe4cbbb8524395d046e51d4cea9,
     type: 3}
   beamVfx: {fileID: 8369116965554791641}
@@ -19398,7 +19399,6 @@ MonoBehaviour:
   showEnergyOnlyWhenControlling: 0
   energyFillImage: {fileID: 6592537182787139237}
   colorTweenDuration: 0.25
-  fireMode: 1
   fireCooldown: 1
   yawSpeed: 90
   pitchSpeed: 60
@@ -19412,7 +19412,7 @@ MonoBehaviour:
   energyRegenPerSecond: 20
   depletedRegenPerSecond: 15
   projectileEnergyCost: 20
-  beamEnergyCostPerSecond: 25
+  beamEnergyCostPerSecond: 40
 --- !u!114 &2055876279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35714,6 +35714,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8080eb055db85c4f87f55c73b7f2e9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fireMode: 0
   projectilePrefab: {fileID: 8375161180900987790, guid: fbaf6fe4cbbb8524395d046e51d4cea9,
     type: 3}
   beamVfx: {fileID: 0}
@@ -35730,7 +35731,6 @@ MonoBehaviour:
   showEnergyOnlyWhenControlling: 0
   energyFillImage: {fileID: 608788561}
   colorTweenDuration: 0.25
-  fireMode: 0
   fireCooldown: 1
   yawSpeed: 90
   pitchSpeed: 60
