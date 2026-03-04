@@ -50,9 +50,10 @@ public class RoomManager : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             baseCamera.SetActive(true);
-            roomblank.SetActive(false);
+            
             if (!isRoomCleared)
             {
+                roomblank.SetActive(false);
                 CloseAllDoors();
             }
         }

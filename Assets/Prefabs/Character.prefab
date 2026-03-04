@@ -1362,6 +1362,7 @@ MonoBehaviour:
   rotateToPlatforms: 1
   minSpeedToFall: 5
   maxCeilingAngle: 60
+  autoCreateController: 1
   m_movingMode: 0
   playerEvents:
     OnJump:
@@ -1616,7 +1617,7 @@ MonoBehaviour:
   grabRadius: 1
   grabLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 131063
 --- !u!114 &3071743841782118053
 MonoBehaviour:
   m_ObjectHideFlags: 0
