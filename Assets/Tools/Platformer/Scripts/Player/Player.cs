@@ -31,6 +31,11 @@ namespace PLAYERTWO.PlatformerProject
         protected Vector3 m_pathForward;
         protected Vector3 m_closestPointOnPath;
 
+        [Header("Context")]
+        [SerializeField] private bool m_isSelectMapPlayer = false;
+
+        public bool IsSelectMapPlayer => m_isSelectMapPlayer;
+
         /// <summary>
         /// Returns the Player Input Manager instance.
         /// </summary>
@@ -275,6 +280,12 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public virtual void Die()
         {
+            if (m_isSelectMapPlayer)
+            {
+                playerEvents.OnDie?.Invoke();
+                return;
+            }
+
             health.Set(0);
             playerEvents.OnDie?.Invoke();
         }
