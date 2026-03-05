@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 using Unity.Cinemachine;
+using TMPro;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -12,10 +13,14 @@ namespace PLAYERTWO.PlatformerProject
 
         [Header("Scene")]
         [SerializeField] private string sceneName;
+        [SerializeField] private string mapDisplayName;
 
         [Header("Markers (UI)")]
-        [SerializeField] private GameObject distantMarker; // xa: có CanvasGroup
-        [SerializeField] private GameObject focusMarker;   // gần: có CanvasGroup
+        [SerializeField] private GameObject distantMarker;
+        [SerializeField] private GameObject focusMarker;
+
+        [Header("Map Name UI")]
+        [SerializeField] private TextMeshProUGUI mapNameText;
 
         [Header("Player")]
         [SerializeField] private string playerTag = "Player";
@@ -25,12 +30,15 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float distantScale = 0.75f;
         [SerializeField] private float focusMinScale = 0.5f;
         [SerializeField] private float focusMaxScale = 1f;
+        [SerializeField] private float focusOvershootScale = 1.06f;
 
         [Header("Tween")]
         [SerializeField] private float switchDuration = 0.2f;
-        [SerializeField] private Ease switchEase = Ease.OutQuad;
+        [SerializeField] private Ease fadeEase = Ease.OutQuad;
+        [SerializeField] private Ease focusEnterEase = Ease.OutBack;
+        [SerializeField] private Ease focusExitEase = Ease.OutQuad;
 
-        [Header("Zone Camera (Optional)")]
+        [Header("Zone Camera")]
         [SerializeField] private CinemachineCamera zoneCamera;
         [SerializeField] private int enterPriority = 100;
         [SerializeField] private int exitPriority = 0;
@@ -40,10 +48,10 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === RUNTIME ===
 
-        private CanvasGroup _distantCg;
-        private CanvasGroup _focusCg;
+        private CanvasGroup _distantCanvasGroup;
+        private CanvasGroup _focusCanvasGroup;
 
-        private Sequence _switchSeq;
+        private Sequence _switchSequence;
 
         private bool _isFocused;
         private bool _playerInside;
@@ -55,17 +63,18 @@ namespace PLAYERTWO.PlatformerProject
         #region === UNITY ===
 
         /// <summary>
-        /// VN: Cache CanvasGroup + set trạng thái ban đầu.
+        /// VN: Cache component, set text map và trạng thái ban đầu.
         /// </summary>
         private void Awake()
         {
             CacheReferences();
-            ApplyInstantState(focused: false);
+            SetupMapNameText();
+            ApplyInstantState(false);
             ApplyCameraPriority(exitPriority);
         }
 
         /// <summary>
-        /// VN: Dọn tween khi object bị disable để tránh leak/bug.
+        /// VN: Dọn tween khi object bị disable.
         /// </summary>
         private void OnDisable()
         {
@@ -84,7 +93,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Player vào trigger -> focus marker + tăng priority camera.
+        /// VN: Player vào trigger thì bật focus và tăng priority camera.
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
@@ -96,7 +105,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Player ra trigger -> về distant marker + giảm priority camera.
+        /// VN: Player ra trigger thì tắt focus và giảm priority camera.
         /// </summary>
         private void OnTriggerExit(Collider other)
         {
@@ -113,23 +122,32 @@ namespace PLAYERTWO.PlatformerProject
         #region === SETUP ===
 
         /// <summary>
-        /// VN: Lấy CanvasGroup từ marker để fade mượt.
+        /// VN: Cache CanvasGroup từ marker để tween fade.
         /// </summary>
         private void CacheReferences()
         {
-            _distantCg = distantMarker != null ? distantMarker.GetComponent<CanvasGroup>() : null;
-            _focusCg = focusMarker != null ? focusMarker.GetComponent<CanvasGroup>() : null;
+            _distantCanvasGroup = distantMarker != null ? distantMarker.GetComponent<CanvasGroup>() : null;
+            _focusCanvasGroup = focusMarker != null ? focusMarker.GetComponent<CanvasGroup>() : null;
         }
 
         /// <summary>
-        /// VN: Kiểm tra đủ component cần thiết trước khi tween.
+        /// VN: Set text tên map một lần lúc bắt đầu.
+        /// </summary>
+        private void SetupMapNameText()
+        {
+            if (mapNameText == null) return;
+            mapNameText.text = mapDisplayName;
+        }
+
+        /// <summary>
+        /// VN: Kiểm tra marker đã đủ component cần thiết chưa.
         /// </summary>
         private bool IsMarkerReady()
         {
             return distantMarker != null
                 && focusMarker != null
-                && _distantCg != null
-                && _focusCg != null;
+                && _distantCanvasGroup != null
+                && _focusCanvasGroup != null;
         }
 
         #endregion
@@ -138,7 +156,7 @@ namespace PLAYERTWO.PlatformerProject
         #region === MARKER SWITCH ===
 
         /// <summary>
-        /// VN: Set trạng thái focus/distant (có tween).
+        /// VN: Đổi trạng thái focus/distant bằng tween mượt.
         /// </summary>
         private void SetFocused(bool focused)
         {
@@ -148,54 +166,53 @@ namespace PLAYERTWO.PlatformerProject
             if (!IsMarkerReady()) return;
 
             KillSwitchTween();
-            _switchSeq = DOTween.Sequence();
+            _switchSequence = DOTween.Sequence();
 
-            // VN: bật cả 2 để cross-fade không bị “cụt”
             distantMarker.SetActive(true);
             focusMarker.SetActive(true);
 
             if (focused)
-                BuildFocusOnTween(_switchSeq);
+                BuildFocusOnTween(_switchSequence);
             else
-                BuildFocusOffTween(_switchSeq);
+                BuildFocusOffTween(_switchSequence);
         }
 
         /// <summary>
-        /// VN: Tween khi vào vùng (focus ON): focus scale 0.5->1 + fade in.
+        /// VN: Tween khi vào vùng: focus fade in và scale 0.5 -> 1.06 -> 1.
         /// </summary>
-        private void BuildFocusOnTween(Sequence seq)
+        private void BuildFocusOnTween(Sequence sequence)
         {
-            _focusCg.alpha = 0f;
+            _focusCanvasGroup.alpha = 0f;
             focusMarker.transform.localScale = Vector3.one * focusMinScale;
 
-            seq.Join(_focusCg.DOFade(1f, switchDuration).SetEase(switchEase));
-            seq.Join(_distantCg.DOFade(0f, switchDuration).SetEase(switchEase));
+            sequence.Join(_focusCanvasGroup.DOFade(1f, switchDuration).SetEase(fadeEase));
+            sequence.Join(_distantCanvasGroup.DOFade(0f, switchDuration).SetEase(fadeEase));
+            sequence.Join(distantMarker.transform.DOScale(distantScale, switchDuration).SetEase(fadeEase));
 
-            seq.Join(focusMarker.transform.DOScale(focusMaxScale, switchDuration).SetEase(switchEase));
-            seq.Join(distantMarker.transform.DOScale(distantScale, switchDuration).SetEase(switchEase));
+            sequence.Append(focusMarker.transform.DOScale(focusOvershootScale, switchDuration * 0.65f).SetEase(focusEnterEase));
+            sequence.Append(focusMarker.transform.DOScale(focusMaxScale, switchDuration * 0.35f).SetEase(Ease.OutQuad));
 
-            seq.OnComplete(() => distantMarker.SetActive(false));
+            sequence.OnComplete(() => distantMarker.SetActive(false));
         }
 
         /// <summary>
-        /// VN: Tween khi ra vùng (focus OFF): focus scale 1->0.5 + fade out.
+        /// VN: Tween khi ra vùng: focus fade out và scale 1 -> 0.5.
         /// </summary>
-        private void BuildFocusOffTween(Sequence seq)
+        private void BuildFocusOffTween(Sequence sequence)
         {
-            _distantCg.alpha = 0f;
+            _distantCanvasGroup.alpha = 0f;
             distantMarker.transform.localScale = Vector3.one * distantScale;
 
-            seq.Join(_distantCg.DOFade(1f, switchDuration).SetEase(switchEase));
-            seq.Join(_focusCg.DOFade(0f, switchDuration).SetEase(switchEase));
+            sequence.Join(_distantCanvasGroup.DOFade(1f, switchDuration).SetEase(fadeEase));
+            sequence.Join(_focusCanvasGroup.DOFade(0f, switchDuration).SetEase(fadeEase));
+            sequence.Join(focusMarker.transform.DOScale(focusMinScale, switchDuration).SetEase(focusExitEase));
+            sequence.Join(distantMarker.transform.DOScale(distantScale, switchDuration).SetEase(fadeEase));
 
-            seq.Join(focusMarker.transform.DOScale(focusMinScale, switchDuration).SetEase(switchEase));
-            seq.Join(distantMarker.transform.DOScale(distantScale, switchDuration).SetEase(switchEase));
-
-            seq.OnComplete(() => focusMarker.SetActive(false));
+            sequence.OnComplete(() => focusMarker.SetActive(false));
         }
 
         /// <summary>
-        /// VN: Áp trạng thái ngay lập tức (không tween).
+        /// VN: Áp trạng thái marker ngay lập tức, không tween.
         /// </summary>
         private void ApplyInstantState(bool focused)
         {
@@ -204,8 +221,8 @@ namespace PLAYERTWO.PlatformerProject
             if (distantMarker != null) distantMarker.SetActive(!focused);
             if (focusMarker != null) focusMarker.SetActive(focused);
 
-            if (_distantCg != null) _distantCg.alpha = focused ? 0f : 1f;
-            if (_focusCg != null) _focusCg.alpha = focused ? 1f : 0f;
+            if (_distantCanvasGroup != null) _distantCanvasGroup.alpha = focused ? 0f : 1f;
+            if (_focusCanvasGroup != null) _focusCanvasGroup.alpha = focused ? 1f : 0f;
 
             if (distantMarker != null)
                 distantMarker.transform.localScale = Vector3.one * distantScale;
@@ -219,8 +236,8 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private void KillSwitchTween()
         {
-            _switchSeq?.Kill();
-            _switchSeq = null;
+            _switchSequence?.Kill();
+            _switchSequence = null;
         }
 
         #endregion
@@ -229,7 +246,7 @@ namespace PLAYERTWO.PlatformerProject
         #region === SCENE LOAD ===
 
         /// <summary>
-        /// VN: FadeOut rồi LoadScene.
+        /// VN: FadeOut rồi chuyển scene.
         /// </summary>
         private void ConfirmEnter()
         {
@@ -250,10 +267,10 @@ namespace PLAYERTWO.PlatformerProject
         #endregion
 
         //─────────────────────────────────────────────
-        #region === CINEMACHINE ===
+        #region === CAMERA ===
 
         /// <summary>
-        /// VN: Đổi priority camera theo vùng trigger.
+        /// VN: Đổi priority camera khi vào/ra vùng trigger.
         /// </summary>
         private void ApplyCameraPriority(int value)
         {
