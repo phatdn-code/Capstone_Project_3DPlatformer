@@ -92,12 +92,16 @@ namespace PLAYERTWO.PlatformerProject
 			);
 		}
 
-		protected virtual void InitializeCallbacks()
-		{
-			m_level.player.playerEvents.OnDie.AddListener(() => Respawn(true));
-		}
+        protected virtual void InitializeCallbacks()
+        {
+            m_level.player.playerEvents.OnDie.AddListener(() =>
+            {
+                bool consumeRetries = !m_level.player.IsSelectMapPlayer;
+                Respawn(consumeRetries);
+            });
+        }
 
-		protected virtual void InitializeYieldInstructions()
+        protected virtual void InitializeYieldInstructions()
 		{
 			m_respawnFadeOutDelay = new WaitForSeconds(respawnFadeOutDelay);
 			m_respawnFadeInDelay = new WaitForSeconds(respawnFadeInDelay);

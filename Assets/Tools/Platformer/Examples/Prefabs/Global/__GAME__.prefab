@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fcbb56f37ae9bf428cb37e1aff6a3d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 0
+  mode: 1
   fileName: save
   binaryFileExtension: data
 --- !u!114 &539602378330051259
@@ -268,7 +268,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 131063
 --- !u!1 &8251847425115746957
 GameObject:
   m_ObjectHideFlags: 0
