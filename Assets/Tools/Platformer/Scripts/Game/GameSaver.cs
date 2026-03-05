@@ -150,23 +150,25 @@ namespace PLAYERTWO.PlatformerProject
 		{
 			var json = data.ToJson();
 			var path = GetFilePath(index);
-			File.WriteAllText(path, json);
+            Debug.Log("SAVE PATH: " + path);
+            File.WriteAllText(path, json);
 		}
 
-		protected virtual GameData LoadJSON(int index)
-		{
-			var path = GetFilePath(index);
+        protected virtual GameData LoadJSON(int index)
+        {
+            var path = GetFilePath(index);
+            Debug.Log($"LOAD SLOT={index} PATH={path} EXISTS={File.Exists(path)}");
 
-			if (File.Exists(path))
-			{
-				var json = File.ReadAllText(path);
-				return GameData.FromJson(json);
-			}
+            if (File.Exists(path))
+            {
+                var json = File.ReadAllText(path);
+                return GameData.FromJson(json);
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		protected virtual void DeleteFile(int index)
+        protected virtual void DeleteFile(int index)
 		{
 			var path = GetFilePath(index);
 

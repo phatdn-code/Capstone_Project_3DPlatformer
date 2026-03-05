@@ -22,6 +22,11 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Map Name UI")]
         [SerializeField] private TextMeshProUGUI mapNameText;
 
+        [Header("Stars UI")]
+        [SerializeField] private GameObject starGroup;
+        [SerializeField] private bool showStarGroup = true;
+        [SerializeField] private GameObject[] stars;
+
         [Header("Player")]
         [SerializeField] private string playerTag = "Player";
         [SerializeField] private KeyCode confirmKey = KeyCode.Space;
@@ -57,28 +62,45 @@ namespace PLAYERTWO.PlatformerProject
         private bool _playerInside;
         private bool _isLoading;
 
+        private GameLevel _levelData;
+
         #endregion
 
         //─────────────────────────────────────────────
         #region === UNITY ===
 
         /// <summary>
-        /// VN: Cache component, set text map và trạng thái ban đầu.
+        /// VN: Cache component, set text map, load sao và áp trạng thái ban đầu.
         /// </summary>
-        private void Awake()
+        private void Start()
         {
             CacheReferences();
             SetupMapNameText();
+            RefreshStarGroupVisibility();
+            CacheLevelData();
+            RefreshStarsUI();
             ApplyInstantState(false);
             ApplyCameraPriority(exitPriority);
         }
 
         /// <summary>
-        /// VN: Dọn tween khi object bị disable.
+        /// VN: Đăng ký event load save để cập nhật sao khi game nạp dữ liệu xong.
+        /// </summary>
+        private void OnEnable()
+        {
+            if (Game.instance != null)
+                Game.instance.onLoadState.AddListener(HandleGameLoaded);
+        }
+
+        /// <summary>
+        /// VN: Dọn tween và hủy event khi object bị disable.
         /// </summary>
         private void OnDisable()
         {
             KillSwitchTween();
+
+            if (Game.instance != null)
+                Game.instance.onLoadState.RemoveListener(HandleGameLoaded);
         }
 
         /// <summary>
@@ -137,6 +159,81 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (mapNameText == null) return;
             mapNameText.text = mapDisplayName;
+        }
+
+        /// <summary>
+        /// VN: Bật/tắt cả cụm sao theo biến cấu hình.
+        /// </summary>
+        private void RefreshStarGroupVisibility()
+        {
+            if (starGroup == null) return;
+            starGroup.SetActive(showStarGroup);
+        }
+
+        /// <summary>
+        /// VN: Tìm dữ liệu level trong Game theo sceneName của portal.
+        /// </summary>
+        private void CacheLevelData()
+        {
+            _levelData = null;
+
+            if (Game.instance == null || string.IsNullOrEmpty(sceneName))
+                return;
+
+            _levelData = Game.instance.levels.Find(level => level.scene == sceneName);
+        }
+
+        /// <summary>
+        /// VN: Đếm tổng số sao đã mở của màn chơi.
+        /// </summary>
+        private int GetCollectedStarCount()
+        {
+            if (_levelData == null || _levelData.stars == null)
+                return 0;
+
+            int count = 0;
+
+            for (int i = 0; i < _levelData.stars.Length; i++)
+            {
+                if (_levelData.stars[i])
+                    count++;
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// VN: Cập nhật hiển thị sao theo tổng số sao đã đạt, bật từ trái sang phải.
+        /// </summary>
+        private void RefreshStarsUI()
+        {
+            RefreshStarGroupVisibility();
+
+            if (!showStarGroup)
+                return;
+
+            if (stars == null || stars.Length == 0)
+                return;
+
+            if (_levelData == null)
+                CacheLevelData();
+
+            int collectedStars = GetCollectedStarCount();
+
+            for (int i = 0; i < stars.Length; i++)
+            {
+                if (stars[i] == null) continue;
+                stars[i].SetActive(i < collectedStars);
+            }
+        }
+
+        /// <summary>
+        /// VN: Nhận callback khi Game load save xong thì load lại sao cho portal.
+        /// </summary>
+        private void HandleGameLoaded(int dataIndex)
+        {
+            CacheLevelData();
+            RefreshStarsUI();
         }
 
         /// <summary>
