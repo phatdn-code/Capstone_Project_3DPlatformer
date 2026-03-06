@@ -4336,9 +4336,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 466521051}
-        m_TargetAssemblyTypeName: MainMenuTransition, Assembly-CSharp
-        m_MethodName: StartTransition
+      - m_Target: {fileID: 2099334633}
+        m_TargetAssemblyTypeName: TMP_Blink, Assembly-CSharp
+        m_MethodName: PlayBlink
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5091,6 +5091,7 @@ GameObject:
   - component: {fileID: 2099334630}
   - component: {fileID: 2099334632}
   - component: {fileID: 2099334631}
+  - component: {fileID: 2099334633}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -5217,6 +5218,35 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2099334629}
   m_CullTransparentMesh: 1
+--- !u!114 &2099334633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099334629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e05962e7fba23a4ca651d96c0ca2e6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  totalDuration: 1
+  blinkCount: 5
+  OnBlinkFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 466521051}
+        m_TargetAssemblyTypeName: MainMenuTransition, Assembly-CSharp
+        m_MethodName: StartTransition
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2051644515948091572
 MonoBehaviour:
   m_ObjectHideFlags: 0
