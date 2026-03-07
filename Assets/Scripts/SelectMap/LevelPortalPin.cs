@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using DG.Tweening;
 using Unity.Cinemachine;
 using TMPro;
+using Sirenix.OdinInspector;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -11,41 +13,96 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === INSPECTOR ===
 
-        [Header("Scene")]
+        [TitleGroup("Level Portal Pin")]
+        [BoxGroup("Level Portal Pin/Scene")]
         [SerializeField] private string sceneName;
+
+        [BoxGroup("Level Portal Pin/Scene")]
         [SerializeField] private string mapDisplayName;
 
-        [Header("Markers (UI)")]
+        [BoxGroup("Level Portal Pin/Unlock")]
+        [ToggleLeft]
+        [InfoBox("Bật nếu đây là map mở sẵn ngay từ đầu, ví dụ map đầu tiên.")]
+        [SerializeField] private bool unlockByDefault = false;
+
+        [BoxGroup("Level Portal Pin/Unlock")]
+        [ShowIf("@!unlockByDefault")]
+        [InfoBox("Scene name của map cần clear trước để mở khóa map này.")]
+        [SerializeField] private string requiredClearedMapScene;
+
+        [BoxGroup("Level Portal Pin/Unlock")]
+        [InfoBox("Sprite[0] = Locked, Sprite[1] = Unlocked.")]
+        [PreviewField(70, ObjectFieldAlignment.Left)]
+        [SerializeField] private Sprite[] distantFrameSprites;
+
+        [BoxGroup("Level Portal Pin/Unlock")]
+        [Required("Thiếu Image frame của distantMarker.")]
+        [SerializeField] private Image distantMarkerFrame;
+
+        [BoxGroup("Level Portal Pin/Unlock")]
+        [ReadOnly]
+        [ShowInInspector]
+        [LabelText("Is Unlocked (Runtime)")]
+        private bool Inspector_IsUnlocked => _isUnlocked;
+
+        [BoxGroup("Level Portal Pin/Markers")]
+        [Required("Thiếu distantMarker.")]
         [SerializeField] private GameObject distantMarker;
+
+        [BoxGroup("Level Portal Pin/Markers")]
+        [Required("Thiếu focusMarker.")]
         [SerializeField] private GameObject focusMarker;
 
-        [Header("Map Name UI")]
+        [BoxGroup("Level Portal Pin/UI")]
         [SerializeField] private TextMeshProUGUI mapNameText;
 
-        [Header("Stars UI")]
+        [BoxGroup("Level Portal Pin/UI")]
         [SerializeField] private GameObject starGroup;
+
+        [BoxGroup("Level Portal Pin/UI")]
+        [ToggleLeft]
         [SerializeField] private bool showStarGroup = true;
+
+        [BoxGroup("Level Portal Pin/UI")]
         [SerializeField] private GameObject[] stars;
 
-        [Header("Player")]
+        [BoxGroup("Level Portal Pin/Player")]
         [SerializeField] private string playerTag = "Player";
+
+        [BoxGroup("Level Portal Pin/Player")]
         [SerializeField] private KeyCode confirmKey = KeyCode.Space;
 
-        [Header("Scale")]
+        [BoxGroup("Level Portal Pin/Scale")]
         [SerializeField] private float distantScale = 0.75f;
+
+        [BoxGroup("Level Portal Pin/Scale")]
         [SerializeField] private float focusMinScale = 0.5f;
+
+        [BoxGroup("Level Portal Pin/Scale")]
         [SerializeField] private float focusMaxScale = 1f;
+
+        [BoxGroup("Level Portal Pin/Scale")]
         [SerializeField] private float focusOvershootScale = 1.06f;
 
-        [Header("Tween")]
+        [BoxGroup("Level Portal Pin/Tween")]
         [SerializeField] private float switchDuration = 0.2f;
+
+        [BoxGroup("Level Portal Pin/Tween")]
         [SerializeField] private Ease fadeEase = Ease.OutQuad;
+
+        [BoxGroup("Level Portal Pin/Tween")]
         [SerializeField] private Ease focusEnterEase = Ease.OutBack;
+
+        [BoxGroup("Level Portal Pin/Tween")]
         [SerializeField] private Ease focusExitEase = Ease.OutQuad;
 
-        [Header("Zone Camera")]
+        [BoxGroup("Level Portal Pin/Zone Camera")]
         [SerializeField] private CinemachineCamera zoneCamera;
+
+        [BoxGroup("Level Portal Pin/Zone Camera")]
         [SerializeField] private int enterPriority = 100;
+
+        [BoxGroup("Level Portal Pin/Zone Camera")]
         [SerializeField] private int exitPriority = 0;
 
         #endregion
@@ -61,6 +118,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool _isFocused;
         private bool _playerInside;
         private bool _isLoading;
+        private bool _isUnlocked;
 
         private GameLevel _levelData;
 
@@ -69,22 +127,24 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────
         #region === UNITY ===
 
-        /// <summary>
-        /// VN: Cache component, set text map, load sao và áp trạng thái ban đầu.
-        /// </summary>
-        private void Start()
+        private void Awake()
         {
             CacheReferences();
+        }
+
+        private void Start()
+        {
             SetupMapNameText();
             RefreshStarGroupVisibility();
             CacheLevelData();
             RefreshStarsUI();
+            RefreshUnlockState();
             ApplyInstantState(false);
             ApplyCameraPriority(exitPriority);
         }
 
         /// <summary>
-        /// VN: Đăng ký event load save để cập nhật sao khi game nạp dữ liệu xong.
+        /// VN: Đăng ký event load save để cập nhật sao và trạng thái mở khóa khi game nạp dữ liệu xong.
         /// </summary>
         private void OnEnable()
         {
@@ -108,22 +168,31 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         private void Update()
         {
-            if (_isLoading || !_playerInside) return;
+            if (_isLoading || !_playerInside || !_isUnlocked) return;
 
             // Nếu cần bật lại:
             // if (Input.GetKeyDown(confirmKey)) ConfirmEnter();
         }
 
         /// <summary>
-        /// VN: Player vào trigger thì bật focus và tăng priority camera.
+        /// VN: Player vào trigger, nếu map đã mở khóa thì bật focus, chưa mở khóa thì giữ distant.
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag(playerTag)) return;
 
             _playerInside = true;
-            SetFocused(true);
+
+            RefreshUnlockState();
             ApplyCameraPriority(enterPriority);
+
+            if (!_isUnlocked)
+            {
+                SetFocused(false);
+                return;
+            }
+
+            SetFocused(true);
         }
 
         /// <summary>
@@ -228,12 +297,13 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Nhận callback khi Game load save xong thì load lại sao cho portal.
+        /// VN: Nhận callback khi Game load save xong thì cập nhật lại portal.
         /// </summary>
         private void HandleGameLoaded(int dataIndex)
         {
             CacheLevelData();
             RefreshStarsUI();
+            RefreshUnlockState();
         }
 
         /// <summary>
@@ -245,6 +315,51 @@ namespace PLAYERTWO.PlatformerProject
                 && focusMarker != null
                 && _distantCanvasGroup != null
                 && _focusCanvasGroup != null;
+        }
+
+        /// <summary>
+        /// VN: Kiểm tra map này đã được mở khóa chưa dựa trên cấu hình mở sẵn hoặc map điều kiện đã clear.
+        /// </summary>
+        private void RefreshUnlockState()
+        {
+            _isUnlocked = IsMapUnlocked();
+            RefreshDistantFrame();
+        }
+
+        /// <summary>
+        /// VN: Nếu bật mở sẵn thì map được mở khóa ngay từ đầu, ngược lại kiểm tra map điều kiện đã clear chưa.
+        /// </summary>
+        private bool IsMapUnlocked()
+        {
+            if (unlockByDefault)
+                return true;
+
+            if (string.IsNullOrEmpty(requiredClearedMapScene))
+                return false;
+
+            if (Game.instance == null || Game.instance.levels == null)
+                return false;
+
+            GameLevel requiredLevel = Game.instance.levels.Find(level => level.scene == requiredClearedMapScene);
+
+            if (requiredLevel == null)
+                return false;
+
+            return requiredLevel.wasCompletedOnce;
+        }
+
+        /// <summary>
+        /// VN: Đổi sprite frame của distant marker theo trạng thái khóa / mở khóa.
+        /// </summary>
+        private void RefreshDistantFrame()
+        {
+            if (distantMarkerFrame == null)
+                return;
+
+            if (distantFrameSprites == null || distantFrameSprites.Length < 2)
+                return;
+
+            distantMarkerFrame.sprite = _isUnlocked ? distantFrameSprites[1] : distantFrameSprites[0];
         }
 
         #endregion
@@ -348,6 +463,7 @@ namespace PLAYERTWO.PlatformerProject
         private void ConfirmEnter()
         {
             if (_isLoading) return;
+            if (!_isUnlocked) return;
             if (string.IsNullOrEmpty(sceneName)) return;
 
             _isLoading = true;
@@ -376,5 +492,40 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         #endregion
+
+#if UNITY_EDITOR
+        //─────────────────────────────────────────────
+        #region === ODIN DEBUG ===
+
+        [BoxGroup("Level Portal Pin/Debug")]
+        [Button("Refresh Unlock State")]
+        private void OdinRefreshUnlockState()
+        {
+            CacheLevelData();
+            RefreshUnlockState();
+        }
+
+        [BoxGroup("Level Portal Pin/Debug")]
+        [Button("Apply Locked Frame")]
+        private void OdinApplyLockedFrame()
+        {
+            if (distantMarkerFrame == null) return;
+            if (distantFrameSprites == null || distantFrameSprites.Length < 1) return;
+
+            distantMarkerFrame.sprite = distantFrameSprites[0];
+        }
+
+        [BoxGroup("Level Portal Pin/Debug")]
+        [Button("Apply Unlocked Frame")]
+        private void OdinApplyUnlockedFrame()
+        {
+            if (distantMarkerFrame == null) return;
+            if (distantFrameSprites == null || distantFrameSprites.Length < 2) return;
+
+            distantMarkerFrame.sprite = distantFrameSprites[1];
+        }
+
+        #endregion
+#endif
     }
 }
