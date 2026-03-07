@@ -51,7 +51,7 @@ MonoBehaviour:
   damage: 20
   radius: 2.4
   warningDuration: 2
-  damageDelay: 0.25
+  damageDelay: 0.9
   snapToGround: 1
   groundOffset: 0.05
   enableDamage: 1

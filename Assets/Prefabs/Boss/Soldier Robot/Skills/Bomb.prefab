@@ -161,7 +161,6 @@ MonoBehaviour:
   warningTime: 2
   explosionRadius: 6
   explosionForce: 500
-  dangerRadius: 1.5
   bombRenderer: {fileID: 5209393269655260262}
   explosionEffect: {fileID: 180702, guid: a7c694f0877ea874fa57e033221095c3, type: 3}
   explosionBossEffect: {fileID: 183222, guid: f2ee009e61b1177489331d95174281b1, type: 3}
