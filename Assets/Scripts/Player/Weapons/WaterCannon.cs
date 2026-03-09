@@ -185,6 +185,12 @@ namespace PLAYERTWO.PlatformerProject
 
         private void Update()
         {
+            if (IsGamePaused())
+            {
+                StopBeamIfNeeded();
+                return;
+            }
+
             HandleControlToggleInput();
 
             if (_isControlling)
@@ -262,6 +268,12 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (cannonCamera != null)
                 cannonCamera.Priority = priority;
+        }
+
+        // Kiểm tra game đang pause hay không.
+        private bool IsGamePaused()
+        {
+            return LevelPauser.instance != null && LevelPauser.instance.paused;
         }
 
         #endregion
@@ -427,6 +439,7 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>VN: Start beam nếu đủ điều kiện (không LOCK + còn năng lượng).</summary>
         private void TryStartBeam()
         {
+            if (IsGamePaused()) return;
             if (!CanFire()) return;
             if (!HasEnoughEnergy(kMinBeamStartEnergy)) return;
 
@@ -438,6 +451,8 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>VN: Bắn projectile (cooldown + trừ energy + có thể LOCK khi cạn).</summary>
         public void FireProjectile()
         {
+            if (IsGamePaused()) return;
+
             if (projectilePrefab == null)
             {
                 Debug.LogWarning("WaterCannon: Chưa gán projectilePrefab.");

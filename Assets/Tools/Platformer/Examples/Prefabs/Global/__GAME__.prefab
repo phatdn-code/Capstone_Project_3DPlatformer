@@ -62,39 +62,51 @@ MonoBehaviour:
   initialRetries: 3
   levelExitScene: MainMenu
   levels:
-  - name: Test Level
-    description: Play around with the features of the asset.
+  - name: Greencliff Isles
+    description: A lush island map of cliffs, greenery, and narrow jumps above the
+      sea.
     image: {fileID: 21300000, guid: b6c83d91877ad26418277a0d3cabbe17, type: 3}
     locked: 0
     requiredStars: 0
-    scene: TestLevelScene
+    scene: Map01
     firstTimeScene: 
     unlockNextLevel: 0
-    nextScene: MainMenu
+    nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: 
-  - name: Planets Level
-    description: The gravity can push you in any direction.
+    exitScene: MainMenu
+  - name: Voltitan Boss
+    description: A high-tech arena ruled by a destructive war machine.
     image: {fileID: 21300000, guid: 3df2d59fce6f503459603dd0390d2b88, type: 3}
     locked: 0
     requiredStars: 0
-    scene: TestLevelScene 2
+    scene: Boss01_Voltitan
     firstTimeScene: 
     unlockNextLevel: 0
-    nextScene: MainMenu
+    nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: 
-  - name: 2D Level
-    description: Explore the asset's features in 2D mode!
+    exitScene: MainMenu
+  - name: Sandstone Depths
+    description: An underground maze of earth, rock, and sand.
     image: {fileID: 21300000, guid: 0d35988de27e9ea43b9258aae22db2b9, type: 3}
     locked: 0
     requiredStars: 0
-    scene: TestLevelScene 3
+    scene: Map02
     firstTimeScene: 
     unlockNextLevel: 0
-    nextScene: MainMenu
+    nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: 
+    exitScene: MainMenu
+  - name: Pyrodrake Boss
+    description: A flying fire dragon that rains flames and meteors from above.
+    image: {fileID: 21300000, guid: 0d35988de27e9ea43b9258aae22db2b9, type: 3}
+    locked: 0
+    requiredStars: 0
+    scene: Boss02_Pyrodrake
+    firstTimeScene: 
+    unlockNextLevel: 0
+    nextScene: MapSelect
+    firstTimeNextScene: 
+    exitScene: MainMenu
 --- !u!114 &2298921648025393660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,7 +280,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 131063
+    m_Bits: 16375
 --- !u!1 &8251847425115746957
 GameObject:
   m_ObjectHideFlags: 0
