@@ -44,6 +44,7 @@ namespace PLAYERTWO.PlatformerProject
 
         [Header("Explosion Effect on Death")]
         [SerializeField] private GameObject explosionEffect;
+        [SerializeField] private GameObject portalEnd;
         [SerializeField] private float explosionDuration = 3f;
 
         [Header("Boss Camera (khi trúng phát cuối)")]
@@ -80,6 +81,8 @@ namespace PLAYERTWO.PlatformerProject
         {
             m_boss = GetComponent<BossCore>();
             m_dragon = GetComponent<DragonRobot>();
+
+            portalEnd.SetActive(false);
         }
 
         /// <summary>
@@ -371,6 +374,8 @@ namespace PLAYERTWO.PlatformerProject
                 m_dragon.DisableColliderAndModel();
                 yield return new WaitForSeconds(explosionDuration);
             }
+
+            portalEnd.SetActive(true);
 
             if (bossCamHoldTime > 0f)
                 yield return new WaitForSeconds(bossCamHoldTime);

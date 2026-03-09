@@ -21,6 +21,7 @@ namespace PLAYERTWO.PlatformerProject
         [Header("VFX")]
         [SerializeField] private GameObject flashFinalBombEffect;
         [SerializeField] private GameObject explosionFinalBombEffect;
+        [SerializeField] private GameObject portalEnd;
         [SerializeField] private GameObject zoneEffect;
 
         #endregion
@@ -69,6 +70,8 @@ namespace PLAYERTWO.PlatformerProject
             boss = GetComponent<BossCore>();
             soldierBoss = boss as SoldierRobot;
             rechargeTransition = GetComponent<SoldierRobotRechargeSequence>();
+
+            portalEnd.SetActive(false);
         }
 
         #endregion
@@ -306,6 +309,7 @@ namespace PLAYERTWO.PlatformerProject
 
             MovementBoundaryZone.Instance.enabled = false;
             zoneEffect.SetActive(false);
+            portalEnd.SetActive(true);
         }
 
         #endregion
