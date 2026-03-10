@@ -713,7 +713,37 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 150818328254702391, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2743809761776714528, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3324093946544834138, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6955056637259454337, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7983267435273570908, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8154726263237380683, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8565365013988681507, guid: 787ed1bb9b5b820418ec005e93a84e0c,
         type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -722,6 +752,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Basic Room
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006344821851656109, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9010548499370238916, guid: 787ed1bb9b5b820418ec005e93a84e0c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9132408287094083784, guid: 787ed1bb9b5b820418ec005e93a84e0c,
         type: 3}
