@@ -5,6 +5,7 @@ using UnityEngine;
 public class RoomManager : MonoBehaviour
 {
     public GameObject roomSpawnPoint;
+    public bool isRoomCleared = false;
 
     [SerializeField] private GameObject[] doors;
     [SerializeField] private GameObject[] roads;
@@ -13,11 +14,7 @@ public class RoomManager : MonoBehaviour
     [SerializeField] private GameObject roomblank;
     [SerializeField] private BoxCollider roomTrigerCollider;
 
-    [SerializeField] private bool isRoomCleared = false;
-
     private List<GameObject> activeDoors = new List<GameObject>();
-
-
 
     public void AddActiveDoor(int index)
     {
