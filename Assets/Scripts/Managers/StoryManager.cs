@@ -446,6 +446,9 @@ namespace PLAYERTWO.PlatformerProject
 
             if (isLastPage)
             {
+                if (Game.instance != null)
+                    Game.instance.MarkIntroStoryAsSeen(true);
+
                 EndStory();
                 return;
             }
@@ -453,11 +456,12 @@ namespace PLAYERTWO.PlatformerProject
             SlideOutCurrentPage();
         }
 
-        /// <summary>
-        /// Skip toàn bộ story.
-        /// </summary>
+        // Bỏ qua story và đánh dấu đã xem ở lần đầu.
         private void SkipStory()
         {
+            if (Game.instance != null)
+                Game.instance.MarkIntroStoryAsSeen(true);
+
             EndStory();
         }
 

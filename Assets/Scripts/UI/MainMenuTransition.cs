@@ -1,146 +1,178 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using PLAYERTWO.PlatformerProject;
 
-public class MainMenuTransition : MonoBehaviour
+namespace PLAYERTWO.PlatformerProject
 {
-    [Header("UI")]
-    [SerializeField] private RectTransform[] panels;
-    [SerializeField] private float duration = 0.8f;
-    [SerializeField] private string nextSceneName;
-
-    [Header("Runtime Cache")]
-    private Vector2[] startPositions;
-    private Image[] images;
-
-    /// <summary>
-    /// Phát nhạc nền khi vào menu.
-    /// </summary>
-    private void Start()
+    public class MainMenuTransition : MonoBehaviour
     {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayMusic(0);
-    }
+        private const int FixedSlotIndex = 0;
 
-    /// <summary>
-    /// Bắt đầu hiệu ứng chuyển cảnh.
-    /// </summary>
-    public void StartTransition()
-    {
-        if (panels == null || panels.Length == 0)
-            return;
+        [Header("UI")]
+        [SerializeField] private RectTransform[] panels;
+        [SerializeField] private float duration = 0.8f;
 
-        StartCoroutine(TransitionRoutine());
-    }
+        [Header("Scene")]
+        [SerializeField] private string storySceneName;
+        [SerializeField] private string selectMapSceneName;
 
-    /// <summary>
-    /// Chạy toàn bộ quá trình di chuyển và fade.
-    /// </summary>
-    private IEnumerator TransitionRoutine()
-    {
-        CacheInitialData();
+        [Header("Runtime Cache")]
+        private Vector2[] startPositions;
+        private Image[] images;
 
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
+        // Phát nhạc nền khi vào menu.
+        private void Start()
         {
-            elapsedTime += Time.deltaTime;
-
-            float normalizedTime = Mathf.Clamp01(elapsedTime / duration);
-            float smoothTime = SmoothStep(normalizedTime);
-
-            UpdateMovement(smoothTime);
-            UpdateFade(normalizedTime);
-
-            yield return null;
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayMusic(0);
         }
 
-        ApplyFinalState();
-        // SceneManager.LoadScene(nextSceneName);
-    }
-
-    /// <summary>
-    /// Lưu vị trí đầu và cache Image của từng panel.
-    /// </summary>
-    private void CacheInitialData()
-    {
-        int panelCount = panels.Length;
-
-        startPositions = new Vector2[panelCount];
-        images = new Image[panelCount];
-
-        for (int i = 0; i < panelCount; i++)
+        // Bắt đầu hiệu ứng chuyển cảnh và nạp save slot cố định.
+        public void StartTransition()
         {
-            if (panels[i] == null)
-                continue;
-
-            startPositions[i] = panels[i].anchoredPosition;
-            panels[i].TryGetComponent(out images[i]);
-        }
-    }
-
-    /// <summary>
-    /// Cập nhật vị trí panel theo trục X.
-    /// </summary>
-    private void UpdateMovement(float t)
-    {
-        for (int i = 0; i < panels.Length; i++)
-        {
-            if (panels[i] == null)
-                continue;
-
-            float targetX = Mathf.Lerp(startPositions[i].x, 0f, t);
-            panels[i].anchoredPosition = new Vector2(targetX, startPositions[i].y);
-        }
-    }
-
-    /// <summary>
-    /// Cập nhật độ mờ của Image từ 0 đến 1.
-    /// </summary>
-    private void UpdateFade(float t)
-    {
-        for (int i = 0; i < images.Length; i++)
-        {
-            if (images[i] == null)
-                continue;
-
-            Color color = images[i].color;
-            color.a = t;
-            images[i].color = color;
-        }
-    }
-
-    /// <summary>
-    /// Ép trạng thái cuối cùng về đúng vị trí và alpha.
-    /// </summary>
-    private void ApplyFinalState()
-    {
-        for (int i = 0; i < panels.Length; i++)
-        {
-            if (panels[i] != null)
+            if (Game.instance == null)
             {
-                panels[i].anchoredPosition = new Vector2(0f, panels[i].anchoredPosition.y);
+                Debug.LogWarning("[MainMenuTransition] Game.instance is null.");
+                return;
             }
 
-            if (images[i] == null)
-                continue;
+            if (!Game.instance.dataLoaded)
+                Game.instance.LoadOrCreateState(FixedSlotIndex);
 
-            Color color = images[i].color;
-            color.a = 1f;
-            images[i].color = color;
+            if (!HasPanels())
+            {
+                LoadTargetScene();
+                return;
+            }
+
+            StartCoroutine(TransitionRoutine());
+        }
+
+        // Chạy toàn bộ hiệu ứng di chuyển và fade.
+        private IEnumerator TransitionRoutine()
+        {
+            CachePanelData();
+
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+
+                float normalizedTime = Mathf.Clamp01(elapsedTime / duration);
+                float smoothTime = SmoothStep(normalizedTime);
+
+                UpdateMovement(smoothTime);
+                UpdateFade(normalizedTime);
+
+                yield return null;
+            }
+
+            ApplyFinalState();
+            LoadTargetScene();
+        }
+
+        // Kiểm tra có panel để chạy hiệu ứng hay không.
+        private bool HasPanels()
+        {
+            return panels != null && panels.Length > 0;
+        }
+
+        // Xác định scene cần vào sau khi bấm Start.
+        private string GetStartScene()
+        {
+            if (Game.instance != null &&
+                Game.instance.dataLoaded && Game.instance.introStorySeen)
+                return selectMapSceneName;
+
+            return storySceneName;
+        }
+
+        // Load scene đích sau khi xác định trạng thái story.
+        private void LoadTargetScene()
+        {
+            string targetScene = GetStartScene();
+
+            if (string.IsNullOrWhiteSpace(targetScene))
+            {
+                Debug.LogWarning("[MainMenuTransition] Target scene is empty.");
+                return;
+            }
+
+            SceneManager.LoadScene(targetScene);
+        }
+
+        // Cache vị trí ban đầu và Image của từng panel.
+        private void CachePanelData()
+        {
+            int panelCount = panels.Length;
+
+            startPositions = new Vector2[panelCount];
+            images = new Image[panelCount];
+
+            for (int i = 0; i < panelCount; i++)
+            {
+                if (panels[i] == null)
+                    continue;
+
+                startPositions[i] = panels[i].anchoredPosition;
+                panels[i].TryGetComponent(out images[i]);
+            }
+        }
+
+        // Cập nhật vị trí X của các panel.
+        private void UpdateMovement(float t)
+        {
+            for (int i = 0; i < panels.Length; i++)
+            {
+                if (panels[i] == null)
+                    continue;
+
+                float targetX = Mathf.Lerp(startPositions[i].x, 0f, t);
+                panels[i].anchoredPosition = new Vector2(targetX, startPositions[i].y);
+            }
+        }
+
+        // Cập nhật alpha của Image từ 0 đến 1.
+        private void UpdateFade(float t)
+        {
+            for (int i = 0; i < images.Length; i++)
+            {
+                if (images[i] == null)
+                    continue;
+
+                Color color = images[i].color;
+                color.a = t;
+                images[i].color = color;
+            }
+        }
+
+        // Ép trạng thái cuối cùng về đúng vị trí và alpha.
+        private void ApplyFinalState()
+        {
+            for (int i = 0; i < panels.Length; i++)
+            {
+                if (panels[i] != null)
+                    panels[i].anchoredPosition = new Vector2(0f, panels[i].anchoredPosition.y);
+
+                if (images[i] == null)
+                    continue;
+
+                Color color = images[i].color;
+                color.a = 1f;
+                images[i].color = color;
+            }
+        }
+
+        // Làm mượt giá trị nội suy.
+        private float SmoothStep(float t)
+        {
+            return t * t * (3f - 2f * t);
         }
     }
-
-    /// <summary>
-    /// Làm mượt giá trị nội suy.
-    /// </summary>
-    private float SmoothStep(float t)
-    {
-        return t * t * (3f - 2f * t);
-    }
 }
-
 
 // using UnityEngine;
 // using UnityEngine.UI;

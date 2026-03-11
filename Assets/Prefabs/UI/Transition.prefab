@@ -103,7 +103,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 131063
 --- !u!1 &2995254222150280253
 GameObject:
   m_ObjectHideFlags: 0
@@ -229,7 +229,8 @@ MonoBehaviour:
   - {fileID: 5607757885845069991}
   - {fileID: 6261851012604302763}
   duration: 0.8
-  nextSceneName: 
+  storySceneName: Story
+  selectMapSceneName: MapSelect
 --- !u!1 &4626148889401556025
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e5a84289c18934bb0e4e134fbce427, type: 3}
   m_Name: StoryData_02
   m_EditorClassIdentifier: 
-  illustration: {fileID: 21300000, guid: f69eddf68c1ac4ba6941f3456bfd0ec0, type: 3}
+  illustration: {fileID: 21300000, guid: 84509be7158e07f4f895b41aa9ca7254, type: 3}
   storyText: 'But one day, the World Core begins to crack. Its light becomes unstable,
     the ground shakes, and the sky changes color. The lands of Hopix start to lose
     balance, breaking apart and collapsing into chaos.
+
 
     Leo watches in horror
     as his homeland begins to fall apart. Everything that once felt safe and familiar

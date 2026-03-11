@@ -11,18 +11,20 @@ namespace PLAYERTWO.PlatformerProject
 		public LevelData[] levels;
 		public string createdAt;
 		public string updatedAt;
+        public bool introStorySeen;
 
-		/// <summary>
-		/// Returns a new instance of Game Data at runtime.
-		/// </summary>
-		public static GameData Create()
+        /// <summary>
+        /// Returns a new instance of Game Data at runtime.
+        /// </summary>
+        public static GameData Create()
 		{
 			return new GameData()
 			{
 				retries = Game.instance.initialRetries,
 				createdAt = DateTime.UtcNow.ToString(),
 				updatedAt = DateTime.UtcNow.ToString(),
-				levels = Game
+                introStorySeen = false,
+                levels = Game
 					.instance.levels.Select(
 						(level) =>
 						{

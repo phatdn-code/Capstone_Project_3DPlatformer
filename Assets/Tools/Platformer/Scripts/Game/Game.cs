@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -41,10 +41,17 @@ namespace PLAYERTWO.PlatformerProject
 		protected DateTime m_createdAt;
 		protected DateTime m_updatedAt;
 
-		/// <summary>
-		/// The amount of Level retries.
-		/// </summary>
-		public int retries
+        /// <summary>
+        /// Save Story
+        /// </summary>
+        protected bool m_introStorySeen;
+        public bool introStorySeen => m_introStorySeen;
+
+
+        /// <summary>
+        /// The amount of Level retries.
+        /// </summary>
+        public int retries
 		{
 			get { return m_retries; }
 			set
@@ -110,8 +117,9 @@ namespace PLAYERTWO.PlatformerProject
 			m_retries = data.retries;
 			m_createdAt = DateTime.Parse(data.createdAt);
 			m_updatedAt = DateTime.Parse(data.updatedAt);
+            m_introStorySeen = data.introStorySeen;
 
-			for (int i = 0; i < data.levels.Length; i++)
+            for (int i = 0; i < data.levels.Length; i++)
 			{
 				if (i >= levels.Count)
 					break;
@@ -215,7 +223,22 @@ namespace PLAYERTWO.PlatformerProject
 				levels = LevelsData(),
 				createdAt = m_createdAt.ToString(),
 				updatedAt = DateTime.UtcNow.ToString(),
-			};
+                introStorySeen = m_introStorySeen,
+            };
 		}
-	}
+
+        /// <summary>
+        /// Đánh dấu người chơi đã xem xong cốt truyện mở đầu và lưu lại nếu cần.
+        /// </summary>
+        public virtual void MarkIntroStoryAsSeen(bool saveImmediately = true)
+        {
+            if (m_introStorySeen)
+                return;
+
+            m_introStorySeen = true;
+
+            if (saveImmediately && dataLoaded)
+                RequestSaving();
+        }
+    }
 }

@@ -1,143 +1,146 @@
 ﻿using UnityEngine;
 using UnityEngine.Audio;
 
-public class AudioManager : SingletonMonobehaviour<AudioManager>
+namespace PLAYERTWO.PlatformerProject
 {
-    // Tên parameter trong Audio Mixer
-    private const string VolumeParam = "VolumeVol";
-    private const string MusicParam = "MusicVol";
-    private const string SoundParam = "SoundVol";
-
-    [Header("Audio Sources")]
-    [SerializeField] private AudioSource[] musics;
-    [SerializeField] private AudioSource[] sounds;
-
-    [Header("Mixer Groups")]
-    [SerializeField] private AudioMixerGroup volumeMixer;
-    [SerializeField] private AudioMixerGroup musicMixer;
-    [SerializeField] private AudioMixerGroup soundMixer;
-
-    [Header("Current Values")]
-    private float volumeVol;
-    private float musicVol;
-    private float soundVol;
-
-    /// <summary>
-    /// Phát 1 bản nhạc theo index.
-    /// </summary>
-    public void PlayMusic(int musicToPlay)
+    public class AudioManager : SingletonMonobehaviour<AudioManager>
     {
-        if (!IsValidIndex(musics, musicToPlay))
-            return;
+        // Tên parameter trong Audio Mixer
+        private const string VolumeParam = "VolumeVol";
+        private const string MusicParam = "MusicVol";
+        private const string SoundParam = "SoundVol";
 
-        StopMusics();
-        musics[musicToPlay].Play();
-    }
+        [Header("Audio Sources")]
+        [SerializeField] private AudioSource[] musics;
+        [SerializeField] private AudioSource[] sounds;
 
-    /// <summary>
-    /// Dừng toàn bộ nhạc nền.
-    /// </summary>
-    public void StopMusics()
-    {
-        for (int i = 0; i < musics.Length; i++)
+        [Header("Mixer Groups")]
+        [SerializeField] private AudioMixerGroup volumeMixer;
+        [SerializeField] private AudioMixerGroup musicMixer;
+        [SerializeField] private AudioMixerGroup soundMixer;
+
+        [Header("Current Values")]
+        private float volumeVol;
+        private float musicVol;
+        private float soundVol;
+
+        /// <summary>
+        /// Phát 1 bản nhạc theo index.
+        /// </summary>
+        public void PlayMusic(int musicToPlay)
         {
-            if (musics[i] != null)
-                musics[i].Stop();
+            if (!IsValidIndex(musics, musicToPlay))
+                return;
+
+            StopMusics();
+            musics[musicToPlay].Play();
         }
-    }
 
-    /// <summary>
-    /// Phát hiệu ứng âm thanh theo index.
-    /// </summary>
-    public void PlaySound(int soundToPlay)
-    {
-        if (!IsValidIndex(sounds, soundToPlay))
-            return;
+        /// <summary>
+        /// Dừng toàn bộ nhạc nền.
+        /// </summary>
+        public void StopMusics()
+        {
+            for (int i = 0; i < musics.Length; i++)
+            {
+                if (musics[i] != null)
+                    musics[i].Stop();
+            }
+        }
 
-        AudioSource sound = sounds[soundToPlay];
-        sound.Stop();
-        sound.Play();
-    }
+        /// <summary>
+        /// Phát hiệu ứng âm thanh theo index.
+        /// </summary>
+        public void PlaySound(int soundToPlay)
+        {
+            if (!IsValidIndex(sounds, soundToPlay))
+                return;
 
-    /// <summary>
-    /// Cập nhật âm lượng tổng từ slider.
-    /// </summary>
-    public void SetVolumeSlider()
-    {
-        if (SettingsManager.Instance == null || SettingsManager.Instance.volumeVolSlider == null)
-            return;
+            AudioSource sound = sounds[soundToPlay];
+            sound.Stop();
+            sound.Play();
+        }
 
-        volumeVol = SettingsManager.Instance.volumeVolSlider.value;
-        SetMixerVolume(volumeMixer, VolumeParam, volumeVol);
-    }
+        /// <summary>
+        /// Cập nhật âm lượng tổng từ slider.
+        /// </summary>
+        public void SetVolumeSlider()
+        {
+            if (SettingsManager.Instance == null || SettingsManager.Instance.volumeVolSlider == null)
+                return;
 
-    /// <summary>
-    /// Cập nhật âm lượng nhạc từ slider.
-    /// </summary>
-    public void SetMusicSlider()
-    {
-        if (SettingsManager.Instance == null || SettingsManager.Instance.musicVolSlider == null)
-            return;
+            volumeVol = SettingsManager.Instance.volumeVolSlider.value;
+            SetMixerVolume(volumeMixer, VolumeParam, volumeVol);
+        }
 
-        musicVol = SettingsManager.Instance.musicVolSlider.value;
-        SetMixerVolume(musicMixer, MusicParam, musicVol);
-    }
+        /// <summary>
+        /// Cập nhật âm lượng nhạc từ slider.
+        /// </summary>
+        public void SetMusicSlider()
+        {
+            if (SettingsManager.Instance == null || SettingsManager.Instance.musicVolSlider == null)
+                return;
 
-    /// <summary>
-    /// Cập nhật âm lượng hiệu ứng từ slider.
-    /// </summary>
-    public void SetSoundSlider()
-    {
-        if (SettingsManager.Instance == null || SettingsManager.Instance.soundVolSlider == null)
-            return;
+            musicVol = SettingsManager.Instance.musicVolSlider.value;
+            SetMixerVolume(musicMixer, MusicParam, musicVol);
+        }
 
-        soundVol = SettingsManager.Instance.soundVolSlider.value;
-        SetMixerVolume(soundMixer, SoundParam, soundVol);
-    }
+        /// <summary>
+        /// Cập nhật âm lượng hiệu ứng từ slider.
+        /// </summary>
+        public void SetSoundSlider()
+        {
+            if (SettingsManager.Instance == null || SettingsManager.Instance.soundVolSlider == null)
+                return;
 
-    /// <summary>
-    /// Trả về âm lượng tổng hiện tại.
-    /// </summary>
-    public float GetVolumeVol()
-    {
-        return volumeVol;
-    }
+            soundVol = SettingsManager.Instance.soundVolSlider.value;
+            SetMixerVolume(soundMixer, SoundParam, soundVol);
+        }
 
-    /// <summary>
-    /// Trả về âm lượng nhạc hiện tại.
-    /// </summary>
-    public float GetMusicVol()
-    {
-        return musicVol;
-    }
+        /// <summary>
+        /// Trả về âm lượng tổng hiện tại.
+        /// </summary>
+        public float GetVolumeVol()
+        {
+            return volumeVol;
+        }
 
-    /// <summary>
-    /// Trả về âm lượng hiệu ứng hiện tại.
-    /// </summary>
-    public float GetSoundVol()
-    {
-        return soundVol;
-    }
+        /// <summary>
+        /// Trả về âm lượng nhạc hiện tại.
+        /// </summary>
+        public float GetMusicVol()
+        {
+            return musicVol;
+        }
 
-    /// <summary>
-    /// Gán giá trị âm lượng vào mixer.
-    /// </summary>
-    private void SetMixerVolume(AudioMixerGroup mixerGroup, string parameterName, float value)
-    {
-        if (mixerGroup == null || mixerGroup.audioMixer == null)
-            return;
+        /// <summary>
+        /// Trả về âm lượng hiệu ứng hiện tại.
+        /// </summary>
+        public float GetSoundVol()
+        {
+            return soundVol;
+        }
 
-        mixerGroup.audioMixer.SetFloat(parameterName, value);
-    }
+        /// <summary>
+        /// Gán giá trị âm lượng vào mixer.
+        /// </summary>
+        private void SetMixerVolume(AudioMixerGroup mixerGroup, string parameterName, float value)
+        {
+            if (mixerGroup == null || mixerGroup.audioMixer == null)
+                return;
 
-    /// <summary>
-    /// Kiểm tra index có hợp lệ không.
-    /// </summary>
-    private bool IsValidIndex(AudioSource[] audioSources, int index)
-    {
-        return audioSources != null &&
-               index >= 0 &&
-               index < audioSources.Length &&
-               audioSources[index] != null;
+            mixerGroup.audioMixer.SetFloat(parameterName, value);
+        }
+
+        /// <summary>
+        /// Kiểm tra index có hợp lệ không.
+        /// </summary>
+        private bool IsValidIndex(AudioSource[] audioSources, int index)
+        {
+            return audioSources != null &&
+                   index >= 0 &&
+                   index < audioSources.Length &&
+                   audioSources[index] != null;
+        }
     }
 }

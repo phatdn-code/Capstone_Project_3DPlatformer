@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e5a84289c18934bb0e4e134fbce427, type: 3}
   m_Name: StoryData_03
   m_EditorClassIdentifier: 
-  illustration: {fileID: 21300000, guid: f69eddf68c1ac4ba6941f3456bfd0ec0, type: 3}
+  illustration: {fileID: 21300000, guid: e904ba38a91cbcd4e82e14641e6e118d, type: 3}
   storyText: "As everything is falling apart, an ancient guardian appears and leaves
     Leo one final message:\n\u201COnly when the three lands are freed from the forces
     of evil can the World Core be restored.\u201D\nIt is the last hope left in the
