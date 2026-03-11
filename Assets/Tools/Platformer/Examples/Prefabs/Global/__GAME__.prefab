@@ -484,6 +484,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Fader
       objectReference: {fileID: 0}
+    - target: {fileID: 5266596880682881603, guid: b3b0177c16229644097992315b340d38,
+        type: 3}
+      propertyPath: startDelay
+      value: 0.25
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

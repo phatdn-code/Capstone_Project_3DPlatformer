@@ -5,91 +5,122 @@ using UnityEngine.UI;
 
 namespace PLAYERTWO.PlatformerProject
 {
-	[RequireComponent(typeof(Image))]
-	[AddComponentMenu("PLAYER TWO/Platformer Project/Misc/Fader")]
-	public class Fader : Singleton<Fader>
-	{
-		public float speed = 1f;
+    [RequireComponent(typeof(Image))]
+    [AddComponentMenu("PLAYER TWO/Platformer Project/Misc/Fader")]
+    public class Fader : Singleton<Fader>
+    {
+        [Header("Fade")]
+        public float speed = 1f;
 
-		protected Image m_image;
+        [Header("Auto On Start")]
+        [SerializeField] private bool fadeInOnStart = true;
+        [SerializeField] private float startDelay = 0f;
+        [SerializeField, Range(0f, 1f)] private float startAlpha = 1f;
 
-		/// <summary>
-		/// Fades out with no callback.
-		/// </summary>
-		public void FadeOut() => FadeOut(() => { });
+        protected Image m_image;
 
-		/// <summary>
-		/// Fades in with no callback.
-		/// </summary>
-		public void FadeIn() => FadeIn(() => { });
+        public bool IsFading { get; private set; }
 
-		/// <summary>
-		/// Fades in with callback.
-		/// </summary>
-		/// <param name="onFinished">The action that will be invoked in the end of the routine.</param>
-		public void FadeOut(Action onFinished)
-		{
-			StopAllCoroutines();
-			StartCoroutine(FadeOutRoutine(onFinished));
-		}
+        /// <summary>
+        /// Fades to black.
+        /// </summary>
+        public void FadeOut() => FadeOut(() => { });
 
-		/// <summary>
-		/// Fades in with callback.
-		/// </summary>
-		/// <param name="onFinished">The action that will be invoked in the end of the routine.</param>
-		public void FadeIn(Action onFinished)
-		{
-			StopAllCoroutines();
-			StartCoroutine(FadeInRoutine(onFinished));
-		}
+        /// <summary>
+        /// Fades from current alpha to transparent.
+        /// </summary>
+        public void FadeIn() => FadeIn(() => { });
 
-		/// <summary>
-		/// Set the fader alpha to a given value.
-		/// </summary>
-		/// <param name="alpha">The desired alpha value.</param>
-		public virtual void SetAlpha(float alpha)
-		{
-			var color = m_image.color;
-			color.a = alpha;
-			m_image.color = color;
-		}
+        /// <summary>
+        /// Instantly set black alpha first, then fade to transparent.
+        /// </summary>
+        public void FadeInFromBlack() => FadeInFromBlack(() => { });
 
-		/// <summary>
-		/// Increases the alpha to one and invokes the callback afterwards.
-		/// </summary>
-		protected virtual IEnumerator FadeOutRoutine(Action onFinished)
-		{
-			while (m_image.color.a < 1)
-			{
-				var color = m_image.color;
-				color.a += speed * Time.deltaTime;
-				m_image.color = color;
-				yield return null;
-			}
+        public void FadeOut(Action onFinished)
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeOutRoutine(onFinished));
+        }
 
-			onFinished?.Invoke();
-		}
+        public void FadeIn(Action onFinished)
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeInRoutine(onFinished));
+        }
 
-		/// <summary>
-		/// Decreases the alpha to zero and invokes the callback afterwards.
-		/// </summary>
-		protected virtual IEnumerator FadeInRoutine(Action onFinished)
-		{
-			while (m_image.color.a > 0)
-			{
-				var color = m_image.color;
-				color.a -= speed * Time.deltaTime;
-				m_image.color = color;
-				yield return null;
-			}
+        public void FadeInFromBlack(Action onFinished)
+        {
+            SetAlpha(1f);
+            FadeIn(onFinished);
+        }
 
-			onFinished?.Invoke();
-		}
+        /// <summary>
+        /// Set the fader alpha to a given value.
+        /// </summary>
+        public virtual void SetAlpha(float alpha)
+        {
+            if (m_image == null) return;
 
-		protected override void Awake()
-		{
-			base.Awake();
-			m_image = GetComponent<Image>();
-		}
-	}
+            var color = m_image.color;
+            color.a = Mathf.Clamp01(alpha);
+            m_image.color = color;
+        }
+
+        /// <summary>
+        /// Increases the alpha to one and invokes the callback afterwards.
+        /// </summary>
+        protected virtual IEnumerator FadeOutRoutine(Action onFinished)
+        {
+            IsFading = true;
+
+            while (m_image.color.a < 1f)
+            {
+                var color = m_image.color;
+                color.a = Mathf.Min(color.a + speed * Time.deltaTime, 1f);
+                m_image.color = color;
+                yield return null;
+            }
+
+            IsFading = false;
+            onFinished?.Invoke();
+        }
+
+        /// <summary>
+        /// Decreases the alpha to zero and invokes the callback afterwards.
+        /// </summary>
+        protected virtual IEnumerator FadeInRoutine(Action onFinished)
+        {
+            IsFading = true;
+
+            while (m_image.color.a > 0f)
+            {
+                var color = m_image.color;
+                color.a = Mathf.Max(color.a - speed * Time.deltaTime, 0f);
+                m_image.color = color;
+                yield return null;
+            }
+
+            IsFading = false;
+            onFinished?.Invoke();
+        }
+
+        private IEnumerator Start()
+        {
+            if (!fadeInOnStart)
+                yield break;
+
+            SetAlpha(startAlpha);
+
+            if (startDelay > 0f)
+                yield return new WaitForSeconds(startDelay);
+
+            FadeIn();
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            m_image = GetComponent<Image>();
+        }
+    }
 }

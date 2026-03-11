@@ -31,4 +31,12 @@
         Trigger = 0,
         Bool = 1
     }
+
+    public enum StoryPageState
+    {
+        Intro,          // Đang chờ intro page / overlay
+        Typing,         // Đang chạy chữ
+        Ready,          // Đã xong, chờ bấm next
+        Transitioning   // Đang chuyển sang page khác
+    }
 }

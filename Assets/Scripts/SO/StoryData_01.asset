@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85e5a84289c18934bb0e4e134fbce427, type: 3}
+  m_Name: StoryData_01
+  m_EditorClassIdentifier: 
+  illustration: {fileID: 21300000, guid: f69eddf68c1ac4ba6941f3456bfd0ec0, type: 3}
+  storyText: 'In a strange universe, there is a world called Hopix, where everything
+    is made of cubes. Mountains, rivers, trees, and houses all have square shapes,
+    yet the world is full of life and harmony. At the center of Hopix lies the World
+    Core, a powerful source of energy that keeps the entire world stable.
+
+
+    In
+    a small village built of stone and wood, Leo lives a quiet and peaceful life,
+    never knowing that his world is about to change.'

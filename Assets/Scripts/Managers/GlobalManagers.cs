@@ -5,11 +5,14 @@ using UnityEngine;
 /// Should only exist once in the very first scene (e.g., Bootstrap or MainMenu).
 /// Keeps itself alive across scene loads using DontDestroyOnLoad.
 /// </summary>
-public class GlobalManagers : SingletonMonobehaviour<GlobalManagers>
+namespace PLAYERTWO.PlatformerProject
 {
-    protected override void Awake()
+    public class GlobalManagers : SingletonMonobehaviour<GlobalManagers>
     {
-        base.Awake();
-        DontDestroyOnLoad(gameObject);
+        protected override void Awake()
+        {
+            base.Awake();
+            DontDestroyOnLoad(gameObject);
+        }
     }
 }
