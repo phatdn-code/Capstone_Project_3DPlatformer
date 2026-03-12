@@ -4381,7 +4381,7 @@ MonoBehaviour:
   scaleMultiplier: 1.1
   scaleDuration: 0.1
   useClickAudio: 1
-  useHighlightAudio: 1
+  useHighlightAudio: 0
   audioType: 2
 --- !u!1 &1772539496
 GameObject:
