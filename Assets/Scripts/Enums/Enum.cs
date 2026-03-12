@@ -15,7 +15,8 @@
     public enum ExtraAttackMode
     {
         None,
-        Animated
+        Animated,
+        PatrolOnly
     }
 
     public enum EnemyAttackType

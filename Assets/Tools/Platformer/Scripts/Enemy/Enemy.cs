@@ -782,6 +782,19 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>Phát hiện player (spot) và mất mục tiêu (escape).</summary>
         protected virtual void HandleSight()
         {
+            // VN: Mode này chỉ đi tuần, không detect player, không rượt, không đánh
+            if (extraAttackMode == ExtraAttackMode.PatrolOnly)
+            {
+                if (player != null)
+                {
+                    StopAllAttacks();
+                    player = null;
+                    enemyEvents?.OnPlayerScaped?.Invoke();
+                }
+
+                return;
+            }
+
             if (!player)
             {
                 if (stats?.current == null) return;
@@ -820,6 +833,8 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>Khi thấy player: nếu bật followTargetOnSight thì chuyển qua FollowEnemyState.</summary>
         protected virtual void OnPlayerSpotted()
         {
+            if (extraAttackMode == ExtraAttackMode.PatrolOnly) return;
+
             if (stats?.current == null) return;
             if (!stats.current.followTargetOnSight) return;
             if (states == null) return;

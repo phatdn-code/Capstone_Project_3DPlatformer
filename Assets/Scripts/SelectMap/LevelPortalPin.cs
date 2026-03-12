@@ -105,6 +105,16 @@ namespace PLAYERTWO.PlatformerProject
         [BoxGroup("Level Portal Pin/Zone Camera")]
         [SerializeField] private int exitPriority = 0;
 
+        [BoxGroup("Level Portal Pin/Boss")]
+        [ToggleLeft]
+        [InfoBox("Bật nếu portal này là portal của màn Boss.")]
+        [SerializeField] private bool isBossPortal = false;
+
+        [BoxGroup("Level Portal Pin/Boss")]
+        [ShowIf(nameof(isBossPortal))]
+        [Required("Thiếu BossMaterialSwitcher.")]
+        [SerializeField] private BossMaterialSwitcher bossMaterialSwitcher;
+
         #endregion
 
         //─────────────────────────────────────────────
@@ -139,6 +149,7 @@ namespace PLAYERTWO.PlatformerProject
             CacheLevelData();
             RefreshStarsUI();
             RefreshUnlockState();
+            RefreshBossVisual();
             ApplyInstantState(false);
             ApplyCameraPriority(exitPriority);
         }
@@ -169,9 +180,10 @@ namespace PLAYERTWO.PlatformerProject
         private void Update()
         {
             if (_isLoading || !_playerInside || !_isUnlocked) return;
+            if (PlayerHub.Instance == null || PlayerHub.Instance.InputManager == null) return;
 
-            // Nếu cần bật lại:
-            // if (Input.GetKeyDown(confirmKey)) ConfirmEnter();
+            if (PlayerHub.Instance.InputManager.GetStompDown())
+                ConfirmEnter();
         }
 
         /// <summary>
@@ -304,6 +316,7 @@ namespace PLAYERTWO.PlatformerProject
             CacheLevelData();
             RefreshStarsUI();
             RefreshUnlockState();
+            RefreshBossVisual();
         }
 
         /// <summary>
@@ -324,6 +337,24 @@ namespace PLAYERTWO.PlatformerProject
         {
             _isUnlocked = IsMapUnlocked();
             RefreshDistantFrame();
+        }
+
+        /// <summary>
+        /// VN: Nếu đây là boss portal thì đổi material boss theo trạng thái đã clear map hay chưa.
+        /// </summary>
+        private void RefreshBossVisual()
+        {
+            if (!isBossPortal)
+                return;
+
+            if (bossMaterialSwitcher == null)
+                return;
+
+            if (_levelData == null)
+                CacheLevelData();
+
+            bool wasDefeated = _levelData != null && _levelData.wasCompletedOnce;
+            bossMaterialSwitcher.ApplyState(wasDefeated);
         }
 
         /// <summary>
@@ -468,13 +499,17 @@ namespace PLAYERTWO.PlatformerProject
 
             _isLoading = true;
 
+            if (PlayerHub.Instance != null)
+                PlayerHub.Instance.LockPlayer(true);
+
             if (Fader.instance == null)
             {
                 SceneManager.LoadScene(sceneName);
                 return;
             }
 
-            Fader.instance.FadeOut(() => SceneManager.LoadScene(sceneName));
+            Fader.instance.FadeOut(/*() => SceneManager.LoadScene(sceneName)*/);
+            AudioManager.Instance.PlaySound(1);
         }
 
         #endregion

@@ -183,6 +183,7 @@ MonoBehaviour:
   rotateToPlatforms: 1
   minSpeedToFall: 5
   maxCeilingAngle: 60
+  autoCreateController: 1
   enemyEvents:
     OnPlayerSpotted:
       m_PersistentCalls:
@@ -202,6 +203,26 @@ MonoBehaviour:
     OnRevive:
       m_PersistentCalls:
         m_Calls: []
+  attackAnimConfigs: []
+  extraAttackMode: 0
+  extraAttackRange: 1.4
+  extraAttackCooldown: 1
+  extraUseContactDamage: 1
+  extraOverrideDamage: 1
+  enableRollAttack: 1
+  rollAttackRange: 4
+  rollTopSpeed: 8
+  rollAcceleration: 40
+  rollStopDistance: 0.4
+  rollCooldown: 2
+  enableSprayAttack: 1
+  sprayAttackRange: 5
+  sprayTopSpeed: 6
+  sprayAcceleration: 35
+  sprayStandOffDistance: 1.2
+  sprayCooldown: 2.5
+  sprayDuration: 1.2
+  sprayEffectObject: {fileID: 0}
 --- !u!114 &1824014398455110128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,9 +240,14 @@ MonoBehaviour:
   lastStateName: Last State
   lateralSpeedName: Lateral Speed
   verticalSpeedName: Vertical Speed
+  speed01Name: Speed01
   healthName: Health
   isGroundedName: Is Grounded
   onStateChangedName: On State Changed
+  attackName: Attack
+  rollAttackName: Roll
+  sprayAttackName: SprayAttack
+  initializedName: Initialized
 --- !u!114 &2093502364004102081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,7 +279,7 @@ MonoBehaviour:
   maxGroundDistance: 50
   groundLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 131063
 --- !u!1001 &1824014397888379810
 PrefabInstance:
   m_ObjectHideFlags: 0
