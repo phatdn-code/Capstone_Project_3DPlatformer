@@ -872,7 +872,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8787043513351263207}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9047268718723819896}
+        m_TargetAssemblyTypeName: UI_LevelController, Assembly-CSharp
+        m_MethodName: Pause
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2273268339546653888
 GameObject:
   m_ObjectHideFlags: 0
@@ -1513,7 +1525,7 @@ MonoBehaviour:
   scaleDuration: 0.1
   useClickAudio: 1
   useHighlightAudio: 1
-  audioType: 0
+  audioType: 3
 --- !u!222 &915014793739288315
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1565,7 +1577,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7533726540396127054}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9047268718723819896}
+        m_TargetAssemblyTypeName: UI_LevelController, Assembly-CSharp
+        m_MethodName: Setting
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!1 &7839898716564308833
 GameObject:
   m_ObjectHideFlags: 0
@@ -1680,7 +1704,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4153602392907500268}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9047268718723819896}
+        m_TargetAssemblyTypeName: UI_LevelController, Assembly-CSharp
+        m_MethodName: Exit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &9074586028705698064
 GameObject:
   m_ObjectHideFlags: 0
@@ -1860,6 +1896,41 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 9047268718723819896}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Setting
+      objectReference: {fileID: 0}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UI_LevelController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1426955674456710134, guid: 3f52c13d0717aec4db99ebc9b487cb21,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 2378011705656070340, guid: 3f52c13d0717aec4db99ebc9b487cb21,
         type: 3}
