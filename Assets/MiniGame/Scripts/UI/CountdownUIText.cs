@@ -70,7 +70,7 @@ namespace MiniGame
 
         IEnumerator FadeBonus(float timeAdded)
         {
-            bonusText.text = "+" + timeAdded + "s";
+            bonusText.text = "+" + timeAdded;
             bonusText.gameObject.SetActive(true);
 
             bonusText.canvasRenderer.SetAlpha(0f);
