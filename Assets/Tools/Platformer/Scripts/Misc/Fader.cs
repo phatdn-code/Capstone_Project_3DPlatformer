@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,11 +11,6 @@ namespace PLAYERTWO.PlatformerProject
     {
         [Header("Fade")]
         public float speed = 1f;
-
-        [Header("Auto On Start")]
-        [SerializeField] private bool fadeInOnStart = true;
-        [SerializeField] private float startDelay = 0f;
-        [SerializeField, Range(0f, 1f)] private float startAlpha = 1f;
 
         protected Image m_image;
 
@@ -102,19 +97,6 @@ namespace PLAYERTWO.PlatformerProject
 
             IsFading = false;
             onFinished?.Invoke();
-        }
-
-        private IEnumerator Start()
-        {
-            if (!fadeInOnStart)
-                yield break;
-
-            SetAlpha(startAlpha);
-
-            if (startDelay > 0f)
-                yield return new WaitForSeconds(startDelay);
-
-            FadeIn();
         }
 
         protected override void Awake()

@@ -22,13 +22,6 @@ namespace PLAYERTWO.PlatformerProject
         private Vector2[] startPositions;
         private Image[] images;
 
-        // Phát nhạc nền khi vào menu.
-        private void Start()
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayMusic(0);
-        }
-
         // Bắt đầu hiệu ứng chuyển cảnh và nạp save slot cố định.
         public void StartTransition()
         {
