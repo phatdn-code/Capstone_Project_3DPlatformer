@@ -30,7 +30,7 @@ public class RoomManager : MonoBehaviour
         if (!isRoomCleared) return;
         foreach (var door in activeDoors)
         {
-            //door.GetComponent<Door>().OpenDoor();
+            door.GetComponent<Door>().OpenDoor();
         }
     }
     public void CloseAllDoors()
@@ -38,7 +38,7 @@ public class RoomManager : MonoBehaviour
         if(isRoomCleared) return;
         foreach (var door in activeDoors)
         {
-            //door.GetComponent<Door>().CloseDoor();
+            door.GetComponent<Door>().CloseDoor();
         }
     }
 
