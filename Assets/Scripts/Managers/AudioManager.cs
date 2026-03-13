@@ -13,6 +13,7 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Audio Sources")]
         [SerializeField] private AudioSource[] musics;
         [SerializeField] private AudioSource[] sounds;
+        [SerializeField] private AudioSource[] storyVoices;
 
         [Header("Mixer Groups")]
         [SerializeField] private AudioMixerGroup volumeMixer;
@@ -59,6 +60,30 @@ namespace PLAYERTWO.PlatformerProject
             AudioSource sound = sounds[soundToPlay];
             sound.Stop();
             sound.Play();
+        }
+
+        /// <summary>
+        /// Phát voice story theo index page.
+        /// </summary>
+        public void PlayStoryVoice(int voiceIndex)
+        {
+            if (!IsValidIndex(storyVoices, voiceIndex))
+                return;
+
+            StopStoryVoices();
+            storyVoices[voiceIndex].Play();
+        }
+
+        /// <summary>
+        /// Dừng toàn bộ voice story.
+        /// </summary>
+        public void StopStoryVoices()
+        {
+            for (int i = 0; i < storyVoices.Length; i++)
+            {
+                if (storyVoices[i] != null)
+                    storyVoices[i].Stop();
+            }
         }
 
         /// <summary>

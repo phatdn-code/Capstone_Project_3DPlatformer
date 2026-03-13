@@ -271,6 +271,9 @@ namespace PLAYERTWO.PlatformerProject
             currentStoryText = currentData != null ? currentData.storyText : string.Empty;
 
             introCoroutine = StartCoroutine(PlayPageIntroThenType(currentStoryText));
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayStoryVoice(currentIndex);
         }
 
         /// <summary>
@@ -777,6 +780,9 @@ namespace PLAYERTWO.PlatformerProject
 
             SetButtonsInteractable(false);
             pageState = StoryPageState.Transitioning;
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.StopStoryVoices();
 
             if (useFadeWhenEnding && Fader.instance != null)
             {
