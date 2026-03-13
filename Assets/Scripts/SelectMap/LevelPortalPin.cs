@@ -489,27 +489,56 @@ namespace PLAYERTWO.PlatformerProject
         #region === SCENE LOAD ===
 
         /// <summary>
-        /// VN: FadeOut rồi chuyển scene.
+        /// VN: Xử lý khi người chơi xác nhận đi vào portal.
         /// </summary>
         private void ConfirmEnter()
         {
-            if (_isLoading) return;
-            if (!_isUnlocked) return;
-            if (string.IsNullOrEmpty(sceneName)) return;
+            if (!CanEnterPortal()) return;
 
             _isLoading = true;
 
-            if (PlayerHub.Instance != null)
-                PlayerHub.Instance.LockPlayer(true);
+            PrepareForEnter();
+            LoadTargetScene();
 
-            if (Fader.instance == null)
+            AudioManager.Instance.PlaySound(1);
+        }
+
+        /// <summary>
+        /// VN: Kiểm tra portal có đủ điều kiện để vào hay không.
+        /// </summary>
+        private bool CanEnterPortal()
+        {
+            return !_isLoading &&
+                   _isUnlocked &&
+                   !string.IsNullOrEmpty(sceneName);
+        }
+
+        /// <summary>
+        /// VN: Khóa các trạng thái cần thiết trước khi chuyển scene.
+        /// </summary>
+        private void PrepareForEnter()
+        {
+            if (LevelPauser.instance != null)
             {
-                SceneManager.LoadScene(sceneName);
+                LevelPauser.instance.Pause(false);
+                LevelPauser.instance.canPause = false;
+            }
+
+            PlayerHub.Instance?.LockPlayer(true);
+        }
+
+        /// <summary>
+        /// VN: Load scene đích, ưu tiên đi qua GameLoader nếu có.
+        /// </summary>
+        private void LoadTargetScene()
+        {
+            if (GameLoader.instance != null)
+            {
+                GameLoader.instance.Load(sceneName);
                 return;
             }
 
-            Fader.instance.FadeOut(/*() => SceneManager.LoadScene(sceneName)*/);
-            AudioManager.Instance.PlaySound(1);
+            Fader.instance?.FadeOut(() => SceneManager.LoadScene(sceneName));
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -12,9 +13,13 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private int musicIndex;
         [SerializeField] private bool playOnStart = true;
 
-        [Header("Fade On Start")]
+        [FoldoutGroup("Fade On Start")]
         [SerializeField] private bool fadeInOnStart = true;
+
+        [FoldoutGroup("Fade On Start"), ShowIf(nameof(fadeInOnStart))]
         [SerializeField, Range(0f, 1f)] private float startAlpha = 1f;
+
+        [FoldoutGroup("Fade On Start"), ShowIf(nameof(fadeInOnStart))]
         [SerializeField] private float startDelay = 0f;
 
         /// <summary>
