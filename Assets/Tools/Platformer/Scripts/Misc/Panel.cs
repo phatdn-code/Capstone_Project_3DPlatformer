@@ -1,186 +1,275 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
 {
-	[RequireComponent(typeof(Collider))]
-	[RequireComponent(typeof(AudioSource))]
-	[AddComponentMenu("PLAYER TWO/Platformer Project/Misc/Panel")]
-	public class Panel : MonoBehaviour, IEntityContact
-	{
-		public enum ActivationEntity
-		{
-			Player,
-			Other,
-			Any,
-			None,
-		}
+    [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(AudioSource))]
+    [AddComponentMenu("PLAYER TWO/Platformer Project/Misc/Panel")]
+    public class Panel : MonoBehaviour, IEntityContact
+    {
+        public enum ActivationEntity
+        {
+            Player,
+            Other,
+            Any,
+            None,
+        }
 
-		public enum ActivationCollider
-		{
-			Any,
-			None,
-		}
+        public enum ActivationCollider
+        {
+            Any,
+            None,
+        }
 
-		[Header("Activation Settings")]
-		[Tooltip("If true, the Panel will deactivate when no activator is in contact.")]
-		public bool autoToggle;
+        [Header("Activation Settings")]
+        public bool autoToggle;
+        public ActivationEntity activationEntity = ActivationEntity.Player;
+        public ActivationCollider activationCollider = ActivationCollider.None;
+        public bool requireStomp;
 
-		[Tooltip("The type of entity that can activate the Panel.")]
-		public ActivationEntity activationEntity;
+        // Bật cái này thì chỉ cần chạm là kích hoạt ngay.
+        // Khi bật, sẽ bỏ qua check đạp từ trên xuống và stomp.
+        public bool activateOnTouch;
 
-		[Tooltip("The type of collider that can activate the Panel.")]
-		public ActivationCollider activationCollider;
+        [Header("Audio Settings")]
+        public AudioClip activateClip;
+        public AudioClip deactivateClip;
 
-		[Tooltip("If true, the Panel will only activate when the Player activator is stomping.")]
-		public bool requireStomp;
+        [Header("Events")]
+        public UnityEvent OnActivate;
+        public UnityEvent OnDeactivate;
 
-		[Header("Audio Settings")]
-		[Tooltip("The audio clip to play when the Panel is activated.")]
-		public AudioClip activateClip;
+        protected Collider m_collider;
+        protected AudioSource m_audio;
 
-		[Tooltip("The audio clip to play when the Panel is deactivated.")]
-		public AudioClip deactivateClip;
+        protected Collider m_entityActivator;
+        protected Collider m_otherActivator;
 
-		[Header("Events")]
-		/// <summary>
-		/// Called when the Panel is activated.
-		/// </summary>
-		public UnityEvent OnActivate;
+        public bool activated { get; protected set; }
 
-		/// <summary>
-		/// Called when the Panel is deactivated.
-		/// </summary>
-		public UnityEvent OnDeactivate;
+        // Lấy component cần dùng.
+        protected virtual void Awake()
+        {
+            gameObject.tag = GameTags.Panel;
+            m_collider = GetComponent<Collider>();
+            m_audio = GetComponent<AudioSource>();
+        }
 
-		protected Collider m_collider;
-		protected Collider m_entityActivator;
-		protected Collider m_otherActivator;
+        // Bật panel.
+        public virtual void Activate()
+        {
+            if (activated)
+                return;
 
-		protected AudioSource m_audio;
+            if (activateClip)
+                m_audio.PlayOneShot(activateClip);
 
-		/// <summary>
-		/// Return true if the Panel is activated.
-		/// </summary>
-		public bool activated { get; protected set; }
+            activated = true;
+            OnActivate?.Invoke();
+        }
 
-		/// <summary>
-		/// Activate this Panel.
-		/// </summary>
-		public virtual void Activate()
-		{
-			if (!activated)
-			{
-				if (activateClip)
-				{
-					m_audio.PlayOneShot(activateClip);
-				}
+        // Tắt panel.
+        public virtual void Deactivate()
+        {
+            if (!activated)
+                return;
 
-				activated = true;
-				OnActivate?.Invoke();
-			}
-		}
+            if (deactivateClip)
+                m_audio.PlayOneShot(deactivateClip);
 
-		/// <summary>
-		/// Deactivates this Panel.
-		/// </summary>
-		public virtual void Deactivate()
-		{
-			if (activated)
-			{
-				if (deactivateClip)
-				{
-					m_audio.PlayOneShot(deactivateClip);
-				}
+            activated = false;
+            OnDeactivate?.Invoke();
+        }
 
-				activated = false;
-				OnDeactivate?.Invoke();
-			}
-		}
+        // Giữ trạng thái khi còn đang chạm.
+        protected virtual void Update()
+        {
+            if (m_entityActivator == null && m_otherActivator == null)
+                return;
 
-		protected virtual void Start()
-		{
-			gameObject.tag = GameTags.Panel;
-			m_collider = GetComponent<Collider>();
-			m_audio = GetComponent<AudioSource>();
-		}
+            var center = m_collider.bounds.center;
+            var contactOffset = Physics.defaultContactOffset + 0.1f;
+            var size = m_collider.bounds.size + Vector3.up * contactOffset;
+            var bounds = new Bounds(center, size);
 
-		protected virtual void Update()
-		{
-			if (m_entityActivator || m_otherActivator)
-			{
-				var center = m_collider.bounds.center;
-				var contactOffset = Physics.defaultContactOffset + 0.1f;
-				var size = m_collider.bounds.size + Vector3.up * contactOffset;
-				var bounds = new Bounds(center, size);
+            var intersectsEntity =
+                m_entityActivator != null && bounds.Intersects(m_entityActivator.bounds);
+            var intersectsOther =
+                m_otherActivator != null && bounds.Intersects(m_otherActivator.bounds);
 
-				var intersectsEntity =
-					m_entityActivator && bounds.Intersects(m_entityActivator.bounds);
-				var intersectsOther =
-					m_otherActivator && bounds.Intersects(m_otherActivator.bounds);
+            if (intersectsEntity || intersectsOther)
+            {
+                if (!activated)
+                    Activate();
+            }
+            else
+            {
+                if (!intersectsEntity)
+                    m_entityActivator = null;
 
-				if (intersectsEntity || intersectsOther)
-				{
-					Activate();
-				}
-				else
-				{
-					m_entityActivator = intersectsEntity ? m_entityActivator : null;
-					m_otherActivator = intersectsOther ? m_otherActivator : null;
+                if (!intersectsOther)
+                    m_otherActivator = null;
 
-					if (autoToggle)
-					{
-						Deactivate();
-					}
-				}
-			}
-		}
+                if (autoToggle)
+                    Deactivate();
+            }
+        }
 
-		public void OnEntityContact(Entity entity)
-		{
-			if (
-				activationEntity == ActivationEntity.None
-				|| entity.verticalVelocity.y > 0
-				|| !BoundsHelper.IsBellowPoint(m_collider, entity.stepPosition)
-			)
-				return;
+        // Nhận tiếp xúc từ hệ Entity của project.
+        public void OnEntityContact(Entity entity)
+        {
+            if (entity == null || activationEntity == ActivationEntity.None)
+                return;
 
-			switch (activationEntity)
-			{
-				default:
-				case ActivationEntity.Any:
-					m_entityActivator = entity.controller;
-					break;
-				case ActivationEntity.Player:
-					if (
-						entity is Player player
-						&& (
-							!requireStomp || player.states.IsCurrentOfType(typeof(StompPlayerState))
-						)
-					)
-						m_entityActivator = entity.controller;
-					break;
-				case ActivationEntity.Other:
-					if (entity is not Player)
-						m_entityActivator = entity.controller;
-					break;
-			}
-		}
+            if (!CanEntityActivate(entity))
+                return;
 
-		protected virtual void OnCollisionStay(Collision collision)
-		{
-			if (
-				GameTags.IsEntity(collision.collider)
-				|| activationCollider == ActivationCollider.None
-			)
-				return;
+            m_entityActivator = entity.controller;
 
-			m_otherActivator = collision.collider;
-		}
+            if (activateOnTouch)
+                Activate();
+        }
 
-		public void SetActivatedFalse()
-		{
+        // Va chạm vật lý - chạm lần đầu.
+        protected virtual void OnCollisionEnter(Collision collision)
+        {
+            HandleColliderContact(collision.collider);
+        }
+
+        // Va chạm vật lý - đang chạm liên tục.
+        protected virtual void OnCollisionStay(Collision collision)
+        {
+            HandleColliderContact(collision.collider);
+        }
+
+        // Trigger - chạm lần đầu.
+        protected virtual void OnTriggerEnter(Collider other)
+        {
+            HandleColliderContact(other);
+        }
+
+        // Trigger - đang chạm liên tục.
+        protected virtual void OnTriggerStay(Collider other)
+        {
+            HandleColliderContact(other);
+        }
+
+        // Trigger rời khỏi.
+        protected virtual void OnTriggerExit(Collider other)
+        {
+            TryClearActivator(other);
+        }
+
+        // Collision rời khỏi.
+        protected virtual void OnCollisionExit(Collision collision)
+        {
+            TryClearActivator(collision.collider);
+        }
+
+        // Xử lý khi có collider chạm vào panel.
+        protected virtual void HandleColliderContact(Collider other)
+        {
+            if (other == null)
+                return;
+
+            var entity = other.GetComponentInParent<Entity>();
+
+            // Nếu là Entity thì ưu tiên dùng nhánh entity.
+            if (entity != null)
+            {
+                if (activationEntity == ActivationEntity.None)
+                    return;
+
+                if (!CanEntityActivate(entity))
+                    return;
+
+                m_entityActivator = entity.controller;
+
+                if (activateOnTouch)
+                    Activate();
+
+                return;
+            }
+
+            // Nếu không phải entity thì dùng nhánh collider thường.
+            if (activationCollider == ActivationCollider.None)
+                return;
+
+            m_otherActivator = other;
+
+            if (activateOnTouch)
+                Activate();
+        }
+
+        // Xóa activator khi rời panel.
+        protected virtual void TryClearActivator(Collider other)
+        {
+            if (other == null)
+                return;
+
+            var entity = other.GetComponentInParent<Entity>();
+
+            if (entity != null && entity.controller == m_entityActivator)
+                m_entityActivator = null;
+
+            if (m_otherActivator == other)
+                m_otherActivator = null;
+
+            if (autoToggle && m_entityActivator == null && m_otherActivator == null)
+                Deactivate();
+        }
+
+        // Kiểm tra entity có được phép kích hoạt không.
+        protected virtual bool CanEntityActivate(Entity entity)
+        {
+            if (entity == null)
+                return false;
+
+            switch (activationEntity)
+            {
+                case ActivationEntity.Player:
+                    if (!(entity is Player))
+                        return false;
+                    break;
+
+                case ActivationEntity.Other:
+                    if (entity is Player)
+                        return false;
+                    break;
+
+                case ActivationEntity.Any:
+                    break;
+
+                case ActivationEntity.None:
+                    return false;
+            }
+
+            // Mode chạm là ăn ngay: bỏ qua check hướng rơi và stomp.
+            if (activateOnTouch)
+                return true;
+
+            // Mode cũ: phải tiếp xúc từ phía trên.
+            if (entity.verticalVelocity.y > 0)
+                return false;
+
+            if (!BoundsHelper.IsBellowPoint(m_collider, entity.stepPosition))
+                return false;
+
+            // Nếu yêu cầu stomp thì chỉ Player đang stomp mới kích hoạt được.
+            if (requireStomp && entity is Player player)
+            {
+                if (!player.states.IsCurrentOfType(typeof(StompPlayerState)))
+                    return false;
+            }
+
+            return true;
+        }
+
+        // Reset trạng thái bằng tay.
+        public void SetActivatedFalse()
+        {
             activated = false;
         }
-	}
+    }
 }

@@ -1339,7 +1339,7 @@ MonoBehaviour:
   storyOverlay: {fileID: 1467934304}
   nextButton: {fileID: 538451716}
   skipButton: {fileID: 456655904}
-  typeSpeed: 0.03
+  typeSpeed: 0.05
   pageIntroDelayRange: {x: 2, y: 3}
   overlayFadeInDuration: 0.45
   overlayFadeOutDuration: 0.55
