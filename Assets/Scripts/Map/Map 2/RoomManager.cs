@@ -6,6 +6,7 @@ public class RoomManager : MonoBehaviour
 {
     public GameObject roomSpawnPoint;
     public bool isRoomCleared = false;
+    public DungeonController dungeonController;
 
     [SerializeField] private GameObject[] doors;
     [SerializeField] private GameObject[] roads;
@@ -46,12 +47,12 @@ public class RoomManager : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            baseCamera.SetActive(true);
+            if (dungeonController == null) return;
+            dungeonController.SwitchCinemachine(baseCamera);
             roomblank.SetActive(false);
 
             if (!isRoomCleared)
             {
-                
                 CloseAllDoors();
             }
         }
@@ -61,7 +62,7 @@ public class RoomManager : MonoBehaviour
     {
         if(other.CompareTag("Player"))
         {
-            baseCamera.SetActive(false);
+            
         }
     }
 

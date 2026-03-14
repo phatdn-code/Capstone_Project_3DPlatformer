@@ -7,11 +7,13 @@ public class Door : MonoBehaviour
     
     public void OpenDoor()
     {
+        if (doorAnimator.GetBool("isClosed") == false) return;
         doorAnimator.SetBool("isClosed", false);
     }
 
     public void CloseDoor()
     {
+        if(doorAnimator.GetBool("isClosed") == true) return;
         doorAnimator.SetBool("isClosed", true);
     }
 }
