@@ -69,9 +69,6 @@ namespace PLAYERTWO.PlatformerProject
         [BoxGroup("Level Portal Pin/Player")]
         [SerializeField] private string playerTag = "Player";
 
-        [BoxGroup("Level Portal Pin/Player")]
-        [SerializeField] private KeyCode confirmKey = KeyCode.Space;
-
         [BoxGroup("Level Portal Pin/Scale")]
         [SerializeField] private float distantScale = 0.75f;
 

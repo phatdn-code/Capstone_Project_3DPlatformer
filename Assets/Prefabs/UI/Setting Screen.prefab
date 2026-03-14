@@ -159,13 +159,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 7948558794221902596}
   m_HandleRect: {fileID: 6088999350417584340}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
+  m_MinValue: -40
+  m_MaxValue: 0
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 221853385873633908}
+        m_TargetAssemblyTypeName: PLAYERTWO.PlatformerProject.SettingsManager, Assembly-CSharp
+        m_MethodName: SetSoundSlider
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &621916663284167321
 GameObject:
   m_ObjectHideFlags: 0
@@ -1957,13 +1969,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 7663014453924962222}
   m_HandleRect: {fileID: 2378011705656070340}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
+  m_MinValue: -40
+  m_MaxValue: 0
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 221853385873633908}
+        m_TargetAssemblyTypeName: PLAYERTWO.PlatformerProject.SettingsManager, Assembly-CSharp
+        m_MethodName: SetMusicSlider
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7318063334238171329
 GameObject:
   m_ObjectHideFlags: 0
@@ -2190,6 +2214,7 @@ GameObject:
   m_Component:
   - component: {fileID: 906602943921801972}
   - component: {fileID: 8984037340968876890}
+  - component: {fileID: 221853385873633908}
   m_Layer: 5
   m_Name: Setting Screen
   m_TagString: Untagged
@@ -2241,3 +2266,18 @@ MonoBehaviour:
   hideCompleteDelay: 0.1
   hiddenOnAwake: 1
   focusObject: {fileID: 0}
+--- !u!114 &221853385873633908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8583064761350142508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58b5e6d8592a1094789565c8a806e7ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  volumeVolSlider: {fileID: 0}
+  musicVolSlider: {fileID: 8800273484669359461}
+  soundVolSlider: {fileID: 3041648893022506517}

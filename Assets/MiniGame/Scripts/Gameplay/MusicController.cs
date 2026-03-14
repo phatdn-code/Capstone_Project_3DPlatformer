@@ -1,30 +1,31 @@
 ﻿using System.Collections;
 using UnityEngine;
+using PLAYERTWO.PlatformerProject;
 
 namespace MiniGame
 {
-	/// <summary>
-	/// Starts, stops and pauses music playback.
-	/// </summary>
+    /// <summary>
+    /// Starts, stops and pauses music playback.
+    /// </summary>
     public class MusicController : MonoBehaviour
     {
-		/// <summary>
-		/// Music during main menu.
-		/// </summary>
+        /// <summary>
+        /// Music during main menu.
+        /// </summary>
         public AudioSource menu;
-		/// <summary>
-		/// Music during in-level gameplay.
-		/// </summary>
+        /// <summary>
+        /// Music during in-level gameplay.
+        /// </summary>
         public AudioSource gameplay;
-		/// <summary>
-		/// Should the music be started when the game starts?
-		/// </summary>
+        /// <summary>
+        /// Should the music be started when the game starts?
+        /// </summary>
         public bool playOnStart = true;
-		/// <summary>
-		/// Should the music be changed from menu to gameplay?
-		/// </summary>
+        /// <summary>
+        /// Should the music be changed from menu to gameplay?
+        /// </summary>
         public bool changeMusicOnTakeOff = true;
-        
+
         /// <summary>
         /// If Change Music On Take Off is set to true, this is the rate at which menu theme will fade out
         /// after the user presses Play button.
@@ -43,15 +44,17 @@ namespace MiniGame
                     menu.Play();
                 }
             }
+
+            AudioManager.Instance.StopMusics();
         }
-        
+
         void OnEnable()
         {
-			if (changeMusicOnTakeOff)
-			{
-				UIEventsPublisher.OnPlayEvent += OnPlayClicked;
-				AirplaneTakeOffDetector.OnTakeOffEvent += StartGameplay;
-			}
+            if (changeMusicOnTakeOff)
+            {
+                UIEventsPublisher.OnPlayEvent += OnPlayClicked;
+                AirplaneTakeOffDetector.OnTakeOffEvent += StartGameplay;
+            }
         }
 
         void OnDisable()
@@ -85,7 +88,7 @@ namespace MiniGame
                 gameplay.UnPause();
             }
         }
-        
+
         private void OnPlayClicked()
         {
             // Fade out music.
@@ -142,7 +145,7 @@ namespace MiniGame
                 gameplay.Play();
             }
         }
-        
+
         private void HandleReviveRequest()
         {
             if (gameplay != null)
@@ -150,7 +153,7 @@ namespace MiniGame
                 StartCoroutine(FadeOutGameplay());
             }
         }
-        
+
         private void HandleRevive()
         {
             if (gameplay != null)

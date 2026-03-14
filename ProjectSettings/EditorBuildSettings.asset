@@ -26,6 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Boss/Boss02_Pyrodrake.unity
     guid: f7665f59abeb2254d8c772339f939327
+  - enabled: 1
+    path: Assets/MiniGame/Scenes/MiniGame.unity
+    guid: abb04098aeebd4101bd15d38d77c21dc
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 1b1e661a1ab16e54ab5b7b8a964dd64f,
       type: 2}
