@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using TMPro;
 using UnityStandardAssets.ImageEffects;
 
 namespace MiniGame
@@ -14,7 +15,7 @@ namespace MiniGame
     public class LevelPickupProgressTracker : MonoBehaviour
     {
         [Header("UI")]
-        public Text pickupsText;
+        public TMP_Text pickupsText;
         public Image pickupIconImage;
 
         [Header("Gameplay")]
@@ -35,7 +36,7 @@ namespace MiniGame
             if (pickupsText == null)
             {
                 var obj = GameObject.Find("PickupsText");
-                if (obj) pickupsText = obj.GetComponent<Text>();
+                if (obj) pickupsText = obj.GetComponent<TMP_Text>();
             }
 
             if (pickupIconImage == null)
