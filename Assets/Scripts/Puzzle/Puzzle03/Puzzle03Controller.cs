@@ -9,6 +9,10 @@ public class Puzzle03Controller : MonoBehaviour
     void Start()
     {
         roomManager = transform.parent.GetComponentInParent<RoomManager>();
+        if (roomManager != null)
+        {
+            roomManager.isRoomCleared = false;
+        }
     }
 
 
