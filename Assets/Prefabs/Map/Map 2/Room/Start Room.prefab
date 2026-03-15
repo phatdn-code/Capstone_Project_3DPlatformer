@@ -82,6 +82,9 @@ MonoBehaviour:
   playerPrefab: {fileID: 8934132337037778629, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
     type: 3}
   spawnPoint: {fileID: 8698494111935328765}
+  UIPrefab: {fileID: 5682829067039051290, guid: 8ec8cfa23923a014fb85511f9256b664,
+    type: 3}
+  UISpawnPoint: {fileID: 0}
 --- !u!1 &5748859046620045368
 GameObject:
   m_ObjectHideFlags: 0

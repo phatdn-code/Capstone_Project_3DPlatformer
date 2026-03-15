@@ -13,29 +13,35 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private DungeonSO dungeonDataSO;
     [SerializeField] private DungeonController dungeonController;
 
-    [SerializeField] private GameObject[] roomObjArray = new GameObject[4];
+    [SerializeField] private GameObject[] roomObjArray = new GameObject[2];
+    [SerializeField] private GameObject[] puzzleRoomObjArray = new GameObject[4];
     private int minRoomCount = 10;
     private int roomCount = 0;
     private CellType[,] dungeons;
     private List<Vector2Int> roomList = new List<Vector2Int>();
-    
+
+    [SerializeField] private int puzzleRoomCount = 2;
+    [SerializeField] private int minigameRoomCount = 1;
+
+
 
     private static Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
-    void Start()
+    private void Start()
     {
         ClearDungeon();
         RoomCount();
+        puzzleRoomObjArray = ShuffleArray(puzzleRoomObjArray);
         ChooseStartRoom();
     }
 
-    void ClearDungeon()
+    private void ClearDungeon()
     {
         dungeonDataSO.ResetData();
         dungeons = new CellType[roomLength, roomLength];
         roomList.Clear();
     }
-    void RoomCount()
+    private void RoomCount()
     {
 
         if (maxRoomCount <= (roomSize * roomSize))
@@ -51,7 +57,7 @@ public class DungeonGenerator : MonoBehaviour
 
     }
 
-    void ChooseStartRoom()
+    private void ChooseStartRoom()
     {
         int indexX = Random.Range(0, roomLength);
         int indexY = Random.Range(0, roomLength);
@@ -64,7 +70,7 @@ public class DungeonGenerator : MonoBehaviour
     }
 
 
-    void NextGenerate(Vector2Int index, GameObject room)
+    private void NextGenerate(Vector2Int index, GameObject room)
     {
         if (roomCount <= 0) return;
         Vector2Int[] availableDirection = CheckDirection(index);
@@ -90,19 +96,18 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
     }
-
-    IEnumerator NextGenerateCoroutine(Vector2Int index, GameObject room)
+    private IEnumerator NextGenerateCoroutine(Vector2Int index, GameObject room)
     {
         yield return new WaitForSeconds(0.5f);
         NextGenerate(index,room);
     }
 
-    void SetDirectionDoorActive(GameObject room,Vector2Int dir )
+    private void SetDirectionDoorActive(GameObject room,Vector2Int dir )
     {
         if ((room == null) || (dir == Vector2Int.zero)) return;
         room.GetComponent<RoomManager>().AddActiveDoor(DoorDir(dir));
     }
-    int DoorDir(Vector2Int dir)
+    private int DoorDir(Vector2Int dir)
     {
         if(dir == Vector2Int.up) return 0;
         else if (dir == Vector2Int.down) return 1;
@@ -111,12 +116,12 @@ public class DungeonGenerator : MonoBehaviour
         else return -1;
     }
 
-    bool InBounds(Vector2Int pos)
+    private bool InBounds(Vector2Int pos)
     {
         return pos.x >= 0 && pos.x < roomLength 
             && pos.y >= 0 && pos.y < roomLength;
     }
-    Vector2Int[] CheckDirection(Vector2Int index)
+    private Vector2Int[] CheckDirection(Vector2Int index)
     {
         List<Vector2Int> availDirs = new List<Vector2Int>();
         foreach (var dir in directions)
@@ -132,7 +137,7 @@ public class DungeonGenerator : MonoBehaviour
         Vector2Int[] availableDirection = availDirs.ToArray();
         return availableDirection;
     }
-    GameObject SpawnBaseRoom(Vector2Int pos)
+    private GameObject SpawnBaseRoom(Vector2Int pos)
     {
         if (!InBounds(pos)) return null;
         if (dungeons[pos.x, pos.y] != CellType.Empty) return null;
@@ -143,7 +148,7 @@ public class DungeonGenerator : MonoBehaviour
         return Instantiate(roomPrefab, new Vector3(pos.x * roomSize, 0, pos.y * roomSize), Quaternion.identity, transform);
     }
 
-    void SpawnRoom(GameObject location, int value)
+    private void SpawnRoom(GameObject location, int value)
     {
         GameObject room =null;
         if (location == null) return;
@@ -152,15 +157,80 @@ public class DungeonGenerator : MonoBehaviour
             if (roomObjArray[0] == null) return;
             room = roomObjArray[0];
         }
-
-        if (value == 0)
+        else if ((value >= puzzleRoomCount + minigameRoomCount) && (puzzleRoomCount +minigameRoomCount >0))
         {
-            if (roomObjArray[1] == null) return;
+            int randomValue = Random.Range(1, 100);
+            if (value > puzzleRoomCount + minigameRoomCount)
+            {
+                // cho ngẫu nhiên giữa puzzle room và minigame room va enemy room
+                if (randomValue % 2 == 0)
+                {
+                    room = ChooseFunctionRoom();
+                }
+                else
+                {
+                    //room = emenyroom;
+                }
+            }
+            else
+            {
+                room = ChooseFunctionRoom();
+            }
+        }
+        else if (value >0)
+        {
+            // room = emenyroom;
+        }
+        else if (value == 0)
+        {
+            if (roomObjArray[1] == null)
+                return;
             room = roomObjArray[1];
         }
 
-        if(room == null) return;
+        if (room == null) return;
         GameObject roomParent = location.GetComponent<RoomManager>().roomSpawnPoint;
         Instantiate(room, roomParent.transform.position, Quaternion.identity, roomParent.transform);
+    }
+
+    private GameObject ChooseFunctionRoom()
+    {
+        GameObject room = null;
+        if (puzzleRoomCount == 0)
+        {
+            // Chọn ngẫu nhiên 1 phòng trong roomList để đặt minigame room
+            minigameRoomCount--;
+        }
+        else if (minigameRoomCount == 0)
+        {
+            room = puzzleRoomObjArray[puzzleRoomCount];
+            puzzleRoomCount--;
+        }
+        else
+        {
+            int randomValue = Random.Range(1, 100);
+            if (randomValue % 2 == 0)
+            {
+                room = puzzleRoomObjArray[puzzleRoomCount];
+                puzzleRoomCount--;
+            }
+            else
+            {
+                // Chọn ngẫu nhiên 1 phòng trong roomList để đặt minigame room
+                minigameRoomCount--;
+            }
+        }
+
+        return room;
+    }
+
+    private GameObject[] ShuffleArray(GameObject[] array)
+    {
+        for (int i = array.Length - 1; i > 0; i--) //shuffle
+        {
+            int j = Random.Range(0, i + 1);
+            (array[i], array[j]) = (array[j], array[i]);
+        }
+        return array;
     }
 }
