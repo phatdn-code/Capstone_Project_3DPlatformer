@@ -81,6 +81,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   spawnPoint: {fileID: 8698494111935328765}
+  effect01Prefab: {fileID: 157306, guid: 7cfa7c8111349fe44b06a87d64ab1dea, type: 3}
+  effect02Prefab: {fileID: 161104, guid: 799ba3095ff225146bea02318a149f87, type: 3}
 --- !u!1 &5748859046620045368
 GameObject:
   m_ObjectHideFlags: 0

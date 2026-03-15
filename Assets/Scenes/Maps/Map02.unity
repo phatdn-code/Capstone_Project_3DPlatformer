@@ -214,7 +214,7 @@ PrefabInstance:
     - target: {fileID: 1394702443019086240, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.04
+      value: -17.089607
       objectReference: {fileID: 0}
     - target: {fileID: 1394702443019086240, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
         type: 3}
@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 548741831}
   m_Layer: 0
   m_Name: Dungeon Generator
-  m_TagString: Untagged
+  m_TagString: DungeonController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

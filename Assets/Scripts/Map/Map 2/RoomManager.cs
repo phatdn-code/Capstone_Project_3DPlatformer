@@ -6,15 +6,17 @@ public class RoomManager : MonoBehaviour
 {
     public GameObject roomSpawnPoint;
     public bool isRoomCleared = false;
+    public GameObject roomblank;
     public DungeonController dungeonController;
 
     [SerializeField] private GameObject[] doors;
     [SerializeField] private GameObject[] roads;
     [SerializeField] private GameObject[] walls;
     [SerializeField] private GameObject baseCamera;
-    [SerializeField] private GameObject roomblank;
+    
     [SerializeField] private BoxCollider roomTrigerCollider;
 
+    public GameObject BaseCamera => baseCamera;
     private List<GameObject> activeDoors = new List<GameObject>();
 
     public void AddActiveDoor(int index)
