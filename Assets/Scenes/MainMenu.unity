@@ -1796,6 +1796,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicIndex: 0
   playOnStart: 1
+  unlockCursorOnStart: 1
   fadeInOnStart: 1
   startAlpha: 1
   startDelay: 0.25

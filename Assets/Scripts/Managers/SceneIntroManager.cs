@@ -10,8 +10,13 @@ namespace PLAYERTWO.PlatformerProject
     public class SceneIntroManager : MonoBehaviour
     {
         [Header("Music")]
+        [ShowIf(nameof(playOnStart))]
         [SerializeField] private int musicIndex;
+
         [SerializeField] private bool playOnStart = true;
+
+        [Header("Cursor")]
+        [SerializeField] private bool unlockCursorOnStart = false;
 
         [FoldoutGroup("Fade On Start")]
         [SerializeField] private bool fadeInOnStart = true;
@@ -23,12 +28,25 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private float startDelay = 0f;
 
         /// <summary>
-        /// Khi vào scene: gọi fade rồi phát nhạc nếu cần.
+        /// Khi vào scene: mở cursor nếu cần, gọi fade rồi phát nhạc nếu cần.
         /// </summary>
         private IEnumerator Start()
         {
+            ApplyCursorStateOnStart();
+
             yield return StartCoroutine(PlayStartFade());
             PlaySceneMusic();
+        }
+
+        /// <summary>
+        /// Mở cursor khi vào scene nếu được bật.
+        /// </summary>
+        private void ApplyCursorStateOnStart()
+        {
+            if (!unlockCursorOnStart)
+                return;
+
+            Game.LockCursor(false);
         }
 
         /// <summary>
