@@ -15,7 +15,9 @@ public class DungeonGenerator : MonoBehaviour
 
     [SerializeField] private GameObject[] roomObjArray = new GameObject[2];
     [SerializeField] private GameObject[] puzzleRoomObjArray = new GameObject[4];
-    private int minRoomCount = 10;
+    [SerializeField] private GameObject[] minigameRoomObjArray = new GameObject[2];
+    [SerializeField] private GameObject[] enemyRoomObjArray = new GameObject[2];
+    private int minRoomCount = 7;
     private int roomCount = 0;
     private CellType[,] dungeons;
     private List<Vector2Int> roomList = new List<Vector2Int>();
@@ -162,14 +164,13 @@ public class DungeonGenerator : MonoBehaviour
             int randomValue = Random.Range(1, 100);
             if (value > puzzleRoomCount + minigameRoomCount)
             {
-                // cho ngẫu nhiên giữa puzzle room và minigame room va enemy room
                 if (randomValue % 2 == 0)
                 {
                     room = ChooseFunctionRoom();
                 }
                 else
                 {
-                    //room = emenyroom;
+                    room = enemyRoomObjArray[Random.Range(0, enemyRoomObjArray.Length)];
                 }
             }
             else
@@ -179,7 +180,7 @@ public class DungeonGenerator : MonoBehaviour
         }
         else if (value >0)
         {
-            // room = emenyroom;
+            room = enemyRoomObjArray[Random.Range(0, enemyRoomObjArray.Length)];
         }
         else if (value == 0)
         {
