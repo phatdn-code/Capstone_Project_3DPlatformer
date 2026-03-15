@@ -8,7 +8,7 @@ using Sirenix.OdinInspector;
 
 namespace PLAYERTWO.PlatformerProject
 {
-    public class LevelPortalPin : MonoBehaviour
+    public class LevelPortalPin : MonoBehaviour, IPortalReturnPoint
     {
         //─────────────────────────────────────────────
         #region === INSPECTOR ===
@@ -19,6 +19,21 @@ namespace PLAYERTWO.PlatformerProject
 
         [BoxGroup("Level Portal Pin/Scene")]
         [SerializeField] private string mapDisplayName;
+
+        [BoxGroup("Level Portal Pin/Return Spawn")]
+        [ToggleLeft]
+        [InfoBox("Bật nếu portal này được dùng làm điểm quay lại khi trở về map.")]
+        [SerializeField] private bool useAsReturnPoint = true;
+
+        [BoxGroup("Level Portal Pin/Return Spawn")]
+        [ShowIf(nameof(useAsReturnPoint))]
+        [InfoBox("ID duy nhất của điểm quay lại. Có thể đặt theo sceneName nếu mỗi portal chỉ vào 1 scene.")]
+        [SerializeField] private string returnPointId;
+
+        [BoxGroup("Level Portal Pin/Return Spawn")]
+        [ShowIf(nameof(useAsReturnPoint))]
+        [InfoBox("Point player sẽ đứng khi quay lại map. Nếu để trống sẽ dùng chính transform của portal.")]
+        [SerializeField] private Transform returnPoint;
 
         [BoxGroup("Level Portal Pin/Unlock")]
         [ToggleLeft]
@@ -128,6 +143,17 @@ namespace PLAYERTWO.PlatformerProject
         private bool _isUnlocked;
 
         private GameLevel _levelData;
+
+        #endregion
+
+        //─────────────────────────────────────────────
+        #region === INTERFACE ===
+
+        public Transform ReturnPoint => returnPoint != null ? returnPoint : transform;
+
+        public string ReturnPointId => string.IsNullOrEmpty(returnPointId) ? sceneName : returnPointId;
+
+        public bool UseAsReturnPoint => useAsReturnPoint;
 
         #endregion
 
@@ -486,6 +512,21 @@ namespace PLAYERTWO.PlatformerProject
         #region === SCENE LOAD ===
 
         /// <summary>
+        /// VN: Ghi nhớ điểm quay lại trước khi rời scene hiện tại.
+        /// </summary>
+        private void RememberReturnPoint()
+        {
+            if (!UseAsReturnPoint)
+                return;
+
+            if (Game.instance == null)
+                return;
+
+            string currentScene = SceneManager.GetActiveScene().name;
+            Game.instance.SetPendingReturnPoint(currentScene, ReturnPointId);
+        }
+
+        /// <summary>
         /// VN: Xử lý khi người chơi xác nhận đi vào portal.
         /// </summary>
         private void ConfirmEnter()
@@ -496,6 +537,7 @@ namespace PLAYERTWO.PlatformerProject
 
             PrepareForEnter();
             LoadTargetScene();
+            RememberReturnPoint();
 
             AudioManager.Instance.PlaySound(1);
         }

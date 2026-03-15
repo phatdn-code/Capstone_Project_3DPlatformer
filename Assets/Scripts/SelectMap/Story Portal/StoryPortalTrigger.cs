@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace PLAYERTWO.PlatformerProject
 {
-    public class StoryPortalTrigger : MonoBehaviour
+    public class StoryPortalTrigger : MonoBehaviour, IPortalReturnPoint
     {
         //────────────────────────────────────────────────────
         #region === REFERENCES ===
@@ -14,6 +14,20 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField, Required] private MagicBookFlight bookFlight;
         [SerializeField] private string storySceneName;
         [SerializeField] private string playerTag = "Player";
+
+        #endregion
+
+        //────────────────────────────────────────────────────
+        #region === RETURN SPAWN ===
+
+        [Title("Return Spawn")]
+        [SerializeField] private bool useAsReturnPoint = true;
+
+        [SerializeField, ShowIf(nameof(useAsReturnPoint))]
+        private string returnPointId;
+
+        [SerializeField, ShowIf(nameof(useAsReturnPoint))]
+        private Transform returnPoint;
 
         #endregion
 
@@ -33,6 +47,17 @@ namespace PLAYERTWO.PlatformerProject
         private bool _hasTriggered;
         private bool _canEnterStory;
         private bool _isLoading;
+
+        #endregion
+
+        //────────────────────────────────────────────────────
+        #region === INTERFACE ===
+
+        public Transform ReturnPoint => returnPoint != null ? returnPoint : transform;
+
+        public string ReturnPointId => string.IsNullOrEmpty(returnPointId) ? storySceneName : returnPointId;
+
+        public bool UseAsReturnPoint => useAsReturnPoint;
 
         #endregion
 
@@ -144,6 +169,21 @@ namespace PLAYERTWO.PlatformerProject
         #region === ENTER STORY ===
 
         /// <summary>
+        /// VN: Ghi nhớ điểm quay lại trước khi rời scene hiện tại.
+        /// </summary>
+        private void RememberReturnPoint()
+        {
+            if (!UseAsReturnPoint)
+                return;
+
+            if (Game.instance == null)
+                return;
+
+            string currentScene = SceneManager.GetActiveScene().name;
+            Game.instance.SetPendingReturnPoint(currentScene, ReturnPointId);
+        }
+
+        /// <summary>
         /// VN: Xác nhận đi vào scene story.
         /// </summary>
         private void ConfirmEnter()
@@ -155,6 +195,7 @@ namespace PLAYERTWO.PlatformerProject
 
             PrepareForEnter();
             LoadStoryScene();
+            RememberReturnPoint();
 
             AudioManager.Instance?.PlaySound(1);
         }
