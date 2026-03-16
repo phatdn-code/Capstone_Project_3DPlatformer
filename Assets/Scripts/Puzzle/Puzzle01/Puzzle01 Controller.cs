@@ -12,9 +12,7 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private List<GameObject> puzzleInput = new List<GameObject>();// List to hold references to puzzle input GameObjects
 
 
-        [SerializeField] private GameObject keyObject;
-        [SerializeField] private GameObject hintObject;
-        [SerializeField] private Transform spawnPoint;
+        [SerializeField] private Door woodenDoor;
 
 
         [SerializeField] private bool canReset = false;
@@ -34,7 +32,7 @@ namespace PLAYERTWO.PlatformerProject
                 if (InCorrectOrder())
                 {
                     Debug.Log("Puzzle completed in correct order!");
-                    SpawnTreasure();
+                    woodenDoor.OpenDoor();
                     return;
                 }
             }
@@ -45,14 +43,6 @@ namespace PLAYERTWO.PlatformerProject
             return puzzlePieces.SequenceEqual(puzzleInput);
         }
 
-        private void SpawnTreasure()
-        {
-            if (keyObject != null)
-            {
-                Instantiate(keyObject, spawnPoint.position, Quaternion.identity);
-            }
-            hintObject.SetActive(false);
-        }
 
         public void ResetLog()
         {
