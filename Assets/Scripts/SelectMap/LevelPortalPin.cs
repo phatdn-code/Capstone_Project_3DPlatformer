@@ -15,7 +15,12 @@ namespace PLAYERTWO.PlatformerProject
 
         [TitleGroup("Level Portal Pin")]
         [BoxGroup("Level Portal Pin/Scene")]
-        [SerializeField] private string sceneName;
+        [SerializeField] private string targetSceneName;
+
+        [BoxGroup("Level Portal Pin/Scene")]
+        [ToggleLeft]
+        [InfoBox("Bật nếu khi đi qua portal này sẽ xóa return point đang chờ của scene đích.")]
+        [SerializeField] private bool clearTargetSceneReturnPoint = false;
 
         [BoxGroup("Level Portal Pin/Scene")]
         [SerializeField] private string mapDisplayName;
@@ -151,7 +156,7 @@ namespace PLAYERTWO.PlatformerProject
 
         public Transform ReturnPoint => returnPoint != null ? returnPoint : transform;
 
-        public string ReturnPointId => string.IsNullOrEmpty(returnPointId) ? sceneName : returnPointId;
+        public string ReturnPointId => string.IsNullOrEmpty(returnPointId) ? targetSceneName : returnPointId;
 
         public bool UseAsReturnPoint => useAsReturnPoint;
 
@@ -281,10 +286,10 @@ namespace PLAYERTWO.PlatformerProject
         {
             _levelData = null;
 
-            if (Game.instance == null || string.IsNullOrEmpty(sceneName))
+            if (Game.instance == null || string.IsNullOrEmpty(targetSceneName))
                 return;
 
-            _levelData = Game.instance.levels.Find(level => level.scene == sceneName);
+            _levelData = Game.instance.levels.Find(level => level.scene == targetSceneName);
         }
 
         /// <summary>
@@ -527,6 +532,23 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
+        /// VN: Nếu bật cờ này thì xóa return point đang chờ của scene đích trước khi load.
+        /// </summary>
+        private void ClearTargetSceneReturnPointIfNeeded()
+        {
+            if (!clearTargetSceneReturnPoint)
+                return;
+
+            if (Game.instance == null)
+                return;
+
+            if (string.IsNullOrEmpty(targetSceneName))
+                return;
+
+            Game.instance.ClearPendingReturnPoint(targetSceneName);
+        }
+
+        /// <summary>
         /// VN: Xử lý khi người chơi xác nhận đi vào portal.
         /// </summary>
         private void ConfirmEnter()
@@ -536,8 +558,10 @@ namespace PLAYERTWO.PlatformerProject
             _isLoading = true;
 
             PrepareForEnter();
-            LoadTargetScene();
+
+            ClearTargetSceneReturnPointIfNeeded();
             RememberReturnPoint();
+            LoadTargetScene();
 
             AudioManager.Instance.PlaySound(1);
         }
@@ -549,7 +573,7 @@ namespace PLAYERTWO.PlatformerProject
         {
             return !_isLoading &&
                    _isUnlocked &&
-                   !string.IsNullOrEmpty(sceneName);
+                   !string.IsNullOrEmpty(targetSceneName);
         }
 
         /// <summary>
@@ -573,11 +597,11 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (GameLoader.instance != null)
             {
-                GameLoader.instance.Load(sceneName);
+                GameLoader.instance.Load(targetSceneName);
                 return;
             }
 
-            Fader.instance?.FadeOut(() => SceneManager.LoadScene(sceneName));
+            Fader.instance?.FadeOut(() => SceneManager.LoadScene(targetSceneName));
         }
 
         #endregion

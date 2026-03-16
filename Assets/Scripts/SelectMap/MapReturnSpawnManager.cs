@@ -13,8 +13,8 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Options")]
         [SerializeField] private bool resolveOnStart = true;
         [SerializeField] private bool setPlayerRespawnAfterMove = true;
-        [SerializeField] private int waitFramesBeforeResolve = 2;
-        [SerializeField] private int maxWaitFramesForPlayer = 20;
+        [SerializeField, Min(0)] private int waitFramesBeforeResolve = 2;
+        [SerializeField, Min(0)] private int maxWaitFramesForPlayer = 20;
 
         [Header("Debug")]
         [SerializeField] private bool showDebugLog = false;
@@ -210,7 +210,7 @@ namespace PLAYERTWO.PlatformerProject
             if (!showDebugLog)
                 return;
 
-            Debug.Log($"[MapSpawnResolver] {message}", this);
+            Debug.Log($"[MapReturnSpawnManager] {message}", this);
         }
 
         #endregion

@@ -1,55 +1,68 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using PLAYERTWO.PlatformerProject;
 
 namespace MiniGame
 {
     /// <summary>
     /// Quản lý các hành động khi người chơi hoàn thành level.
-    /// Có thể restart level hiện tại hoặc chuyển sang level tiếp theo.
+    /// Có thể restart level hiện tại, chuyển sang scene chỉ định,
+    /// hoặc chuyển sang scene tiếp theo trong Build Settings.
     /// </summary>
     public class LevelCompletionManager : MonoBehaviour
     {
         /// <summary>
-        /// Nếu bật, khi hoàn thành level sẽ load lại scene hiện tại.
-        /// Nếu tắt, game sẽ chuyển sang scene tiếp theo.
+        /// VN: Nếu bật, khi hoàn thành level sẽ load lại scene hiện tại.
+        /// Nếu tắt, game sẽ ưu tiên load targetScene nếu có,
+        /// còn không thì chuyển sang scene tiếp theo.
         /// </summary>
-        [Tooltip("Restart scene hiện tại thay vì chuyển sang scene tiếp theo.")]
+        [Tooltip("Restart scene hiện tại thay vì chuyển scene khác.")]
         public bool restartCurrentScene = false;
 
         /// <summary>
-        /// Hàm được gọi khi level hoàn thành.
+        /// VN: Nếu có nhập scene này, HandleLevelComplete sẽ load scene này
+        /// thay vì tự động qua scene tiếp theo.
+        /// </summary>
+        [Tooltip("Nếu có giá trị, sẽ load scene này thay vì scene tiếp theo.")]
+        [SerializeField] private string targetScene;
+
+        /// <summary>
+        /// VN: Hàm được gọi khi level hoàn thành.
         /// </summary>
         public virtual void HandleLevelComplete()
         {
-            // Nếu chọn restart level hiện tại
             if (restartCurrentScene)
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(targetScene))
+            {
+                if (GameLoader.instance != null)
+                {
+                    GameLoader.instance.Load(targetScene);
+                    return;
+                }
+
+                SceneManager.LoadScene(targetScene);
+                return;
+            }
+
+            int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+
+            if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
+            {
+                SceneManager.LoadScene(nextSceneIndex);
             }
             else
             {
-                // Lấy index của scene tiếp theo
-                int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+                var pause = GameObject.FindFirstObjectByType<PauseController>();
 
-                // Nếu tồn tại scene tiếp theo trong Build Settings
-                if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
-                {
-                    SceneManager.LoadScene(nextSceneIndex);
-                }
-                else
-                {
-                    // Không còn scene nào phía sau → đây là level cuối
+                if (pause != null)
+                    pause.Pause();
 
-                    // Tạm dừng game
-                    var pause = GameObject.FindFirstObjectByType<PauseController>();
-                    if (pause != null)
-                    {
-                        pause.Pause();
-                    }
-
-                    // Log lỗi để báo rằng đang cố load scene không tồn tại
-                    Debug.LogError("MiniGame: Trying to load next scene from the last scene.");
-                }
+                Debug.LogError("MiniGame: Trying to load next scene from the last scene.");
             }
         }
     }

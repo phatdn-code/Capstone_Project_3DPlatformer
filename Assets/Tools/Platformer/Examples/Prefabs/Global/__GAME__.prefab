@@ -65,7 +65,7 @@ MonoBehaviour:
   - name: Greencliff Isles
     description: A lush island map of cliffs, greenery, and narrow jumps above the
       sea.
-    image: {fileID: 21300000, guid: b6c83d91877ad26418277a0d3cabbe17, type: 3}
+    image: {fileID: 21300000, guid: 9bbf04b7e04182e428c5e65f44cb4986, type: 3}
     locked: 0
     requiredStars: 0
     scene: Map01
@@ -76,7 +76,7 @@ MonoBehaviour:
     exitScene: MainMenu
   - name: Voltitan Boss
     description: A high-tech arena ruled by a destructive war machine.
-    image: {fileID: 21300000, guid: 3df2d59fce6f503459603dd0390d2b88, type: 3}
+    image: {fileID: 21300000, guid: da695f527932a1c4d92d5b68e5662027, type: 3}
     locked: 0
     requiredStars: 0
     scene: Boss01_Voltitan
@@ -98,7 +98,7 @@ MonoBehaviour:
     exitScene: MainMenu
   - name: Pyrodrake Boss
     description: A flying fire dragon that rains flames and meteors from above.
-    image: {fileID: 21300000, guid: 0d35988de27e9ea43b9258aae22db2b9, type: 3}
+    image: {fileID: 21300000, guid: 3e555495884990e43ade63fdf6a0f100, type: 3}
     locked: 0
     requiredStars: 0
     scene: Boss02_Pyrodrake

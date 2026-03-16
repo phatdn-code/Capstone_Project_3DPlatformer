@@ -232,5 +232,19 @@ namespace PLAYERTWO.PlatformerProject
             m_pendingReturnScene = null;
             m_pendingReturnPointId = null;
         }
+
+        /// <summary>
+        /// VN: Chỉ xóa điểm quay lại đang chờ nếu nó thuộc đúng scene được truyền vào.
+        /// </summary>
+        public virtual void ClearPendingReturnPoint(string sceneName)
+        {
+            if (string.IsNullOrEmpty(sceneName))
+                return;
+
+            if (m_pendingReturnScene != sceneName)
+                return;
+
+            ClearPendingReturnPoint();
+        }
     }
 }
