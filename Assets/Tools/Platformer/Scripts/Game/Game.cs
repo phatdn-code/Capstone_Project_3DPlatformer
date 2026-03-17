@@ -31,8 +31,16 @@ namespace PLAYERTWO.PlatformerProject
         protected DateTime m_createdAt;
         protected DateTime m_updatedAt;
 
+        //==================================================
+        // VN: Lưu phần story
         protected bool m_introStorySeen;
         public bool introStorySeen => m_introStorySeen;
+        //==================================================
+
+        //==================================================
+        // VN: Lưu tiến trình mini game theo ID
+        protected HashSet<string> m_completedMiniGameIds = new();
+        //==================================================
 
         //==================================================
         // VN: Lưu tạm điểm quay lại khi chuyển scene
@@ -94,6 +102,9 @@ namespace PLAYERTWO.PlatformerProject
             m_createdAt = DateTime.Parse(data.createdAt);
             m_updatedAt = DateTime.Parse(data.updatedAt);
             m_introStorySeen = data.introStorySeen;
+            m_completedMiniGameIds = data.completedMiniGameIds != null
+                ? new HashSet<string>(data.completedMiniGameIds)
+                : new HashSet<string>();
 
             for (int i = 0; i < data.levels.Length; i++)
             {
@@ -168,6 +179,7 @@ namespace PLAYERTWO.PlatformerProject
                 createdAt = m_createdAt.ToString(),
                 updatedAt = DateTime.UtcNow.ToString(),
                 introStorySeen = m_introStorySeen,
+                completedMiniGameIds = m_completedMiniGameIds.ToArray(),
             };
         }
 
@@ -179,6 +191,106 @@ namespace PLAYERTWO.PlatformerProject
             m_introStorySeen = true;
 
             if (saveImmediately && dataLoaded)
+                RequestSaving();
+        }
+
+        /// <summary>
+        /// VN: Kiểm tra 1 minigame cụ thể đã hoàn thành chưa.
+        /// </summary>
+        public virtual bool IsMiniGameCompleted(string miniGameId)
+        {
+            if (string.IsNullOrEmpty(miniGameId))
+                return false;
+
+            return m_completedMiniGameIds.Contains(miniGameId);
+        }
+
+        /// <summary>
+        /// VN: Kiểm tra có ít nhất 1 minigame trong danh sách đã hoàn thành chưa.
+        /// </summary>
+        public virtual bool IsAnyMiniGameCompleted(string[] miniGameIds)
+        {
+            if (miniGameIds == null || miniGameIds.Length == 0)
+                return false;
+
+            for (int i = 0; i < miniGameIds.Length; i++)
+            {
+                if (IsMiniGameCompleted(miniGameIds[i]))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// VN: Kiểm tra tất cả minigame trong danh sách đã hoàn thành chưa.
+        /// </summary>
+        public virtual bool AreAllMiniGamesCompleted(string[] miniGameIds)
+        {
+            if (miniGameIds == null || miniGameIds.Length == 0)
+                return false;
+
+            for (int i = 0; i < miniGameIds.Length; i++)
+            {
+                if (!IsMiniGameCompleted(miniGameIds[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// VN: Đánh dấu 1 minigame đã hoàn thành.
+        /// </summary>
+        public virtual void MarkMiniGameCompleted(string miniGameId, bool saveImmediately = true)
+        {
+            if (string.IsNullOrEmpty(miniGameId))
+                return;
+
+            if (!m_completedMiniGameIds.Add(miniGameId))
+                return;
+
+            if (saveImmediately && dataLoaded)
+                RequestSaving();
+        }
+
+        /// <summary>
+        /// VN: Xóa trạng thái hoàn thành của 1 minigame.
+        /// </summary>
+        public virtual void ResetMiniGameCompleted(string miniGameId, bool saveImmediately = true)
+        {
+            if (string.IsNullOrEmpty(miniGameId))
+                return;
+
+            if (!m_completedMiniGameIds.Remove(miniGameId))
+                return;
+
+            if (saveImmediately && dataLoaded)
+                RequestSaving();
+        }
+
+        /// <summary>
+        /// VN: Xóa trạng thái hoàn thành của nhiều minigame.
+        /// </summary>
+        public virtual void ResetMiniGamesCompleted(string[] miniGameIds, bool saveImmediately = true)
+        {
+            if (miniGameIds == null || miniGameIds.Length == 0)
+                return;
+
+            bool changed = false;
+
+            for (int i = 0; i < miniGameIds.Length; i++)
+            {
+                string miniGameId = miniGameIds[i];
+
+                if (string.IsNullOrEmpty(miniGameId))
+                    continue;
+
+                if (m_completedMiniGameIds.Remove(miniGameId))
+                    changed = true;
+            }
+
+            if (changed && saveImmediately && dataLoaded)
                 RequestSaving();
         }
 

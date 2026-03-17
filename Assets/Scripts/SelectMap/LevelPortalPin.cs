@@ -23,6 +23,10 @@ namespace PLAYERTWO.PlatformerProject
         [SerializeField] private bool clearTargetSceneReturnPoint = false;
 
         [BoxGroup("Level Portal Pin/Scene")]
+        [InfoBox("Danh sách ID minigame sẽ bị reset khi portal này thực hiện clear target scene return point.")]
+        [SerializeField] private string[] miniGameIdsToReset;
+
+        [BoxGroup("Level Portal Pin/Scene")]
         [SerializeField] private string mapDisplayName;
 
         [BoxGroup("Level Portal Pin/Return Spawn")]
@@ -532,7 +536,8 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Nếu bật cờ này thì xóa return point đang chờ của scene đích trước khi load.
+        /// VN: Nếu bật cờ này thì xóa return point đang chờ của scene đích
+        /// và reset các minigame ID đã cấu hình.
         /// </summary>
         private void ClearTargetSceneReturnPointIfNeeded()
         {
@@ -542,10 +547,10 @@ namespace PLAYERTWO.PlatformerProject
             if (Game.instance == null)
                 return;
 
-            if (string.IsNullOrEmpty(targetSceneName))
-                return;
+            if (!string.IsNullOrEmpty(targetSceneName))
+                Game.instance.ClearPendingReturnPoint(targetSceneName);
 
-            Game.instance.ClearPendingReturnPoint(targetSceneName);
+            Game.instance.ResetMiniGamesCompleted(miniGameIdsToReset);
         }
 
         /// <summary>

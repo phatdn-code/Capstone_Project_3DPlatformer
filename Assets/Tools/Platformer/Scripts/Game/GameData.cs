@@ -12,6 +12,7 @@ namespace PLAYERTWO.PlatformerProject
 		public string createdAt;
 		public string updatedAt;
         public bool introStorySeen;
+        public string[] completedMiniGameIds;
 
         /// <summary>
         /// Returns a new instance of Game Data at runtime.
@@ -24,6 +25,7 @@ namespace PLAYERTWO.PlatformerProject
 				createdAt = DateTime.UtcNow.ToString(),
 				updatedAt = DateTime.UtcNow.ToString(),
                 introStorySeen = false,
+                completedMiniGameIds = Array.Empty<string>(),
                 levels = Game
 					.instance.levels.Select(
 						(level) =>

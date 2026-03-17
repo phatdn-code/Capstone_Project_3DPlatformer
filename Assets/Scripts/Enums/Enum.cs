@@ -40,4 +40,10 @@
         Ready,          // Đã xong, chờ bấm next
         Transitioning   // Đang chuyển sang page khác
     }
+
+    public enum RequirementMode
+    {
+        Any,
+        All
+    }
 }

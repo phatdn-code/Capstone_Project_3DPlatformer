@@ -26,11 +26,20 @@ namespace MiniGame
         [Tooltip("Nếu có giá trị, sẽ load scene này thay vì scene tiếp theo.")]
         [SerializeField] private string targetScene;
 
+        [Tooltip("ID dùng để đánh dấu minigame này đã hoàn thành.")]
+        [SerializeField] private string miniGameId;
+
+        [Tooltip("Bật nếu khi hoàn thành minigame sẽ lưu trạng thái clear.")]
+        [SerializeField] private bool markMiniGameCompletedOnFinish = true;
+
         /// <summary>
         /// VN: Hàm được gọi khi level hoàn thành.
         /// </summary>
         public virtual void HandleLevelComplete()
         {
+            if (markMiniGameCompletedOnFinish && Game.instance != null)
+                Game.instance.MarkMiniGameCompleted(miniGameId);
+
             if (restartCurrentScene)
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -52,9 +61,8 @@ namespace MiniGame
             int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
 
             if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
-            {
                 SceneManager.LoadScene(nextSceneIndex);
-            }
+
             else
             {
                 var pause = GameObject.FindFirstObjectByType<PauseController>();
