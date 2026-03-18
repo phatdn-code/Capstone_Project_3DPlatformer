@@ -1,6 +1,9 @@
+using PLAYERTWO.PlatformerProject;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEditor.EditorTools;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class StartRoomController : MonoBehaviour
 {
@@ -32,9 +35,10 @@ public class StartRoomController : MonoBehaviour
             roomManager.roomblank.SetActive(false);
         }
         player = GameObject.FindGameObjectWithTag("Player");
+        
+        
         StartCoroutine(SpawnEffectCouroutine());
     }
-
     private IEnumerator SpawnEffectCouroutine()
     {
         yield return new WaitForSeconds(2f);
@@ -43,9 +47,9 @@ public class StartRoomController : MonoBehaviour
         effect02Obj = Instantiate(effect02Prefab, spawnPoint.transform.position, Quaternion.Euler(90f, 0f, 0f));
         effect01 = effect01Obj.GetComponent<ParticleSystem>();
         effect01.Play();
-
         effect02 = effect02Obj.GetComponent<ParticleSystem>();
         effect02.Play();
+        player.GetComponent<EntityController>().enabled = true;
     }
 
 }
