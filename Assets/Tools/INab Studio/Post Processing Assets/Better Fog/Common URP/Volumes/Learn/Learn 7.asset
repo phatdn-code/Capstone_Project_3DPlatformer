@@ -533,10 +533,10 @@ MonoBehaviour:
   active: 1
   _FogIntensity:
     m_OverrideState: 1
-    m_Value: 0.86
+    m_Value: 0.72
   _EnergyLoss:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
   _UseGradient:
     m_OverrideState: 1
     m_Value: 0
@@ -608,10 +608,10 @@ MonoBehaviour:
     m_Value: 1
   _Height:
     m_OverrideState: 1
-    m_Value: 1.48
+    m_Value: 2.09
   _HeightDensity:
     m_OverrideState: 1
-    m_Value: 0.33
+    m_Value: 0.45
   _HeightFogType:
     m_OverrideState: 1
     m_Value: 1
@@ -647,19 +647,19 @@ MonoBehaviour:
     m_Value: 1
   _Threshold:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: -0.1
   _SoftKnee:
     m_OverrideState: 1
-    m_Value: 1.7
+    m_Value: -18.37
   _Radius:
     m_OverrideState: 1
     m_Value: 7
   _BlurWeight:
     m_OverrideState: 1
-    m_Value: 0.29
+    m_Value: 1.12
   _Intensity:
     m_OverrideState: 1
-    m_Value: 0.61
+    m_Value: 1
   _HighQuality:
     m_OverrideState: 1
     m_Value: 1
