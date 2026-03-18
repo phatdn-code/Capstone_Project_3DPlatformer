@@ -438,7 +438,6 @@ MonoBehaviour:
   - {fileID: 5623475732021594613, guid: 0720f7155a66b364987426f7ac78dd6f, type: 3}
   - {fileID: 2755832092375891886, guid: 8617a5818730dce41a1518b64da09cea, type: 3}
   - {fileID: 7801660748493604045, guid: 7c6c7a57da56c394ba147ff3b98b2e36, type: 3}
-  - {fileID: 7801660748493604045, guid: 7c6c7a57da56c394ba147ff3b98b2e36, type: 3}
   minigameRoomObjArray:
   - {fileID: 0}
   - {fileID: 0}

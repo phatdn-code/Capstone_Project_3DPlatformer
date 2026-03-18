@@ -9,12 +9,16 @@ public class DungeonController : MonoBehaviour
 
     public void SwitchCinemachine(GameObject cinemachine)
     {
+        
         if (Cinemachine01 != null)
         {
-            Cinemachine02 = Cinemachine01;
-            Cinemachine01 = cinemachine;
-            Cinemachine01.SetActive(true);
-            Cinemachine02.SetActive(false);
+            if ((Cinemachine01 != Cinemachine02) && (Cinemachine01 != cinemachine))
+            {
+                Cinemachine02 = Cinemachine01;
+                Cinemachine01 = cinemachine;
+                Cinemachine01.SetActive(true);
+                Cinemachine02.SetActive(false);
+            }
         }
         else
         {
