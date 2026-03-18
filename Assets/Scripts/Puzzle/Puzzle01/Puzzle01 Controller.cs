@@ -10,7 +10,7 @@ namespace PLAYERTWO.PlatformerProject
     {
         [SerializeField] private GameObject[] puzzlePieces; // Array to hold references to puzzle piece GameObjects
         [SerializeField] private List<GameObject> puzzleInput = new List<GameObject>();// List to hold references to puzzle input GameObjects
-
+        [SerializeField] private GameObject star;
 
         [SerializeField] private Door woodenDoor;
 
@@ -32,6 +32,7 @@ namespace PLAYERTWO.PlatformerProject
                 if (InCorrectOrder())
                 {
                     Debug.Log("Puzzle completed in correct order!");
+                    if(star != null) star.SetActive(true);
                     woodenDoor.OpenDoor();
                     return;
                 }

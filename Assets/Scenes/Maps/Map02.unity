@@ -319,6 +319,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6448806085511004130, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7369248610730551632, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8934132337037778629, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
         type: 3}
       propertyPath: m_Name
@@ -415,8 +425,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fe5b3b711f289498922d0904c6d816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cinemachine01: {fileID: 0}
-  cinemachine02: {fileID: 0}
+  Cinemachine01: {fileID: 0}
+  Cinemachine02: {fileID: 0}
+  StarCout: 2
 --- !u!1001 &785606332
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -472,6 +483,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4843316740644930361, guid: 564bdb7014e760c43afd895061f62b70,
         type: 3}
+      propertyPath: m_ClearFlags
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4843316740644930361, guid: 564bdb7014e760c43afd895061f62b70,
+        type: 3}
       propertyPath: field of view
       value: 40
       objectReference: {fileID: 0}
@@ -489,6 +505,26 @@ PrefabInstance:
         type: 3}
       propertyPath: orthographic size
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4843316740644930361, guid: 564bdb7014e760c43afd895061f62b70,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4843316740644930361, guid: 564bdb7014e760c43afd895061f62b70,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0.062611245
+      objectReference: {fileID: 0}
+    - target: {fileID: 4843316740644930361, guid: 564bdb7014e760c43afd895061f62b70,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0.4021318
+      objectReference: {fileID: 0}
+    - target: {fileID: 4843316740644930361, guid: 564bdb7014e760c43afd895061f62b70,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0.6320754
       objectReference: {fileID: 0}
     - target: {fileID: 4843316741654724384, guid: 564bdb7014e760c43afd895061f62b70,
         type: 3}
