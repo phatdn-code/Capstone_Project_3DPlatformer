@@ -64,7 +64,10 @@ public class RoomManager : MonoBehaviour
     {
         if(other.CompareTag("Player"))
         {
-            
+            if (dungeonController.Cinemachine01 == null)
+            {
+                dungeonController.Cinemachine01 = baseCamera;
+            }
         }
     }
 

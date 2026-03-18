@@ -149,6 +149,10 @@ public class DungeonGenerator : MonoBehaviour
 
         return Instantiate(roomPrefab, new Vector3(pos.x * roomSize, 0, pos.y * roomSize), Quaternion.identity, transform);
     }
+    public int TotalFunctionRoom()
+    {
+        return puzzleRoomCount + minigameRoomCount;
+    }
 
     private void SpawnRoom(GameObject location, int value)
     {
@@ -159,10 +163,10 @@ public class DungeonGenerator : MonoBehaviour
             if (roomObjArray[0] == null) return;
             room = roomObjArray[0];
         }
-        else if ((value >= puzzleRoomCount + minigameRoomCount) && (puzzleRoomCount +minigameRoomCount >0))
+        else if ((value >= TotalFunctionRoom()) && (TotalFunctionRoom() > 0))
         {
             int randomValue = Random.Range(1, 100);
-            if (value > puzzleRoomCount + minigameRoomCount)
+            if (value > TotalFunctionRoom())
             {
                 if (randomValue % 2 == 0)
                 {
@@ -191,7 +195,7 @@ public class DungeonGenerator : MonoBehaviour
 
         if (room == null) return;
         GameObject roomParent = location.GetComponent<RoomManager>().roomSpawnPoint;
-        Instantiate(room, roomParent.transform.position, Quaternion.identity, roomParent.transform);
+        GameObject spawnRoom = Instantiate(room, roomParent.transform.position, Quaternion.identity, roomParent.transform);
     }
 
     private GameObject ChooseFunctionRoom()

@@ -8731,6 +8731,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomManager: {fileID: 0}
+  starIndex: 0
+  star: {fileID: 4954314296798422865}
 --- !u!1 &5723574635608761354
 GameObject:
   m_ObjectHideFlags: 0
@@ -252126,6 +252128,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 44f809803cfadd64cbc04f3f10cef2cf, type: 3}
+--- !u!1 &4954314296798422865 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4383456566185744660, guid: 44f809803cfadd64cbc04f3f10cef2cf,
+    type: 3}
+  m_PrefabInstance: {fileID: 8652655267203644997}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4954314296798422866 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4383456566185744663, guid: 44f809803cfadd64cbc04f3f10cef2cf,

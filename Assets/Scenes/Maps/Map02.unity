@@ -425,8 +425,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fe5b3b711f289498922d0904c6d816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cinemachine01: {fileID: 0}
-  cinemachine02: {fileID: 0}
+  Cinemachine01: {fileID: 0}
+  Cinemachine02: {fileID: 0}
+  StarCout: 2
 --- !u!1001 &785606332
 PrefabInstance:
   m_ObjectHideFlags: 0

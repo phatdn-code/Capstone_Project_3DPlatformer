@@ -2,23 +2,24 @@ using UnityEngine;
 
 public class DungeonController : MonoBehaviour
 {
-    [SerializeField] private GameObject cinemachine01;
-    [SerializeField] private GameObject cinemachine02;
+    public GameObject Cinemachine01;
+    public GameObject Cinemachine02;
+    public int StarCout = 2;
 
 
     public void SwitchCinemachine(GameObject cinemachine)
     {
-        if (cinemachine01 != null)
+        if (Cinemachine01 != null)
         {
-            cinemachine02 = cinemachine01;
-            cinemachine01 = cinemachine;
-            cinemachine01.SetActive(true);
-            cinemachine02.SetActive(false);
+            Cinemachine02 = Cinemachine01;
+            Cinemachine01 = cinemachine;
+            Cinemachine01.SetActive(true);
+            Cinemachine02.SetActive(false);
         }
         else
         {
-            cinemachine01 = cinemachine;
-            cinemachine01.SetActive(true);
+            Cinemachine01 = cinemachine;
+            Cinemachine01.SetActive(true);
         }
     }
 }
