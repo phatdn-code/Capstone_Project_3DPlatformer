@@ -94,7 +94,7 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            SceneManager.LoadScene(targetScene);
+            GameLoader.instance.Load(targetScene);
         }
 
         // Cache vị trí ban đầu và Image của từng panel.

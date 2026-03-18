@@ -371,6 +371,8 @@ namespace PLAYERTWO.PlatformerProject
             if (explosionEffect != null)
             {
                 Instantiate(explosionEffect, transform.position, explosionEffect.transform.rotation);
+                AudioManager.Instance.PlaySound(5);
+
                 m_dragon.DisableColliderAndModel();
                 yield return new WaitForSeconds(explosionDuration);
             }
@@ -404,6 +406,9 @@ namespace PLAYERTWO.PlatformerProject
 
             if (m_boss == null) m_boss = GetComponent<BossCore>();
             if (m_boss == null) return;
+
+            // VN: Double-safe, đảm bảo boss đang bị khóa combat trong cutscene.
+            m_dragon?.EnterFinalSequenceState();
 
             var anim = m_boss.BossAnim;
             if (anim == null) return;

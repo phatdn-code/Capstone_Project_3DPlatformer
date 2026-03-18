@@ -811,7 +811,7 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            SceneManager.LoadScene(nextSceneName);
+            GameLoader.instance.Load(nextSceneName);
         }
 
         #endregion

@@ -158,6 +158,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool _pendingRetreatAfterTakeDamage;
         private bool _isShieldRecharging;
         private bool _isRetreating;
+        private bool _isInFinalSequence;
 
         public bool IsDamageImmuneThisRound => _isDamageImmuneThisRound;
 
@@ -224,10 +225,20 @@ namespace PLAYERTWO.PlatformerProject
         //─────────────────────────────────────────────────────────────
         #region === INITIALIZATION ===
 
+        /// <summary>
+        /// VN: Boss chết thật thì khóa luôn toàn bộ combat để coroutine/event cũ không chạy tiếp.
+        /// </summary>
         private void HandleBossDefeated()
         {
-            if (BossHealth != null && BossHealth.isDead)
-                RequestStopAttacking();
+            if (BossHealth == null || !BossHealth.isDead)
+                return;
+
+            _isInFinalSequence = true;
+            _pendingRetreatAfterTakeDamage = false;
+            _isRetreating = false;
+            _isShieldRecharging = false;
+
+            RequestStopAttacking();
         }
 
         #endregion
@@ -296,7 +307,6 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (BossHealth == null) return;
 
-            // Đã stop rồi thì không xử lý nữa
             if (_stopAttackingRequested)
             {
                 _lastHpSnapshot = BossHealth.CurrentHealth;
@@ -316,7 +326,9 @@ namespace PLAYERTWO.PlatformerProject
                 int delta = _lastHpSnapshot - currentHp;
                 _damageTakenWhileAttacking += delta;
 
-                if (_damageTakenWhileAttacking >= stopAttackAfterDamage)
+                // HP về 0 thì không đi vào flow retreat do damage threshold nữa
+                // vì lúc này hoặc là chết thật, hoặc phase break đã có luồng riêng xử lý
+                if (currentHp > 0 && _damageTakenWhileAttacking >= stopAttackAfterDamage)
                     TriggerStaggerAndRetreat();
             }
 
@@ -374,21 +386,39 @@ namespace PLAYERTWO.PlatformerProject
             dragonAnim?.ForceStopSkillAnimations();
         }
 
+        /// <summary>
+        /// VN: Kiểm tra boss có đang ở trạng thái phải dừng toàn bộ skill hay không.
+        /// </summary>
+        private bool IsCombatLocked()
+        {
+            return _isInFinalSequence
+                || IsInCutscene
+                || _stopAttackingRequested
+                || (BossHealth != null && BossHealth.isDead);
+        }
 
         /// <summary>
-        /// VN: Dùng khi vào FinalSequence - dừng toàn bộ attack + tắt warning/VFX để tránh bị kẹt.
+        /// VN: Khi vào final scene thì khóa cứng toàn bộ skill, tween và VFX combat.
         /// </summary>
         public void EnterFinalSequenceState()
         {
-            // RequestStopAttacking() đã Stop coroutine + DOKill + DisableAllVisualEffects()
+            _isInFinalSequence = true;
+            _pendingRetreatAfterTakeDamage = false;
+
             RequestStopAttacking();
 
-            // Double-safe (phòng trường hợp warning bị bật ở chỗ nào đó khác)
+            // VN: Double-safe, tắt sạch warning / effect của Meteor.
             if (meteorWarningEffect != null)
                 meteorWarningEffect.SetActive(false);
 
             if (meteorRainWarningEffect != null)
                 meteorRainWarningEffect.SetActive(false);
+
+            if (meteorEffectObject != null)
+                meteorEffectObject.SetActive(false);
+
+            if (meteorRainEffectObject != null)
+                meteorRainEffectObject.SetActive(false);
         }
 
 
@@ -423,6 +453,13 @@ namespace PLAYERTWO.PlatformerProject
         public void OnTakeDamageRetreatFromAnimation()
         {
             if (!_pendingRetreatAfterTakeDamage) return;
+
+            // VN: Double-safe, nếu boss đã chết thật thì không retreat nữa.
+            if (BossHealth != null && BossHealth.isDead)
+            {
+                _pendingRetreatAfterTakeDamage = false;
+                return;
+            }
 
             _pendingRetreatAfterTakeDamage = false;
             RetreatToCurrentZoneEntryPoint();
@@ -1048,7 +1085,7 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void StartFlameThrowerFromAnimation()
         {
-            if (_stopAttackingRequested) return;
+            if (IsCombatLocked()) return;
 
             SetFlameEffectActive(true);
 
@@ -1199,7 +1236,7 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         public void ShootBlastFireballFromAnimation()
         {
-            if (_stopAttackingRequested) return;
+            if (IsCombatLocked()) return;
 
             if (blastFlashEffect != null)
                 blastFlashEffect.SetActive(true);
@@ -1288,14 +1325,13 @@ namespace PLAYERTWO.PlatformerProject
         #region === METEOR ATTACK ===
 
         /// <summary>
-        /// Chuỗi xử lý skill Meteor:
-        /// - Lấy danh sách meteorCastPoints từ PortalZone hiện tại.
-        /// - Chọn ngẫu nhiên 3–4 điểm.
-        /// - Bay lên cao, lượn qua từng điểm và cast Meteor.
-        /// - Cuối cùng bay về vị trí/hướng ban đầu.
+        /// VN: Chuỗi Meteor. Nếu boss đã vào final scene / cutscene / chết thì thoát ngay.
         /// </summary>
         private IEnumerator MeteorAttackRoutine()
         {
+            if (IsCombatLocked())
+                yield break;
+
             SetSkillBossCamActive(true);
 
             Transform[] chosenPoints;
@@ -1303,26 +1339,47 @@ namespace PLAYERTWO.PlatformerProject
             Vector3 originalPos;
             Quaternion originalRot;
 
-            // Chuẩn bị dữ liệu cần cho skill Meteor (zone, height, điểm random, vị trí gốc)
+            // VN: Chuẩn bị dữ liệu cast Meteor.
             if (!TryPrepareMeteorContext(out chosenPoints, out meteorHeight, out originalPos, out originalRot))
             {
-                // Thiếu dữ liệu cần thiết → fallback sang Flame
-                yield return StartCoroutine(FlameThrowerRoutine());
+                SetSkillBossCamActive(false);
+
+                if (!IsCombatLocked())
+                    yield return StartCoroutine(FlameThrowerRoutine());
+
                 yield break;
             }
 
-            // 1) Bay lên cao: giữ nguyên XZ, đặt Y = meteorHeight
+            if (IsCombatLocked())
+            {
+                SetSkillBossCamActive(false);
+                yield break;
+            }
+
+            // VN: Bay lên độ cao Meteor.
             yield return LiftToMeteorHeight(meteorHeight);
 
-            // 2) Lần lượt bay tới từng điểm Meteor và tấn công
+            if (IsCombatLocked())
+            {
+                SetSkillBossCamActive(false);
+                yield break;
+            }
+
+            // VN: Bay qua từng điểm và cast.
             foreach (var point in chosenPoints)
             {
-                if (point == null) continue;
+                if (IsCombatLocked())
+                    break;
+
+                if (point == null)
+                    continue;
+
                 yield return FlyAndStrikeMeteorAtPoint(point, meteorHeight);
             }
 
-            // 3) Kết thúc Meteor → bay về vị trí/hướng ban đầu
-            yield return ReturnFromMeteor(originalPos, originalRot);
+            // VN: Chỉ bay về khi combat chưa bị khóa giữa chừng.
+            if (!IsCombatLocked())
+                yield return ReturnFromMeteor(originalPos, originalRot);
 
             SetSkillBossCamActive(false);
         }
@@ -1399,14 +1456,16 @@ namespace PLAYERTWO.PlatformerProject
             yield return liftTween.WaitForCompletion();
         }
 
+
         /// <summary>
-        /// Bay tới một điểm Meteor, xoay mặt về target và play animation đánh Meteor.
-        /// Dragon luôn đứng cách target đúng bằng meteorAttackRadius (trên mặt phẳng XZ),
-        /// đồng thời bật effect cảnh báo tại vùng rơi meteor trong lúc cast.
+        /// VN: Bay tới 1 điểm Meteor. Mỗi bước đều check để final scene chen vào là dừng ngay.
         /// </summary>
         private IEnumerator FlyAndStrikeMeteorAtPoint(Transform targetPoint, float meteorHeight)
         {
             if (targetPoint == null)
+                yield break;
+
+            if (IsCombatLocked())
                 yield break;
 
             // Vị trí hiện tại và vị trí target (chiếu xuống mặt phẳng XZ)
@@ -1424,25 +1483,23 @@ namespace PLAYERTWO.PlatformerProject
                 fromPos.z
             );
 
-            // Hướng từ target ra Dragon (để đứng trên đường hiện tại nhưng đúng radius)
+            // Hướng từ target ra Dragon
             Vector3 flatDir = fromXZ - targetXZ;
 
-            // Nếu đang trùng/siêu gần target → chọn hướng fallback
+            // VN: Nếu đang trùng target thì lấy hướng fallback.
             if (flatDir.sqrMagnitude < 0.0001f)
             {
-                // Ưu tiên hướng nhìn hiện tại
                 Vector3 fallback = visualRoot != null ? visualRoot.forward : transform.forward;
                 fallback.y = 0f;
 
                 if (fallback.sqrMagnitude < 0.0001f)
-                    fallback = Vector3.forward; // fallback cuối
+                    fallback = Vector3.forward;
 
                 flatDir = fallback;
             }
 
             flatDir.Normalize();
 
-            // Vị trí đúng cách target một đoạn meteorAttackRadius trên mặt phẳng XZ
             Vector3 finalXZ = targetXZ + flatDir * meteorAttackRadius;
 
             Vector3 finalPos = new Vector3(
@@ -1453,7 +1510,7 @@ namespace PLAYERTWO.PlatformerProject
 
             float moveDur = meteorMoveDuration > 0f ? meteorMoveDuration : 0.6f;
 
-            // Cho xoay về hướng điểm đến trước khi bay
+            // VN: Xoay và bay tới vị trí cast.
             FaceTowards(finalPos);
 
             Tween moveTween = transform
@@ -1462,13 +1519,15 @@ namespace PLAYERTWO.PlatformerProject
 
             yield return moveTween.WaitForCompletion();
 
-            // ĐÃ ĐẾN VỊ TRÍ TẤN CÔNG → XOAY MẶT VỀ CHÍNH TARGET
+            if (IsCombatLocked())
+                yield break;
+
+            // VN: Tới nơi thì xoay mặt về đúng điểm target.
             Vector3 facePoint = targetPoint.position;
-            facePoint.y = meteorHeight; // nhìn ngang mặt phẳng bay
+            facePoint.y = meteorHeight;
             FaceTowards(facePoint);
 
-            // Bật effect cảnh báo tại vùng target (dùng vị trí targetPoint)
-            // Nếu warning là vòng tròn dưới đất → giữ Y của targetPoint.
+            // VN: Bật warning tại điểm rơi.
             SetMeteorWarningActive(
                 true,
                 new Vector3(
@@ -1478,14 +1537,19 @@ namespace PLAYERTWO.PlatformerProject
                 )
             );
 
-            // Cho xoay xong một chút để tạo cảm giác "ngắm"
             yield return new WaitForSeconds(1f);
 
-            // Play animation Meteor Attack (Animation Events sẽ lo spawn meteor rơi)
+            if (IsCombatLocked())
+                yield break;
+
+            // VN: Chạy animation đánh Meteor.
             dragonAnim?.PlayMeteorAttack();
 
-            // Chờ thời gian animation
             yield return new WaitForSeconds(meteorStrikeAnimDuration);
+
+            if (IsCombatLocked())
+                yield break;
+
             yield return new WaitForSeconds(meteorBetweenPointsDelay);
         }
 
@@ -1544,13 +1608,13 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Gọi từ Animation Event: bật VFX tạo meteor đúng frame trong clip.
+        /// VN: Animation Event bật hiệu ứng Meteor. Nếu boss đã vào final scene thì không bật nữa.
         /// </summary>
         public void StartMeteorFromAnimation()
         {
-            if (_stopAttackingRequested) return;
+            if (IsCombatLocked())
+                return;
 
-            // Tắt effect cảnh báo sau khi chiêu Meteor của điểm này kết thúc
             SetMeteorWarningActive(false, null);
             SetMeteorEffectActive(true);
         }
@@ -1564,14 +1628,13 @@ namespace PLAYERTWO.PlatformerProject
         #region === METEOR RAIN ATTACK ===
 
         /// <summary>
-        /// Chuỗi xử lý skill Meteor Rain:
-        /// - Lấy danh sách meteorRainPoints từ PortalZone hiện tại.
-        /// - Random tối đa 2 điểm.
-        /// - Bay lên cao (meteorRainBossHeightY), lượn qua từng điểm và cast Meteor Rain.
-        /// - Cuối cùng bay về vị trí/hướng ban đầu.
+        /// VN: Chuỗi Meteor Rain. Nếu boss đã vào final scene / cutscene / chết thì dừng ngay.
         /// </summary>
         private IEnumerator MeteorRainAttackRoutine()
         {
+            if (IsCombatLocked())
+                yield break;
+
             SetSkillBossCamActive(true);
 
             Transform[] rainPoints;
@@ -1579,29 +1642,48 @@ namespace PLAYERTWO.PlatformerProject
             Vector3 originalPos;
             Quaternion originalRot;
 
-            // Chuẩn bị dữ liệu cần cho skill Meteor Rain
+            // VN: Chuẩn bị dữ liệu cast Meteor Rain.
             if (!TryPrepareMeteorRainContext(out rainPoints, out rainHeight, out originalPos, out originalRot))
             {
-                // Thiếu dữ liệu → fallback sang Flame
-                yield return StartCoroutine(FlameThrowerRoutine());
+                SetSkillBossCamActive(false);
+
+                if (!IsCombatLocked())
+                    yield return StartCoroutine(FlameThrowerRoutine());
+
                 yield break;
             }
 
-            // 1) Bay lên cao: giữ nguyên XZ, đặt Y = rainHeight
+            if (IsCombatLocked())
+            {
+                SetSkillBossCamActive(false);
+                yield break;
+            }
+
+            // VN: Bay lên độ cao Rain.
             yield return LiftToMeteorRainHeight(rainHeight);
 
-            // 2) Lần lượt bay tới từng điểm Meteor Rain và tấn công (tối đa 2 lần)
+            if (IsCombatLocked())
+            {
+                SetSkillBossCamActive(false);
+                yield break;
+            }
+
             int hitsToUse = Mathf.Min(2, rainPoints.Length);
+
             for (int i = 0; i < hitsToUse; i++)
             {
+                if (IsCombatLocked())
+                    break;
+
                 Transform point = rainPoints[i];
-                if (point == null) continue;
+                if (point == null)
+                    continue;
 
                 yield return FlyAndStrikeMeteorRainAtPoint(point, rainHeight);
             }
 
-            // 3) Kết thúc Meteor Rain → bay về vị trí/hướng ban đầu
-            yield return ReturnFromMeteor(originalPos, originalRot);
+            if (!IsCombatLocked())
+                yield return ReturnFromMeteor(originalPos, originalRot);
 
             SetSkillBossCamActive(false);
         }
@@ -1680,15 +1762,16 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Bay tới một điểm Meteor Rain, bật warning và play animation Rain.
-        /// Dragon đứng cách target đúng bằng meteorRainAttackRadius (trên mặt phẳng XZ).
+        /// VN: Bay tới 1 điểm Meteor Rain. Nếu final scene chen vào giữa chừng thì dừng luôn.
         /// </summary>
         private IEnumerator FlyAndStrikeMeteorRainAtPoint(Transform targetPoint, float rainHeight)
         {
             if (targetPoint == null)
                 yield break;
 
-            // Vị trí hiện tại và target (chiếu xuống mặt phẳng XZ)
+            if (IsCombatLocked())
+                yield break;
+
             Vector3 fromPos = transform.position;
 
             Vector3 targetXZ = new Vector3(
@@ -1703,25 +1786,22 @@ namespace PLAYERTWO.PlatformerProject
                 fromPos.z
             );
 
-            // Hướng từ target ra Dragon (để đứng trên đường hiện tại nhưng đúng radius)
             Vector3 flatDir = fromXZ - targetXZ;
 
-            // Nếu đang trùng/siêu gần target → chọn hướng fallback
+            // VN: Nếu đang trùng target thì lấy hướng fallback.
             if (flatDir.sqrMagnitude < 0.0001f)
             {
-                // Ưu tiên hướng nhìn hiện tại
                 Vector3 fallback = visualRoot != null ? visualRoot.forward : transform.forward;
                 fallback.y = 0f;
 
                 if (fallback.sqrMagnitude < 0.0001f)
-                    fallback = Vector3.forward; // fallback cuối
+                    fallback = Vector3.forward;
 
                 flatDir = fallback;
             }
 
             flatDir.Normalize();
 
-            // Vị trí đúng cách target một đoạn meteorRainAttackRadius trên mặt phẳng XZ
             Vector3 finalXZ = targetXZ + flatDir * meteorRainAttackRadius;
 
             Vector3 finalPos = new Vector3(
@@ -1732,7 +1812,7 @@ namespace PLAYERTWO.PlatformerProject
 
             float moveDur = meteorRainMoveDuration > 0f ? meteorRainMoveDuration : 0.6f;
 
-            // Cho xoay về hướng điểm đến trước khi bay
+            // VN: Xoay và bay tới vị trí cast.
             FaceTowards(finalPos);
 
             Tween moveTween = transform
@@ -1741,12 +1821,15 @@ namespace PLAYERTWO.PlatformerProject
 
             yield return moveTween.WaitForCompletion();
 
-            // ĐÃ ĐẾN VỊ TRÍ TẤN CÔNG → XOAY MẶT VỀ CHÍNH TARGET
+            if (IsCombatLocked())
+                yield break;
+
+            // VN: Tới nơi thì xoay mặt về đúng điểm target.
             Vector3 facePoint = targetPoint.position;
-            facePoint.y = rainHeight; // nhìn ngang mặt phẳng bay
+            facePoint.y = rainHeight;
             FaceTowards(facePoint);
 
-            // Bật effect cảnh báo mưa meteor tại vùng target
+            // VN: Bật warning tại vùng mưa meteor.
             if (meteorRainWarningEffect != null)
             {
                 meteorRainWarningEffect.transform.position = new Vector3(
@@ -1757,28 +1840,29 @@ namespace PLAYERTWO.PlatformerProject
                 meteorRainWarningEffect.SetActive(true);
             }
 
-            // Cho xoay/nhắm một chút trước khi cast
             yield return new WaitForSeconds(1f);
 
-            // Bật trạng thái animation Meteor Rain (bool trên Animator)
+            if (IsCombatLocked())
+                yield break;
+
+            // VN: Bật animation mưa meteor.
             dragonAnim?.SetMeteorRain(true);
 
             SetMeteorRainWarningActive(false, null);
             SetMeteorRainEffectActive(true);
 
-            // Thời gian animation mưa meteor
             yield return new WaitForSeconds(meteorRainStrikeAnimDuration);
 
-            // Tắt trạng thái animation
-            dragonAnim?.SetMeteorRain(false);
+            if (IsCombatLocked())
+                yield break;
 
+            // VN: Tắt trạng thái sau khi cast xong.
+            dragonAnim?.SetMeteorRain(false);
             SetMeteorRainEffectActive(false);
 
-            // Tắt warning sau khi kết thúc một lần cast
             if (meteorRainWarningEffect != null)
                 meteorRainWarningEffect.SetActive(false);
 
-            // Nghỉ giữa 2 lần tấn công Rain
             yield return new WaitForSeconds(meteorRainBetweenPointsDelay);
         }
 
