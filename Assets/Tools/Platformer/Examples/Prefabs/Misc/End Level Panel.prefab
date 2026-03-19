@@ -75,6 +75,7 @@ MonoBehaviour:
   activationEntity: 0
   activationCollider: 1
   requireStomp: 0
+  activateOnTouch: 0
   activateClip: {fileID: 8300000, guid: c44bef33a5615c947b7d5255b5bcbfab, type: 3}
   deactivateClip: {fileID: 0}
   OnActivate:
@@ -142,7 +143,8 @@ AudioSource:
   m_GameObject: {fileID: 2425441376148008993}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -4550646962974570008, guid: 19097a18f372cf342be28fd0a3e786b4,
+    type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1

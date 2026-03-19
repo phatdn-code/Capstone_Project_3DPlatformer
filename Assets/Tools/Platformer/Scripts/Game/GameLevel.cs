@@ -152,8 +152,8 @@ namespace PLAYERTWO.PlatformerProject
 		{
 			if (string.IsNullOrEmpty(exitScene))
 				GameLoader.instance.Load(Game.instance.levelExitScene);
-			else
-				GameLoader.instance.Load(exitScene);
+
+			else GameLoader.instance.Load(exitScene);
 		}
 
 		/// <summary>

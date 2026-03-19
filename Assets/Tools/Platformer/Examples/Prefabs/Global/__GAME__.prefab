@@ -62,6 +62,18 @@ MonoBehaviour:
   initialRetries: 3
   levelExitScene: MainMenu
   levels:
+  - name: World Map
+    description: The hub scene where players choose stages, track progress, and begin
+      their next platforming challenge.
+    image: {fileID: 0}
+    locked: 0
+    requiredStars: 0
+    scene: MapSelect
+    firstTimeScene: 
+    unlockNextLevel: 0
+    nextScene: 
+    firstTimeNextScene: 
+    exitScene: MainMenu
   - name: Greencliff Isles
     description: A lush island map of cliffs, greenery, and narrow jumps above the
       sea.
@@ -73,7 +85,7 @@ MonoBehaviour:
     unlockNextLevel: 0
     nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: MainMenu
+    exitScene: MapSelect
   - name: Voltitan Boss
     description: A high-tech arena ruled by a destructive war machine.
     image: {fileID: 21300000, guid: da695f527932a1c4d92d5b68e5662027, type: 3}
@@ -84,7 +96,7 @@ MonoBehaviour:
     unlockNextLevel: 0
     nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: MainMenu
+    exitScene: MapSelect
   - name: Sandstone Depths
     description: An underground maze of earth, rock, and sand.
     image: {fileID: 21300000, guid: 0d35988de27e9ea43b9258aae22db2b9, type: 3}
@@ -95,7 +107,7 @@ MonoBehaviour:
     unlockNextLevel: 0
     nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: MainMenu
+    exitScene: MapSelect
   - name: Pyrodrake Boss
     description: A flying fire dragon that rains flames and meteors from above.
     image: {fileID: 21300000, guid: 3e555495884990e43ade63fdf6a0f100, type: 3}
@@ -106,7 +118,7 @@ MonoBehaviour:
     unlockNextLevel: 0
     nextScene: MapSelect
     firstTimeNextScene: 
-    exitScene: MainMenu
+    exitScene: MapSelect
 --- !u!114 &2298921648025393660
 MonoBehaviour:
   m_ObjectHideFlags: 0
