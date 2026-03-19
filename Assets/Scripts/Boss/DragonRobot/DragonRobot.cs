@@ -435,6 +435,7 @@ namespace PLAYERTWO.PlatformerProject
             RequestStopAttacking();
 
             dragonAnim?.PlayTakeDamage();
+            AudioManager.Instance?.PlaySound(SoundCategory.PyrodrakeBoss, 1);
         }
 
         /// <summary>
@@ -714,6 +715,21 @@ namespace PLAYERTWO.PlatformerProject
 
                 return null;
             }
+        }
+
+        /// <summary>
+        /// VN: Đặt ngay hướng nhìn của boss theo world rotation.
+        /// Nếu có visualRoot thì xoay visualRoot, không thì xoay transform.
+        /// </summary>
+        public void SetInstantFacing(Quaternion worldRotation)
+        {
+            if (visualRoot != null)
+            {
+                visualRoot.DOKill();
+                visualRoot.rotation = worldRotation;
+            }
+
+            else transform.rotation = worldRotation;
         }
 
         #endregion
@@ -1216,7 +1232,7 @@ namespace PLAYERTWO.PlatformerProject
             }
 
             if (!isBlastSequenceActive) yield break;
-            if (_stopAttackingRequested) yield break;   // <-- thêm dòng này
+            if (_stopAttackingRequested) yield break;
 
             isBlastRotLocked = true;
             dragonAnim?.PlayBlastAttack();

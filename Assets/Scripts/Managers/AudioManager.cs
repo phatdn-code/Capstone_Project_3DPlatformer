@@ -5,89 +5,87 @@ namespace PLAYERTWO.PlatformerProject
 {
     public class AudioManager : SingletonMonobehaviour<AudioManager>
     {
-        // Tên parameter trong Audio Mixer
+        // VN: Tên parameter trong Audio Mixer.
         private const string VolumeParam = "VolumeVol";
         private const string MusicParam = "MusicVol";
         private const string SoundParam = "SoundVol";
 
-        [Header("Audio Sources")]
+        [Header("Music Sources")]
         [SerializeField] private AudioSource[] musics;
-        [SerializeField] private AudioSource[] sounds;
-        [SerializeField] private AudioSource[] storyVoices;
+
+        [Header("Sound Sources")]
+        [SerializeField] private AudioSource[] normalSounds;
+        [SerializeField] private AudioSource[] storySounds;
+        [SerializeField] private AudioSource[] bossSounds;
 
         [Header("Mixer Groups")]
         [SerializeField] private AudioMixerGroup volumeMixer;
         [SerializeField] private AudioMixerGroup musicMixer;
         [SerializeField] private AudioMixerGroup soundMixer;
 
-        [Header("Current Values")]
+        // VN: Giá trị volume hiện tại.
         private float volumeVol;
         private float musicVol;
         private float soundVol;
 
         /// <summary>
-        /// Phát 1 bản nhạc theo index.
+        /// VN: Phát nhạc theo index.
         /// </summary>
-        public void PlayMusic(int musicToPlay)
+        public void PlayMusic(int musicIndex)
         {
-            if (!IsValidIndex(musics, musicToPlay))
+            if (!TryGetAudioSource(musics, musicIndex, out AudioSource source))
                 return;
 
-            StopMusics();
-            musics[musicToPlay].Play();
+            StopArray(musics);
+            source.Play();
         }
 
         /// <summary>
-        /// Dừng toàn bộ nhạc nền.
+        /// VN: Dừng toàn bộ nhạc.
         /// </summary>
         public void StopMusics()
         {
-            for (int i = 0; i < musics.Length; i++)
-            {
-                if (musics[i] != null)
-                    musics[i].Stop();
-            }
+            StopArray(musics);
         }
 
         /// <summary>
-        /// Phát hiệu ứng âm thanh theo index.
+        /// VN: Phát sound theo nhóm và index.
         /// </summary>
-        public void PlaySound(int soundToPlay)
+        public void PlaySound(SoundCategory category, int soundIndex)
         {
-            if (!IsValidIndex(sounds, soundToPlay))
+            AudioSource[] targetGroup = GetSoundGroup(category);
+
+            if (!TryGetAudioSource(targetGroup, soundIndex, out AudioSource source))
                 return;
 
-            AudioSource sound = sounds[soundToPlay];
-            sound.Stop();
-            sound.Play();
+            if (ShouldStopWholeGroupBeforePlay(category))
+                StopArray(targetGroup);
+
+            else source.Stop();
+
+            source.Play();
         }
 
         /// <summary>
-        /// Phát voice story theo index page.
+        /// VN: Dừng toàn bộ sound của 1 nhóm.
         /// </summary>
-        public void PlayStoryVoice(int voiceIndex)
+        public void StopSoundGroup(SoundCategory category)
         {
-            if (!IsValidIndex(storyVoices, voiceIndex))
-                return;
-
-            StopStoryVoices();
-            storyVoices[voiceIndex].Play();
+            StopArray(GetSoundGroup(category));
         }
 
         /// <summary>
-        /// Dừng toàn bộ voice story.
+        /// VN: Dừng toàn bộ sound của tất cả nhóm.
         /// </summary>
-        public void StopStoryVoices()
+        public void StopAllSounds()
         {
-            for (int i = 0; i < storyVoices.Length; i++)
-            {
-                if (storyVoices[i] != null)
-                    storyVoices[i].Stop();
-            }
+            StopArray(normalSounds);
+            StopArray(storySounds);
+            StopArray(bossSounds);
         }
 
         /// <summary>
-        /// Cập nhật âm lượng tổng từ slider.
+        /// VN: Cập nhật volume tổng từ slider.
         /// </summary>
         public void SetVolumeSlider()
         {
@@ -99,7 +97,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Cập nhật âm lượng nhạc từ slider.
+        /// VN: Cập nhật volume nhạc từ slider.
         /// </summary>
         public void SetMusicSlider()
         {
@@ -111,7 +109,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Cập nhật âm lượng hiệu ứng từ slider.
+        /// VN: Cập nhật volume sound từ slider.
         /// </summary>
         public void SetSoundSlider()
         {
@@ -123,7 +121,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Trả về âm lượng tổng hiện tại.
+        /// VN: Lấy volume tổng hiện tại.
         /// </summary>
         public float GetVolumeVol()
         {
@@ -131,7 +129,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Trả về âm lượng nhạc hiện tại.
+        /// VN: Lấy volume nhạc hiện tại.
         /// </summary>
         public float GetMusicVol()
         {
@@ -139,7 +137,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Trả về âm lượng hiệu ứng hiện tại.
+        /// VN: Lấy volume sound hiện tại.
         /// </summary>
         public float GetSoundVol()
         {
@@ -147,7 +145,60 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Gán giá trị âm lượng vào mixer.
+        /// VN: Lấy mảng sound theo nhóm.
+        /// </summary>
+        private AudioSource[] GetSoundGroup(SoundCategory category)
+        {
+            switch (category)
+            {
+                case SoundCategory.Normal:
+                    return normalSounds;
+
+                case SoundCategory.Story:
+                    return storySounds;
+
+                case SoundCategory.PyrodrakeBoss:
+                    return bossSounds;
+
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// VN: Xác định nhóm nào cần stop cả mảng trước khi phát.
+        /// </summary>
+        private bool ShouldStopWholeGroupBeforePlay(SoundCategory category)
+        {
+            switch (category)
+            {
+                case SoundCategory.Story:
+                    return true;
+
+                case SoundCategory.Normal:
+                case SoundCategory.PyrodrakeBoss:
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// VN: Dừng toàn bộ AudioSource trong mảng.
+        /// </summary>
+        private void StopArray(AudioSource[] sources)
+        {
+            if (sources == null)
+                return;
+
+            for (int i = 0; i < sources.Length; i++)
+            {
+                if (sources[i] != null)
+                    sources[i].Stop();
+            }
+        }
+
+        /// <summary>
+        /// VN: Gán giá trị volume vào Audio Mixer.
         /// </summary>
         private void SetMixerVolume(AudioMixerGroup mixerGroup, string parameterName, float value)
         {
@@ -158,14 +209,23 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Kiểm tra index có hợp lệ không.
+        /// VN: Lấy AudioSource hợp lệ theo index.
         /// </summary>
-        private bool IsValidIndex(AudioSource[] audioSources, int index)
+        private bool TryGetAudioSource(AudioSource[] sources, int index, out AudioSource source)
         {
-            return audioSources != null &&
-                   index >= 0 &&
-                   index < audioSources.Length &&
-                   audioSources[index] != null;
+            source = null;
+
+            if (sources == null)
+                return false;
+
+            if (index < 0 || index >= sources.Length)
+                return false;
+
+            if (sources[index] == null)
+                return false;
+
+            source = sources[index];
+            return true;
         }
     }
 }

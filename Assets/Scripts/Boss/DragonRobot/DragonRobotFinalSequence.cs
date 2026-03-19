@@ -205,7 +205,16 @@ namespace PLAYERTWO.PlatformerProject
             }
 
             if (finalBossPose != null)
-                transform.SetPositionAndRotation(finalBossPose.position, finalBossPose.rotation);
+            {
+                // VN: Chỉ set vị trí ở root.
+                transform.position = finalBossPose.position;
+
+                // VN: Hướng nhìn thật của boss set qua DragonRobot vì model xoay bằng visualRoot.
+                if (m_dragon != null)
+                    m_dragon.SetInstantFacing(finalBossPose.rotation);
+                else
+                    transform.rotation = finalBossPose.rotation;
+            }
         }
 
         /// <summary>
@@ -371,7 +380,7 @@ namespace PLAYERTWO.PlatformerProject
             if (explosionEffect != null)
             {
                 Instantiate(explosionEffect, transform.position, explosionEffect.transform.rotation);
-                AudioManager.Instance.PlaySound(5);
+                AudioManager.Instance?.PlaySound(SoundCategory.PyrodrakeBoss, 3);
 
                 m_dragon.DisableColliderAndModel();
                 yield return new WaitForSeconds(explosionDuration);
@@ -422,6 +431,7 @@ namespace PLAYERTWO.PlatformerProject
             }
 
             anim.PlayDeath();
+            AudioManager.Instance?.PlaySound(SoundCategory.PyrodrakeBoss, 2);
 
             m_lastHitTriggered = true;
             m_listenCutsceneWaterHits = false;

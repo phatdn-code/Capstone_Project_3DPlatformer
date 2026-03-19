@@ -197,7 +197,7 @@ namespace PLAYERTWO.PlatformerProject
             LoadStoryScene();
             RememberReturnPoint();
 
-            AudioManager.Instance?.PlaySound(1);
+            AudioManager.Instance?.PlaySound(SoundCategory.Normal, 1);
         }
 
         /// <summary>

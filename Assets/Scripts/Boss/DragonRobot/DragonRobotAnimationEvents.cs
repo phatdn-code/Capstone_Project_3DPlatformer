@@ -80,7 +80,10 @@ namespace PLAYERTWO.PlatformerProject
         // Helpers (stub) – bạn tự fill sau
 
         private void PlayFlameStartSound() { /* TODO: âm thanh bắt đầu phun lửa */ }
-        private void PlayBlastShootSound() { /* TODO: âm thanh bắn cầu lửa */ }
+        private void PlayBlastShootSound()
+        {
+            AudioManager.Instance?.PlaySound(SoundCategory.PyrodrakeBoss, 0);
+        }
         private void PlayMeteorSound() { /* TODO: âm thanh tung chiêu Meteor */ }
         private void PlayRoarSound() { /* TODO: âm thanh gầm */ }
         private void PlayLandingEffect() { /* TODO: dust VFX, camera shake */ }

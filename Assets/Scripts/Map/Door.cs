@@ -12,13 +12,13 @@ public class Door : MonoBehaviour
     {
         if (doorAnimator.GetBool("isClosed") == false) return;
         doorAnimator.SetBool("isClosed", false);
-        AudioManager.Instance.PlaySound(sfxIndex);
+        AudioManager.Instance.PlaySound(SoundCategory.Normal, sfxIndex);
     }
 
     public void CloseDoor()
     {
         if(doorAnimator.GetBool("isClosed") == true) return;
         doorAnimator.SetBool("isClosed", true);
-        AudioManager.Instance.PlaySound(sfxIndex);
+        AudioManager.Instance.PlaySound(SoundCategory.Normal, sfxIndex);
     }
 }

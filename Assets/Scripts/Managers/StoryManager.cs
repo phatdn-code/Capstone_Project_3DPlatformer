@@ -315,7 +315,7 @@ namespace PLAYERTWO.PlatformerProject
         private void StartTyping(string text)
         {
             if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayStoryVoice(currentIndex);
+                AudioManager.Instance.PlaySound(SoundCategory.Story, currentIndex);
 
             typingCoroutine = StartCoroutine(Typewriter(text));
         }
@@ -488,8 +488,8 @@ namespace PLAYERTWO.PlatformerProject
 
             if (AudioManager.Instance != null)
             {
-                AudioManager.Instance.StopStoryVoices();
-                AudioManager.Instance.PlaySound(0);
+                AudioManager.Instance.StopSoundGroup(SoundCategory.Story);
+                AudioManager.Instance.PlaySound(SoundCategory.Normal, 0);
             }
 
             transitionSequence = CreateSlideOutSequence(rectTransform, imageCanvasGroup);
@@ -782,7 +782,7 @@ namespace PLAYERTWO.PlatformerProject
             pageState = StoryPageState.Transitioning;
 
             if (AudioManager.Instance != null)
-                AudioManager.Instance.StopStoryVoices();
+                AudioManager.Instance.StopSoundGroup(SoundCategory.Story);
 
             if (useFadeWhenEnding && Fader.instance != null)
             {

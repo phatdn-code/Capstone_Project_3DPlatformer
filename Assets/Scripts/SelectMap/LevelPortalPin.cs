@@ -29,6 +29,10 @@ namespace PLAYERTWO.PlatformerProject
         [BoxGroup("Level Portal Pin/Scene")]
         [SerializeField] private string mapDisplayName;
 
+        [BoxGroup("Level Portal Pin/UI")]
+        [InfoBox("Các Image này sẽ nhận sprite của level có scene trùng targetSceneName.")]
+        [SerializeField] private Image[] levelImages;
+
         [BoxGroup("Level Portal Pin/Return Spawn")]
         [ToggleLeft]
         [InfoBox("Bật nếu portal này được dùng làm điểm quay lại khi trở về map.")]
@@ -179,6 +183,7 @@ namespace PLAYERTWO.PlatformerProject
             SetupMapNameText();
             RefreshStarGroupVisibility();
             CacheLevelData();
+            RefreshLevelImages();
             RefreshStarsUI();
             RefreshUnlockState();
             RefreshBossVisual();
@@ -297,6 +302,29 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
+        /// VN: Gán sprite của level tương ứng vào tất cả Image trong mảng.
+        /// </summary>
+        private void RefreshLevelImages()
+        {
+            if (levelImages == null || levelImages.Length == 0)
+                return;
+
+            if (_levelData == null)
+                CacheLevelData();
+
+            if (_levelData == null || _levelData.image == null)
+                return;
+
+            for (int i = 0; i < levelImages.Length; i++)
+            {
+                if (levelImages[i] == null)
+                    continue;
+
+                levelImages[i].sprite = _levelData.image;
+            }
+        }
+
+        /// <summary>
         /// VN: Đếm tổng số sao đã mở của màn chơi.
         /// </summary>
         private int GetCollectedStarCount()
@@ -346,6 +374,7 @@ namespace PLAYERTWO.PlatformerProject
         private void HandleGameLoaded(int dataIndex)
         {
             CacheLevelData();
+            RefreshLevelImages();
             RefreshStarsUI();
             RefreshUnlockState();
             RefreshBossVisual();
@@ -568,7 +597,7 @@ namespace PLAYERTWO.PlatformerProject
             RememberReturnPoint();
             LoadTargetScene();
 
-            AudioManager.Instance.PlaySound(1);
+            AudioManager.Instance.PlaySound(SoundCategory.Normal, 1);
         }
 
         /// <summary>

@@ -46,4 +46,11 @@
         Any,
         All
     }
+
+    public enum SoundCategory
+    {
+        Normal,
+        Story,
+        PyrodrakeBoss,
+    }
 }

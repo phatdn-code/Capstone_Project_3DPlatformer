@@ -65,7 +65,7 @@ MonoBehaviour:
   - name: World Map
     description: The hub scene where players choose stages, track progress, and begin
       their next platforming challenge.
-    image: {fileID: 0}
+    image: {fileID: 21300000, guid: 55e1747a871c1f54d99553ef1d0e77b1, type: 3}
     locked: 0
     requiredStars: 0
     scene: MapSelect
@@ -99,7 +99,7 @@ MonoBehaviour:
     exitScene: MapSelect
   - name: Sandstone Depths
     description: An underground maze of earth, rock, and sand.
-    image: {fileID: 21300000, guid: 0d35988de27e9ea43b9258aae22db2b9, type: 3}
+    image: {fileID: 21300000, guid: 266c7c569c62f19448976486d59eeebd, type: 3}
     locked: 0
     requiredStars: 0
     scene: Map02

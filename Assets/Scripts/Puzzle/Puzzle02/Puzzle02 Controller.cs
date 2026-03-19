@@ -127,7 +127,7 @@ public class Puzzle02Controller : MonoBehaviour
 
         _isCompleted = true;
         OnPuzzleCompleted();
-        AudioManager.Instance.PlaySound(4);
+        AudioManager.Instance.PlaySound(SoundCategory.Normal, 4);
     }
 
     private void OnPuzzleCompleted()
