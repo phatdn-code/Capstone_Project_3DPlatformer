@@ -6,7 +6,6 @@ public class PlayerPuzzleController : PlayerInputManager
     [SerializeField] private Puzzle02Controller _controller;
     [SerializeField] private GameObject _selectionUI;
 
-    private PlayerObjectGrabber _playerObjectGrabber;
     private Puzzle02UIController _puzzle02UIController;
 
     private bool _canSelect = false;
@@ -15,8 +14,6 @@ public class PlayerPuzzleController : PlayerInputManager
     protected override void Awake()
     {
         base.Awake();
-        _playerObjectGrabber = GetComponent<PlayerObjectGrabber>();
-
         if (_selectionUI != null)
             _selectionUI.SetActive(false);
     }
@@ -29,13 +26,11 @@ public class PlayerPuzzleController : PlayerInputManager
             _selectionUI.SetActive(true);
 
         else _selectionUI.SetActive(false);
-
-        _playerObjectGrabber.enabled = !_canSelect;
     }
 
     public void SelectPuzzle()
     {
-        if (!_canSelect || !m_player.inputs.GetPickAndDropDown())
+        if (!_canSelect || !m_player.inputs.GetStompDown())
             return;
 
         _isPuzzlePlaying = !_isPuzzlePlaying;

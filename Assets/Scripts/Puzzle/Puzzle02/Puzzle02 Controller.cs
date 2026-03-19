@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PLAYERTWO.PlatformerProject;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -126,6 +127,7 @@ public class Puzzle02Controller : MonoBehaviour
 
         _isCompleted = true;
         OnPuzzleCompleted();
+        AudioManager.Instance.PlaySound(4);
     }
 
     private void OnPuzzleCompleted()
