@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   x: 2
   y: 0
-  pieceImage: {fileID: 21300000, guid: affcf4fd6349317428d62892783fa3b9, type: 3}
+  pieceImage: {fileID: 21300000, guid: 2e313ec6c41c95d42a0da1a3b48afedc, type: 3}
