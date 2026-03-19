@@ -10,7 +10,6 @@ public class DungeonGenerator : MonoBehaviour
     public int maxRoomCount = 30;
     public GameObject roomPrefab;
     public enum CellType { Empty, Room}
-    [SerializeField] private DungeonSO dungeonDataSO;
     [SerializeField] private DungeonController dungeonController;
 
     [SerializeField] private GameObject[] roomObjArray = new GameObject[2];
@@ -39,7 +38,6 @@ public class DungeonGenerator : MonoBehaviour
 
     private void ClearDungeon()
     {
-        dungeonDataSO.ResetData();
         dungeons = new CellType[roomLength, roomLength];
         roomList.Clear();
     }
@@ -63,12 +61,11 @@ public class DungeonGenerator : MonoBehaviour
     {
         int indexX = Random.Range(0, roomLength);
         int indexY = Random.Range(0, roomLength);
-        dungeonDataSO.startIndex = new Vector2Int(indexX, indexY);
-        GameObject room = SpawnBaseRoom(dungeonDataSO.startIndex);
+        GameObject room = SpawnBaseRoom(new Vector2Int(indexX,indexY));
         room.GetComponent<RoomManager>().dungeonController = dungeonController;
         SpawnRoom(room, maxRoomCount);
         roomCount--;
-        StartCoroutine(NextGenerateCoroutine(dungeonDataSO.startIndex,room));
+        StartCoroutine(NextGenerateCoroutine(new Vector2Int(indexX, indexY), room));
     }
 
 
