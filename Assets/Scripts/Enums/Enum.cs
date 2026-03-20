@@ -51,6 +51,7 @@
     {
         Normal,
         Story,
+        VoltitanBoss,
         PyrodrakeBoss,
     }
 }

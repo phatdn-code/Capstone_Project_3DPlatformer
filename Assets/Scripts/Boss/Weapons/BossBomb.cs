@@ -368,6 +368,8 @@ namespace PLAYERTWO.PlatformerProject
                 PoolManager.Instance.ReuseComponent(explosionBossEffect, transform.position, Quaternion.identity);
 
             Explode();
+
+            AudioManager.Instance?.PlaySound(SoundCategory.VoltitanBoss, 1);
         }
 
         #endregion

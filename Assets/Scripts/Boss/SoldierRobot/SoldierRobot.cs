@@ -341,6 +341,8 @@ namespace PLAYERTWO.PlatformerProject
 
             if (fireball != null && player != null)
                 fireball.SetupFromPool(player.transform, this);
+
+            AudioManager.Instance?.PlaySound(SoundCategory.VoltitanBoss, 0);
         }
 
         private IEnumerator PerformSpecialSkill()

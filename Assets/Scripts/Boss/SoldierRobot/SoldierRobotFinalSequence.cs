@@ -277,6 +277,8 @@ namespace PLAYERTWO.PlatformerProject
             robot.BossAnim.PlayDeath();
             supportGunner?.PlayDeath();
 
+            AudioManager.Instance?.PlaySound(SoundCategory.VoltitanBoss, 2);
+
             boss.IsInCutscene = false;
 
             StartCoroutine(DissolveZoneAndReturnCamera());

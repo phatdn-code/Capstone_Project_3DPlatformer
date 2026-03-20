@@ -16,7 +16,8 @@ namespace PLAYERTWO.PlatformerProject
         [Header("Sound Sources")]
         [SerializeField] private AudioSource[] normalSounds;
         [SerializeField] private AudioSource[] storySounds;
-        [SerializeField] private AudioSource[] bossSounds;
+        [SerializeField] private AudioSource[] volTitanSounds;
+        [SerializeField] private AudioSource[] pyrodrakeSounds;
 
         [Header("Mixer Groups")]
         [SerializeField] private AudioMixerGroup volumeMixer;
@@ -81,7 +82,8 @@ namespace PLAYERTWO.PlatformerProject
         {
             StopArray(normalSounds);
             StopArray(storySounds);
-            StopArray(bossSounds);
+            StopArray(volTitanSounds);
+            StopArray(pyrodrakeSounds);
         }
 
         /// <summary>
@@ -157,8 +159,11 @@ namespace PLAYERTWO.PlatformerProject
                 case SoundCategory.Story:
                     return storySounds;
 
+                case SoundCategory.VoltitanBoss:
+                    return volTitanSounds;
+
                 case SoundCategory.PyrodrakeBoss:
-                    return bossSounds;
+                    return pyrodrakeSounds;
 
                 default:
                     return null;
