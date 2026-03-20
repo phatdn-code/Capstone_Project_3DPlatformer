@@ -50,6 +50,8 @@ public class PlayerPuzzleController : PlayerInputManager
     public void ExitPuzzle()
     {
         LockCursor(false);
+        _canSelect = true;
+        _isPuzzlePlaying=false;
         _puzzle02UIController?.ExitPuzzle02();
     }
 
@@ -76,6 +78,7 @@ public class PlayerPuzzleController : PlayerInputManager
             return;
 
         _canSelect = false;
+        _isPuzzlePlaying = false;
         _puzzle02UIController = null;
         UpdateSelectionUI();
     }
