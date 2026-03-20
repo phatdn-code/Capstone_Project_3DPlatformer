@@ -202,6 +202,7 @@ namespace PLAYERTWO.PlatformerProject
             if (dragon != null && dragon.IsDamageImmuneThisRound) return;
 
             bossHealth.TakeDamage(damageToBoss);
+            AudioManager.Instance.PlaySound(SoundCategory.Normal, 6);
         }
 
         /// <summary>Play VFX khi hit.</summary>

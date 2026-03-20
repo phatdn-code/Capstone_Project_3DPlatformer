@@ -478,6 +478,8 @@ namespace PLAYERTWO.PlatformerProject
 
             var projectile = Instantiate(projectilePrefab, pos, Quaternion.identity);
             projectile.LaunchForward(pos, dir);
+
+            AudioManager.Instance.PlaySound(SoundCategory.Normal, 5);
         }
 
         /// <summary>VN: Stop beam nếu đang bắn (an toàn, gọi nhiều lần cũng không sao).</summary>
