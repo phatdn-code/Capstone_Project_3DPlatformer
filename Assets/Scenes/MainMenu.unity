@@ -1563,7 +1563,7 @@ MonoBehaviour:
   useScale: 0
   scaleMultiplier: 1.1
   scaleDuration: 0.1
-  useClickAudio: 1
+  useClickAudio: 0
   useHighlightAudio: 0
   audioType: 2
 --- !u!1001 &1966975825
