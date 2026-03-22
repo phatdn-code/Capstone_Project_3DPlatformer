@@ -68,6 +68,22 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
+        /// VN: Dừng đúng 1 sound theo nhóm và index.
+        /// </summary>
+        public void StopSound(SoundCategory category, int soundIndex)
+        {
+            // VN: Lấy đúng mảng sound của nhóm cần dừng.
+            AudioSource[] targetGroup = GetSoundGroup(category);
+
+            // VN: Kiểm tra index hợp lệ và lấy đúng AudioSource cần dừng.
+            if (!TryGetAudioSource(targetGroup, soundIndex, out AudioSource source))
+                return;
+
+            // VN: Chỉ dừng đúng sound này, không ảnh hưởng sound khác.
+            source.Stop();
+        }
+
+        /// <summary>
         /// VN: Dừng toàn bộ sound của 1 nhóm.
         /// </summary>
         public void StopSoundGroup(SoundCategory category)

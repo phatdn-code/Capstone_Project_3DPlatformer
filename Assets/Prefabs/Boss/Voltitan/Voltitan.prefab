@@ -193,12 +193,12 @@ MonoBehaviour:
   bossName: Voltitan
   m_phases:
   - phaseName: Voltitan
-    maxHealth: 100
+    maxHealth: 80
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
   - phaseName: Voltitan
-    maxHealth: 200
+    maxHealth: 120
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}

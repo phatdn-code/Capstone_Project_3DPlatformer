@@ -76,7 +76,7 @@ public class SupportGunnerAI : MonoBehaviour
         if (isActive) return;
 
         orbitCenter = center;
-        orbitRadius = radius + orbitDistanceOffset; // ✅ bay xa hơn khỏi tâm
+        orbitRadius = radius + orbitDistanceOffset;
         isActive = true;
 
         StartCoroutine(EnterArenaRoutine());
@@ -148,6 +148,9 @@ public class SupportGunnerAI : MonoBehaviour
             SetRunning(false);
             SetShooting(true);
 
+            // VN: Bắt đầu đợt bắn -> phát sound bắn loop.
+            AudioManager.Instance?.PlaySound(SoundCategory.VoltitanBoss, 3);
+
             float timer = 0f;
             while (timer < burstDuration)
             {
@@ -158,6 +161,9 @@ public class SupportGunnerAI : MonoBehaviour
 
             SetShooting(false);
             SetRunning(true);
+
+            // VN: Kết thúc đợt bắn -> dừng đúng sound bắn.
+            AudioManager.Instance?.StopSound(SoundCategory.VoltitanBoss, 3);
 
             yield return new WaitForSeconds(restDuration);
         }
