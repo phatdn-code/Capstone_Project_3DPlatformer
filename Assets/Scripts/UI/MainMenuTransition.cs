@@ -1,8 +1,121 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using PLAYERTWO.PlatformerProject;
+
+namespace PLAYERTWO.PlatformerProject
+{
+    public class MainMenuTransition : MonoBehaviour
+    {
+        private const int FixedSlotIndex = 0;
+
+        private static readonly int ProgressId = Shader.PropertyToID("_Progress");
+        private static readonly int PanelCountId = Shader.PropertyToID("_PanelCount");
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+
+        [Header("UI")]
+        [SerializeField] private Image transitionImage;
+        [SerializeField, Min(1)] private int panelCount = 3;
+        [SerializeField] private Color panelColor = Color.black;
+        [SerializeField, Min(0f)] private float duration = 0.8f;
+
+        [Header("Scene")]
+        [SerializeField] private string storySceneName;
+        [SerializeField] private string selectMapSceneName;
+
+        private Material runtimeMaterial;
+
+        private void Awake()
+        {
+            if (transitionImage == null)
+            {
+                Debug.LogWarning("[MainMenuTransition] Transition image is null.");
+                return;
+            }
+
+            runtimeMaterial = new Material(transitionImage.material);
+            transitionImage.material = runtimeMaterial;
+
+            runtimeMaterial.SetFloat(ProgressId, 0f);
+            runtimeMaterial.SetFloat(PanelCountId, panelCount);
+            runtimeMaterial.SetColor(ColorId, panelColor);
+        }
+
+        public void StartTransition()
+        {
+            if (Game.instance == null)
+            {
+                Debug.LogWarning("[MainMenuTransition] Game.instance is null.");
+                return;
+            }
+
+            if (!Game.instance.dataLoaded)
+                Game.instance.LoadOrCreateState(FixedSlotIndex);
+
+            StartCoroutine(TransitionRoutine());
+        }
+
+        private IEnumerator TransitionRoutine()
+        {
+            if (runtimeMaterial == null)
+                yield break;
+
+            if (duration <= 0f)
+            {
+                runtimeMaterial.SetFloat(ProgressId, 1f);
+                LoadTargetScene();
+                yield break;
+            }
+
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+
+                float t = Mathf.Clamp01(elapsed / duration);
+                float smooth = SmoothStep(t);
+
+                runtimeMaterial.SetFloat(ProgressId, smooth);
+                yield return null;
+            }
+
+            runtimeMaterial.SetFloat(ProgressId, 1f);
+            LoadTargetScene();
+        }
+
+        private string GetStartScene()
+        {
+            return Game.instance != null &&
+                   Game.instance.dataLoaded &&
+                   Game.instance.introStorySeen
+                ? selectMapSceneName
+                : storySceneName;
+        }
+
+        private void LoadTargetScene()
+        {
+            string targetScene = GetStartScene();
+
+            if (string.IsNullOrWhiteSpace(targetScene))
+            {
+                Debug.LogWarning("[MainMenuTransition] Target scene is empty.");
+                return;
+            }
+
+            GameLoader.instance.Load(targetScene);
+        }
+
+        private float SmoothStep(float t)
+        {
+            return t * t * (3f - 2f * t);
+        }
+    }
+}
+
+
+/*using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -166,75 +279,4 @@ namespace PLAYERTWO.PlatformerProject
         }
     }
 }
-
-// using UnityEngine;
-// using UnityEngine.UI;
-// using UnityEngine.SceneManagement;
-// using System.Collections;
-
-// public class MainMenuTransition : MonoBehaviour
-// {
-//     [Header("Cài đặt UI")]
-//     public RectTransform[] rectangles; // Kéo 3 Image vào đây
-//     public float duration = 0.8f;      // Thời gian di chuyển (giây)
-//     public string nextSceneName;       // Tên scene muốn chuyển đến
-
-//     [ContextMenu("Bắt đầu chuyển cảnh")]
-//     public void StartTransition()
-//     {
-//         StartCoroutine(MoveAndFadeRoutine());
-//     }
-
-//     IEnumerator MoveAndFadeRoutine()
-/*     {
-        float elapsedTime = 0f;
-
-        // Lưu vị trí bắt đầu
-        Vector2[] startPositions = new Vector2[rectangles.Length];
-        for (int i = 0; i < rectangles.Length; i++)
-        {
-            startPositions[i] = rectangles[i].anchoredPosition;
-        }
-
-        while (elapsedTime < duration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / duration;
-
-            // Làm mượt chuyển động (SmoothStep)
-            float smoothT = t * t * (3f - 2f * t);
-
-            for (int i = 0; i < rectangles.Length; i++)
-            {
-                // 1. Di chuyển vị trí X về 0
-                float newX = Mathf.Lerp(startPositions[i].x, 0, smoothT);
-                rectangles[i].anchoredPosition = new Vector2(newX, startPositions[i].y);
-
-                // 2. Hiệu ứng Fade In (từ 0 lên 1)
-                if (rectangles[i].TryGetComponent<Image>(out Image img))
-                {
-                    Color c = img.color;
-                    c.a = Mathf.Lerp(0f, 1f, t); // Fade có thể dùng t trực tiếp hoặc smoothT tùy ý bạn
-                    img.color = c;
-                }
-            }
-
-            yield return null;
-        }
-
-        // Đảm bảo trạng thái cuối cùng chuẩn xác
-        for (int i = 0; i < rectangles.Length; i++)
-        {
-            rectangles[i].anchoredPosition = new Vector2(0, rectangles[i].anchoredPosition.y);
-            if (rectangles[i].TryGetComponent<Image>(out Image img))
-                {
-                    Color c = img.color;
-                    c.a = 1f;
-                    img.color = c;
-                }
-        }
-
-        // Chuyển Scene
-        // SceneManager.LoadScene(nextSceneName);
-    }
-} */
+*/
