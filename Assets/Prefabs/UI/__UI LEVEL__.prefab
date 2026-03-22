@@ -360,7 +360,19 @@ MonoBehaviour:
       m_Calls: []
   OnUnpause:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3941043034477466082}
+        m_TargetAssemblyTypeName: UI_LevelController, Assembly-CSharp
+        m_MethodName: Setting
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   pauseScreen: {fileID: 7521508217709742114}
 --- !u!1001 &4831675300499609037
 PrefabInstance:
@@ -799,6 +811,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6cd8cff219257d04b8048ea72c6f9d0e, type: 3}
+--- !u!114 &3941043034477466082 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9047268718723819896, guid: 6cd8cff219257d04b8048ea72c6f9d0e,
+    type: 3}
+  m_PrefabInstance: {fileID: 5422121975215028378}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d667310f58c8343ab053439eb2ccd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &7521508217709742114 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2548752524953956536, guid: 6cd8cff219257d04b8048ea72c6f9d0e,
