@@ -11,6 +11,8 @@ public class PlayerPuzzleController : PlayerInputManager
     private bool _canSelect = false;
     private bool _isPuzzlePlaying = false;
 
+    public bool isPuzzlePlaying => _isPuzzlePlaying;
+
     protected override void Awake()
     {
         base.Awake();

@@ -82,7 +82,7 @@ namespace PLAYERTWO.PlatformerProject
             if (pauseScreen)
                 pauseScreen.Hide();
 
-            if (m_playerPuzzleController != null)
+            if (m_playerPuzzleController != null && m_playerPuzzleController.isPuzzlePlaying)
                 m_playerPuzzleController.ExitPuzzle();
 
             OnUnpause?.Invoke();
