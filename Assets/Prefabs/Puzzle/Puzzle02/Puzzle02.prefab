@@ -767,11 +767,11 @@ MonoBehaviour:
   normalColor: {r: 0.06666667, g: 0.06666667, b: 0.06666667, a: 1}
   highlightedColor: {r: 0.9372549, g: 0.9372549, b: 0.9372549, a: 1}
   pressedColor: {r: 0.9372549, g: 0.9372549, b: 0.9372549, a: 1}
-  useScale: 1
+  useScale: 0
   scaleMultiplier: 1.1
   scaleDuration: 0.1
   useClickAudio: 1
-  useHighlightAudio: 1
+  useHighlightAudio: 0
   audioType: 0
 --- !u!222 &2117933166781699026
 CanvasRenderer:
