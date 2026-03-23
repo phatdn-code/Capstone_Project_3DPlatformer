@@ -1,99 +1,193 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using PLAYERTWO.PlatformerProject;
 using UnityEngine.UI;
 
-public class UI_HUD : MonoBehaviour
+namespace PLAYERTWO.PlatformerProject
 {
-	[Header("Format Settings")]
-	[Tooltip("The format to display the retries counter.")]
-	public string retriesFormat = "00";
+    public class UI_HUD : MonoBehaviour
+    {
+        [Header("Format Settings")]
+        public string retriesFormat = "00";
+        public string coinsFormat = "000";
+        public string healthFormat = "0";
 
-	[Tooltip("The format to display the coins counter.")]
-	public string coinsFormat = "000";
+        [Header("UI References")]
+        public TMP_Text retriesText;
+        public TMP_Text coinsText;
+        public TMP_Text healthText;
+        public Image[] starImages;
 
-	[Tooltip("The format to display the health counter.")]
-	public string healthFormat = "0";
+        protected Game game;
+        protected LevelScore score;
+        protected Player currentPlayer;
 
-	[Header("UI Elements")]
-	[Tooltip("The text to display the retries counter.")]
-	public TMP_Text retries;
+        /// <summary>
+        /// VN: Khởi tạo reference, đăng ký listener và cập nhật HUD lần đầu.
+        /// </summary>
+        protected virtual void Start()
+        {
+            CacheReferences();
+            RegisterListeners();
+            Refresh();
+        }
 
-	[Tooltip("The text to display the coins counter.")]
-	public TMP_Text coins;
+        /// <summary>
+        /// VN: Gỡ listener khi object bị hủy để tránh trùng callback.
+        /// </summary>
+        protected virtual void OnDestroy()
+        {
+            UnregisterListeners();
+        }
 
-	[Tooltip("The text to display the health counter.")]
-	public TMP_Text health;
+        /// <summary>
+        /// VN: Lấy các reference cần thiết từ hệ thống game.
+        /// </summary>
+        protected virtual void CacheReferences()
+        {
+            game = Game.instance;
+            score = LevelScore.instance;
+            currentPlayer = Level.instance != null ? Level.instance.player : null;
+        }
 
-	[Tooltip("The images to display the stars.")]
-	public Image[] starsImages;
+        /// <summary>
+        /// VN: Đăng ký các sự kiện để HUD tự cập nhật khi dữ liệu thay đổi.
+        /// </summary>
+        protected virtual void RegisterListeners()
+        {
+            if (score != null)
+            {
+                score.OnCoinsSet.AddListener(UpdateCoins);
+                score.OnStarsSet.AddListener(UpdateStars);
+            }
 
-	protected Game m_game;
-	protected LevelScore m_score;
+            if (game != null)
+                game.OnRetriesSet.AddListener(UpdateRetries);
 
-	protected Player m_player => Level.instance.player;
+            RegisterPlayerHealthListener(currentPlayer);
 
-	protected virtual void Start()
-	{
-		m_game = Game.instance;
-		m_score = LevelScore.instance;
-		m_score.OnScoreLoaded.AddListener(() =>
-		{
-			m_score.OnCoinsSet.AddListener(UpdateCoins);
-			m_score.OnStarsSet.AddListener(UpdateStars);
-			m_game.OnRetriesSet.AddListener(UpdateRetries);
-			m_player.health.onChange.AddListener(UpdateHealth);
-			Refresh();
-		});
+            if (Level.instance != null)
+                Level.instance.onPlayerChanged.AddListener(OnPlayerChanged);
+        }
 
-		Level.instance.onPlayerChanged.AddListener(
-			(player) => player.health.onChange.AddListener(UpdateHealth)
-		);
-	}
+        /// <summary>
+        /// VN: Gỡ các sự kiện đã đăng ký trước đó.
+        /// </summary>
+        protected virtual void UnregisterListeners()
+        {
+            if (score != null)
+            {
+                score.OnCoinsSet.RemoveListener(UpdateCoins);
+                score.OnStarsSet.RemoveListener(UpdateStars);
+            }
 
-	/// <summary>
-	/// Set the coin counter to a given value.
-	/// </summary>
-	protected virtual void UpdateCoins(int value)
-	{
-		coins.text = value.ToString(coinsFormat);
-	}
+            if (game != null)
+                game.OnRetriesSet.RemoveListener(UpdateRetries);
 
-	/// <summary>
-	/// Set the retries counter to a given value.
-	/// </summary>
-	protected virtual void UpdateRetries(int value)
-	{
-		retries.text = value.ToString(retriesFormat);
-	}
+            UnregisterPlayerHealthListener(currentPlayer);
 
-	/// <summary>
-	/// Called when the Player Health changed.
-	/// </summary>
-	protected virtual void UpdateHealth()
-	{
-		health.text = m_player.health.current.ToString(healthFormat);
-	}
+            if (Level.instance != null)
+                Level.instance.onPlayerChanged.RemoveListener(OnPlayerChanged);
+        }
 
-	/// <summary>
-	/// Set the stars images enabled state to match a boolean array.
-	/// </summary>
-	protected virtual void UpdateStars(bool[] value)
-	{
-		for (int i = 0; i < starsImages.Length; i++)
-		{
-			starsImages[i].enabled = value[i];
-		}
-	}
+        /// <summary>
+        /// VN: Gắn listener theo dõi máu của player hiện tại.
+        /// </summary>
+        protected virtual void RegisterPlayerHealthListener(Player player)
+        {
+            if (player == null || player.health == null)
+                return;
 
-	/// <summary>
-	/// Called to force an updated on the HUD.
-	/// </summary>
-	public virtual void Refresh()
-	{
-		UpdateCoins(m_score.coins);
-		UpdateRetries(m_game.retries);
-		UpdateHealth();
-		UpdateStars(m_score.stars);
-	}
+            player.health.onChange.AddListener(UpdateHealth);
+        }
+
+        /// <summary>
+        /// VN: Gỡ listener máu của player hiện tại.
+        /// </summary>
+        protected virtual void UnregisterPlayerHealthListener(Player player)
+        {
+            if (player == null || player.health == null)
+                return;
+
+            player.health.onChange.RemoveListener(UpdateHealth);
+        }
+
+        /// <summary>
+        /// VN: Xử lý khi player trong level bị thay đổi.
+        /// </summary>
+        protected virtual void OnPlayerChanged(Player newPlayer)
+        {
+            UnregisterPlayerHealthListener(currentPlayer);
+
+            currentPlayer = newPlayer;
+
+            RegisterPlayerHealthListener(currentPlayer);
+            UpdateHealth();
+        }
+
+        /// <summary>
+        /// VN: Cập nhật text số coin.
+        /// </summary>
+        protected virtual void UpdateCoins(int value)
+        {
+            if (coinsText == null)
+                return;
+
+            coinsText.text = value.ToString(coinsFormat);
+        }
+
+        /// <summary>
+        /// VN: Cập nhật text số lượt chơi lại.
+        /// </summary>
+        protected virtual void UpdateRetries(int value)
+        {
+            if (retriesText == null)
+                return;
+
+            retriesText.text = value.ToString(retriesFormat);
+        }
+
+        /// <summary>
+        /// VN: Cập nhật text máu hiện tại của player.
+        /// </summary>
+        protected virtual void UpdateHealth()
+        {
+            if (healthText == null || currentPlayer == null || currentPlayer.health == null)
+                return;
+
+            healthText.text = currentPlayer.health.current.ToString(healthFormat);
+        }
+
+        /// <summary>
+        /// VN: Cập nhật trạng thái hiển thị sao theo dữ liệu nhận vào.
+        /// </summary>
+        protected virtual void UpdateStars(bool[] values)
+        {
+            if (starImages == null || values == null)
+                return;
+
+            int length = Mathf.Min(starImages.Length, values.Length);
+
+            for (int i = 0; i < length; i++)
+            {
+                if (starImages[i] != null)
+                    starImages[i].enabled = values[i];
+            }
+        }
+
+        /// <summary>
+        /// VN: Cập nhật toàn bộ HUD theo dữ liệu hiện tại.
+        /// </summary>
+        public virtual void Refresh()
+        {
+            if (score != null)
+            {
+                UpdateCoins(score.coins);
+                UpdateStars(score.stars);
+            }
+
+            if (game != null) UpdateRetries(game.retries);
+
+            UpdateHealth();
+        }
+    }
 }
