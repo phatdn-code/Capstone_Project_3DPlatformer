@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using PLAYERTWO.PlatformerProject;
+using UnityEngine;
 
 namespace MiniGame
 {
@@ -10,6 +11,7 @@ namespace MiniGame
 
         public virtual void PublishPlay()
         {
+            Game.LockCursor(true);
             if (OnPlayEvent != null)
             {
                 OnPlayEvent();

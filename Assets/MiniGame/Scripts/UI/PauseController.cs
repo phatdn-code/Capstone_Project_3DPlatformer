@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using PLAYERTWO.PlatformerProject;
+using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 #pragma warning disable CS0618
 
@@ -57,6 +58,8 @@ namespace MiniGame
             Time.timeScale = 0f;
             pausePanelObject.SetActive(true);
 
+            Game.LockCursor(false);
+
             if (_musicController)
             {
                 _musicController.Pause();
@@ -70,6 +73,8 @@ namespace MiniGame
             _paused = false;
             Time.timeScale = 1f;
             pausePanelObject.SetActive(false);
+
+            Game.LockCursor(true);
 
             if (_musicController)
             {
