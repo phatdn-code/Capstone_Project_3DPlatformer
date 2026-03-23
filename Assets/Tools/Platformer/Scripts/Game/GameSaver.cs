@@ -14,8 +14,8 @@ namespace PLAYERTWO.PlatformerProject
 			PlayerPrefs,
 		}
 
-		public Mode mode = Mode.Binary;
-		public string fileName = "save";
+        public Mode mode = Mode.JSON;
+        public string fileName = "save";
 		public string binaryFileExtension = "data";
 
 		/// <summary>

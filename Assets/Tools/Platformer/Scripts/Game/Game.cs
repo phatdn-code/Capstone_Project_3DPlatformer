@@ -98,7 +98,7 @@ namespace PLAYERTWO.PlatformerProject
         public virtual void LoadState(int index, GameData data)
         {
             m_dataIndex = index;
-            m_retries = data.retries;
+            retries = data.retries;
             m_createdAt = DateTime.Parse(data.createdAt);
             m_updatedAt = DateTime.Parse(data.updatedAt);
             m_introStorySeen = data.introStorySeen;
@@ -166,7 +166,7 @@ namespace PLAYERTWO.PlatformerProject
             }
         }
 
-        public virtual void ResetRetries() => m_retries = initialRetries;
+        public virtual void ResetRetries() => retries = initialRetries;
 
         public virtual bool HasAnyBeatenLevel() => levels.Any((level) => level.beatenTimes > 0);
 

@@ -237,6 +237,9 @@ public class SupportGunnerAI : MonoBehaviour
         SetShooting(false);
         SetRunning(true);
 
+        // VN: Kết thúc đợt bắn -> dừng đúng sound bắn.
+        AudioManager.Instance?.StopSound(SoundCategory.VoltitanBoss, 3);
+
         while (Vector3.Distance(transform.position, idlePosition) > 0.2f)
         {
             Vector3 dir = (idlePosition - transform.position).normalized;

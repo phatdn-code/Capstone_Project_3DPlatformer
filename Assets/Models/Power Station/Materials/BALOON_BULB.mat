@@ -142,7 +142,7 @@ Material:
     - _AdvancedDissolveCutoutGeometricXYZSpace: 0
     - _AdvancedDissolveCutoutGeometricXYZStyle: 0
     - _AdvancedDissolveCutoutStandardBaseInvert: 0
-    - _AdvancedDissolveCutoutStandardClip: 0.058
+    - _AdvancedDissolveCutoutStandardClip: 1
     - _AdvancedDissolveCutoutStandardMap1Channel: 3
     - _AdvancedDissolveCutoutStandardMap1Intensity: 1
     - _AdvancedDissolveCutoutStandardMap1Invert: 0
@@ -211,7 +211,7 @@ Material:
     m_Colors:
     - _AdvancedDissolveBakedKeywords: {r: 0, g: 0, b: 0, a: 0}
     - _AdvancedDissolveCutoutGeometric1Normal: {r: 0, g: -1.0000005, b: 0, a: 0}
-    - _AdvancedDissolveCutoutGeometric1Position: {r: 0, g: 1.0000005, b: -0.00000047683716,
+    - _AdvancedDissolveCutoutGeometric1Position: {r: 0, g: 25, b: -0.00000047683716,
         a: 0}
     - _AdvancedDissolveCutoutGeometric2Normal: {r: 1, g: 0, b: 0, a: 0}
     - _AdvancedDissolveCutoutGeometric2Position: {r: 0, g: 0, b: 0, a: 0}

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
@@ -62,25 +62,32 @@ namespace PLAYERTWO.PlatformerProject
 
 		protected Level m_level => Level.instance;
 
-		/// <summary>
-		/// Resets the Level Score to its default values.
-		/// </summary>
-		public virtual void ResetScore()
-		{
-			time = 0;
-			coins = 0;
+        /// <summary>
+        /// Resets the Level Score to its default values.
+        /// </summary>
+        public virtual void ResetScore()
+        {
+            time = 0;
+            coins = 0;
 
-			if (m_level != null)
-			{
-				stars = m_level.GetStarts();
-			}
-		}
+            int defaultStarsCount = Game.instance != null ? Game.instance.starsPerLevel : 3;
 
-		/// <summary>
-		/// Collect a given star from the Stars array.
-		/// </summary>
-		/// <param name="index">The index of the Star you want to collect.</param>
-		public virtual void CollectStar(int index)
+            if (m_level != null)
+            {
+                bool[] loadedStars = m_level.GetStarts();
+                stars = loadedStars != null ? loadedStars : new bool[defaultStarsCount];
+            }
+
+            else stars = new bool[defaultStarsCount];
+
+            OnStarsSet?.Invoke(stars); // VN: Cập nhật lại UI sao sau khi reset score.
+        }
+
+        /// <summary>
+        /// Collect a given star from the Stars array.
+        /// </summary>
+        /// <param name="index">The index of the Star you want to collect.</param>
+        public virtual void CollectStar(int index)
 		{
 			stars[index] = true;
 			OnStarsSet?.Invoke(stars);
@@ -95,32 +102,47 @@ namespace PLAYERTWO.PlatformerProject
 				m_level.BeatLevel(time, coins, stars);
 		}
 
-		protected virtual void Start()
-		{
-			if (m_level != null)
-			{
-				try
-				{
-					stars = m_level.GetStarts();
-				}
-				catch (System.NullReferenceException)
-				{
-					// Fallback to default stars array if GetStarts() fails
-					stars = new bool[3]; // Assuming 3 stars per level
-					Debug.LogWarning("Level.GetStarts() returned null, using default stars array");
-				}
-			}
-			else
-			{
-				// Fallback if m_level is null
-				stars = new bool[3];
-				Debug.LogWarning("Level reference is null, using default stars array");
-			}
+        protected virtual void Start()
+        {
+            int defaultStarsCount = Game.instance != null ? Game.instance.starsPerLevel : 3;
 
-			OnScoreLoaded.Invoke();
-		}
+            if (m_level != null)
+            {
+                try
+                {
+                    bool[] loadedStars = m_level.GetStarts();
 
-		protected virtual void Update()
+                    // VN: Nếu dữ liệu sao bị null hoặc sai số lượng thì dùng mảng mặc định.
+                    if (loadedStars == null || loadedStars.Length != defaultStarsCount)
+                    {
+                        stars = new bool[defaultStarsCount];
+                        Debug.LogWarning("Level.GetStarts() returned invalid data, using default stars array");
+                    }
+                    else stars = loadedStars;
+                }
+
+                catch (System.Exception ex)
+                {
+                    // VN: Nếu có lỗi khi lấy dữ liệu sao thì fallback sang mảng mặc định.
+                    stars = new bool[defaultStarsCount];
+                    Debug.LogWarning($"Failed to load stars data, using default stars array. Error: {ex.Message}");
+                }
+            }
+
+            else
+            {
+                // VN: Nếu chưa có Level thì vẫn tạo mảng sao mặc định để tránh null.
+                stars = new bool[defaultStarsCount];
+                Debug.LogWarning("Level reference is null, using default stars array");
+            }
+
+            // VN: Phát dữ liệu ban đầu cho UI ngay khi LevelScore khởi tạo xong.
+            OnCoinsSet?.Invoke(coins);
+            OnStarsSet?.Invoke(stars);
+            OnScoreLoaded?.Invoke();
+        }
+
+        protected virtual void Update()
 		{
 			if (!stopTime)
 			{

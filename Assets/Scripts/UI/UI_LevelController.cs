@@ -10,7 +10,10 @@ public class UI_LevelController : MonoBehaviour
 	// protected LevelScore m_score => LevelScore.instance;
 	protected LevelPauser m_pauser => LevelPauser.instance;
 
-	public virtual void Pause(bool value) => m_pauser.Pause(value);
+	public virtual void Pause(bool value)
+	{
+		m_pauser.Pause(value);
+	}
 
 	public virtual void Setting(bool value)
 	{
@@ -19,7 +22,7 @@ public class UI_LevelController : MonoBehaviour
 			settingScreen.SetActive(true);
 			settingScreen.Show();
 		}
-		else
+		else if(settingScreen.gameObject.activeSelf)
 		{
 			settingScreen.Hide();
 		}

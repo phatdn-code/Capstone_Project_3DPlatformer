@@ -1,8 +1,235 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using PLAYERTWO.PlatformerProject;
+
+namespace PLAYERTWO.PlatformerProject
+{
+    public class MainMenuTransition : MonoBehaviour
+    {
+        #region Constants
+        private const int FixedSlotIndex = 0;
+
+        private static readonly int ProgressId = Shader.PropertyToID("_Progress");
+        private static readonly int PanelCountId = Shader.PropertyToID("_PanelCount");
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+        #endregion
+
+        #region Inspector
+        [Header("UI")]
+        [SerializeField] private Image transitionImage;
+        [SerializeField, Min(1)] private int panelCount = 3;
+        [SerializeField] private Color panelColor = Color.black;
+        [SerializeField, Min(0f)] private float duration = 0.8f;
+
+        [Header("Scene")]
+        [SerializeField] private string storySceneName;
+        [SerializeField] private string selectMapSceneName;
+        #endregion
+
+        #region Runtime
+        private Material runtimeMaterial;
+        private Coroutine transitionCoroutine;
+        private bool isTransitioning;
+        #endregion
+
+        // Khởi tạo material runtime riêng để tránh sửa trực tiếp material gốc.
+        private void Awake()
+        {
+            InitializeRuntimeMaterial();
+        }
+
+        // Dọn material runtime khi object bị huỷ để tránh rò rỉ bộ nhớ.
+        private void OnDestroy()
+        {
+            ReleaseRuntimeMaterial();
+        }
+
+        // Bắt đầu hiệu ứng chuyển cảnh từ main menu.
+        public void StartTransition()
+        {
+            if (isTransitioning)
+                return;
+
+            if (!HasGameInstance())
+                return;
+
+            EnsureSaveDataLoaded();
+
+            if (!HasRuntimeMaterial())
+            {
+                LoadTargetScene();
+                return;
+            }
+
+            transitionCoroutine = StartCoroutine(TransitionRoutine());
+        }
+
+        // Chạy hiệu ứng tăng progress của shader rồi load scene đích.
+        private IEnumerator TransitionRoutine()
+        {
+            isTransitioning = true;
+
+            if (duration <= 0f)
+            {
+                CompleteTransitionImmediately();
+                yield break;
+            }
+
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+
+                float normalizedTime = Mathf.Clamp01(elapsedTime / duration);
+                float smoothTime = SmoothStep(normalizedTime);
+
+                SetTransitionProgress(smoothTime);
+                yield return null;
+            }
+
+            CompleteTransition();
+        }
+
+        // Khởi tạo material runtime và áp thông số ban đầu cho shader.
+        private void InitializeRuntimeMaterial()
+        {
+            if (transitionImage == null)
+            {
+                Debug.LogWarning("[MainMenuTransition] Transition image is null.");
+                return;
+            }
+
+            if (transitionImage.material == null)
+            {
+                Debug.LogWarning("[MainMenuTransition] Transition image material is null.");
+                return;
+            }
+
+            runtimeMaterial = new Material(transitionImage.material);
+            transitionImage.material = runtimeMaterial;
+
+            ApplyMaterialSettings();
+        }
+
+        // Huỷ material runtime đã clone để tránh bị giữ lại trong bộ nhớ.
+        private void ReleaseRuntimeMaterial()
+        {
+            if (runtimeMaterial == null)
+                return;
+
+            Destroy(runtimeMaterial);
+            runtimeMaterial = null;
+        }
+
+        // Áp toàn bộ giá trị cấu hình lên material của hiệu ứng.
+        private void ApplyMaterialSettings()
+        {
+            runtimeMaterial.SetFloat(ProgressId, 0f);
+            runtimeMaterial.SetFloat(PanelCountId, panelCount);
+            runtimeMaterial.SetColor(ColorId, panelColor);
+        }
+
+        // Cập nhật giá trị progress cho shader transition.
+        private void SetTransitionProgress(float value)
+        {
+            if (runtimeMaterial == null)
+                return;
+
+            runtimeMaterial.SetFloat(ProgressId, value);
+        }
+
+        // Đảm bảo save data đã được load trước khi xác định scene cần vào.
+        private void EnsureSaveDataLoaded()
+        {
+            if (!Game.instance.dataLoaded)
+                Game.instance.LoadOrCreateState(FixedSlotIndex);
+        }
+
+        // Kiểm tra Game.instance có tồn tại hay không.
+        private bool HasGameInstance()
+        {
+            if (Game.instance != null)
+                return true;
+
+            Debug.LogWarning("[MainMenuTransition] Game.instance is null.");
+            return false;
+        }
+
+        // Kiểm tra đã có material runtime để chạy hiệu ứng hay chưa.
+        private bool HasRuntimeMaterial()
+        {
+            return runtimeMaterial != null;
+        }
+
+        // Hoàn tất ngay hiệu ứng khi duration <= 0.
+        private void CompleteTransitionImmediately()
+        {
+            SetTransitionProgress(1f);
+            FinishTransitionState();
+            LoadTargetScene();
+        }
+
+        // Hoàn tất hiệu ứng ở trạng thái cuối rồi load scene.
+        private void CompleteTransition()
+        {
+            SetTransitionProgress(1f);
+            FinishTransitionState();
+            LoadTargetScene();
+        }
+
+        // Reset trạng thái runtime sau khi hiệu ứng kết thúc.
+        private void FinishTransitionState()
+        {
+            isTransitioning = false;
+            transitionCoroutine = null;
+        }
+
+        // Trả về scene cần load dựa trên trạng thái intro story.
+        private string GetTargetScene()
+        {
+            if (Game.instance != null &&
+                Game.instance.dataLoaded &&
+                Game.instance.introStorySeen)
+            {
+                return selectMapSceneName;
+            }
+
+            return storySceneName;
+        }
+
+        // Load scene đích sau khi kiểm tra dữ liệu hợp lệ.
+        private void LoadTargetScene()
+        {
+            if (GameLoader.instance == null)
+            {
+                Debug.LogWarning("[MainMenuTransition] GameLoader.instance is null.");
+                return;
+            }
+
+            string targetScene = GetTargetScene();
+
+            if (string.IsNullOrWhiteSpace(targetScene))
+            {
+                Debug.LogWarning("[MainMenuTransition] Target scene is empty.");
+                return;
+            }
+
+            GameLoader.instance.Load(targetScene);
+        }
+
+        // Làm mượt chuyển động để hiệu ứng nhìn tự nhiên hơn.
+        private float SmoothStep(float t)
+        {
+            return t * t * (3f - 2f * t);
+        }
+    }
+}
+
+
+/*using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -166,75 +393,4 @@ namespace PLAYERTWO.PlatformerProject
         }
     }
 }
-
-// using UnityEngine;
-// using UnityEngine.UI;
-// using UnityEngine.SceneManagement;
-// using System.Collections;
-
-// public class MainMenuTransition : MonoBehaviour
-// {
-//     [Header("Cài đặt UI")]
-//     public RectTransform[] rectangles; // Kéo 3 Image vào đây
-//     public float duration = 0.8f;      // Thời gian di chuyển (giây)
-//     public string nextSceneName;       // Tên scene muốn chuyển đến
-
-//     [ContextMenu("Bắt đầu chuyển cảnh")]
-//     public void StartTransition()
-//     {
-//         StartCoroutine(MoveAndFadeRoutine());
-//     }
-
-//     IEnumerator MoveAndFadeRoutine()
-/*     {
-        float elapsedTime = 0f;
-
-        // Lưu vị trí bắt đầu
-        Vector2[] startPositions = new Vector2[rectangles.Length];
-        for (int i = 0; i < rectangles.Length; i++)
-        {
-            startPositions[i] = rectangles[i].anchoredPosition;
-        }
-
-        while (elapsedTime < duration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / duration;
-
-            // Làm mượt chuyển động (SmoothStep)
-            float smoothT = t * t * (3f - 2f * t);
-
-            for (int i = 0; i < rectangles.Length; i++)
-            {
-                // 1. Di chuyển vị trí X về 0
-                float newX = Mathf.Lerp(startPositions[i].x, 0, smoothT);
-                rectangles[i].anchoredPosition = new Vector2(newX, startPositions[i].y);
-
-                // 2. Hiệu ứng Fade In (từ 0 lên 1)
-                if (rectangles[i].TryGetComponent<Image>(out Image img))
-                {
-                    Color c = img.color;
-                    c.a = Mathf.Lerp(0f, 1f, t); // Fade có thể dùng t trực tiếp hoặc smoothT tùy ý bạn
-                    img.color = c;
-                }
-            }
-
-            yield return null;
-        }
-
-        // Đảm bảo trạng thái cuối cùng chuẩn xác
-        for (int i = 0; i < rectangles.Length; i++)
-        {
-            rectangles[i].anchoredPosition = new Vector2(0, rectangles[i].anchoredPosition.y);
-            if (rectangles[i].TryGetComponent<Image>(out Image img))
-                {
-                    Color c = img.color;
-                    c.a = 1f;
-                    img.color = c;
-                }
-        }
-
-        // Chuyển Scene
-        // SceneManager.LoadScene(nextSceneName);
-    }
-} */
+*/
