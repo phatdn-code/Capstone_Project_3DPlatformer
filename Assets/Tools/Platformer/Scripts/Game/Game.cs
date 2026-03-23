@@ -44,8 +44,7 @@ namespace PLAYERTWO.PlatformerProject
 
         //==================================================
         // VN: Lưu tạm điểm quay lại khi chuyển scene
-        protected string m_pendingReturnScene;
-        protected string m_pendingReturnPointId;
+        protected Dictionary<string, string> m_pendingReturnPoints = new();
         //==================================================
 
         public int retries
@@ -295,7 +294,7 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Ghi nhớ scene map và ID điểm quay lại để khi quay về sẽ spawn đúng portal.
+        /// VN: Lưu điểm quay lại theo từng scene, không ghi đè scene khác.
         /// </summary>
         public virtual void SetPendingReturnPoint(string sceneName, string pointId)
         {
@@ -305,12 +304,11 @@ namespace PLAYERTWO.PlatformerProject
             if (string.IsNullOrEmpty(pointId))
                 return;
 
-            m_pendingReturnScene = sceneName;
-            m_pendingReturnPointId = pointId;
+            m_pendingReturnPoints[sceneName] = pointId;
         }
 
         /// <summary>
-        /// VN: Lấy ID điểm quay lại nếu scene hiện tại đúng scene đã lưu.
+        /// VN: Lấy và xóa pending return point của đúng scene hiện tại.
         /// </summary>
         public virtual bool TryConsumePendingReturnPoint(string currentScene, out string pointId)
         {
@@ -319,44 +317,30 @@ namespace PLAYERTWO.PlatformerProject
             if (string.IsNullOrEmpty(currentScene))
                 return false;
 
-            if (string.IsNullOrEmpty(m_pendingReturnScene))
+            if (!m_pendingReturnPoints.TryGetValue(currentScene, out pointId))
                 return false;
 
-            if (string.IsNullOrEmpty(m_pendingReturnPointId))
-                return false;
-
-            if (m_pendingReturnScene != currentScene)
-                return false;
-
-            pointId = m_pendingReturnPointId;
-
-            m_pendingReturnScene = null;
-            m_pendingReturnPointId = null;
-
+            m_pendingReturnPoints.Remove(currentScene);
             return true;
         }
 
         /// <summary>
-        /// VN: Xóa dữ liệu điểm quay lại đang chờ.
+        /// VN: Xóa toàn bộ pending return point.
         /// </summary>
         public virtual void ClearPendingReturnPoint()
         {
-            m_pendingReturnScene = null;
-            m_pendingReturnPointId = null;
+            m_pendingReturnPoints.Clear();
         }
 
         /// <summary>
-        /// VN: Chỉ xóa điểm quay lại đang chờ nếu nó thuộc đúng scene được truyền vào.
+        /// VN: Xóa pending return point của đúng scene được truyền vào.
         /// </summary>
         public virtual void ClearPendingReturnPoint(string sceneName)
         {
             if (string.IsNullOrEmpty(sceneName))
                 return;
 
-            if (m_pendingReturnScene != sceneName)
-                return;
-
-            ClearPendingReturnPoint();
+            m_pendingReturnPoints.Remove(sceneName);
         }
     }
 }
