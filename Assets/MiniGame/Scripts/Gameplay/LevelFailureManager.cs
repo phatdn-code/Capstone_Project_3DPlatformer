@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using PLAYERTWO.PlatformerProject;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.ImageEffects;
@@ -58,6 +59,7 @@ namespace MiniGame
         {
             if (showLevelFailMenu)
             {
+                Game.LockCursor(false);
                 // chạy hiệu ứng fade + slow motion
                 StartCoroutine(FadeOutCoroutine());
             }
