@@ -565,6 +565,18 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
+        /// VN: Chốt score hiện tại của scene vào dữ liệu game và save trước khi đổi scene.
+        /// </summary>
+        private void SaveCurrentLevelProgressBeforeLoad()
+        {
+            if (LevelScore.instance != null)
+                LevelScore.instance.Consolidate();
+
+            if (Game.instance != null && Game.instance.dataLoaded)
+                Game.instance.RequestSaving();
+        }
+
+        /// <summary>
         /// VN: Nếu bật cờ này thì xóa return point đang chờ của scene đích
         /// và reset các minigame ID đã cấu hình.
         /// </summary>
@@ -595,6 +607,10 @@ namespace PLAYERTWO.PlatformerProject
 
             ClearTargetSceneReturnPointIfNeeded();
             RememberReturnPoint();
+
+            // VN: Lưu sao/coin hiện tại trước khi sang scene khác.
+            SaveCurrentLevelProgressBeforeLoad();
+
             LoadTargetScene();
 
             AudioManager.Instance.PlaySound(SoundCategory.Normal, 1);

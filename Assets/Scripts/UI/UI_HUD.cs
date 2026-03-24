@@ -158,20 +158,41 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Cập nhật trạng thái hiển thị sao theo dữ liệu nhận vào.
+        /// VN: Cập nhật sao HUD theo tổng số sao đã đạt, hiển thị từ trái sang phải.
         /// </summary>
         protected virtual void UpdateStars(bool[] values)
         {
-            if (starImages == null || values == null)
+            if (starImages == null || starImages.Length == 0)
                 return;
 
-            int length = Mathf.Min(starImages.Length, values.Length);
+            int collectedStars = GetCollectedStarCount(values);
 
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < starImages.Length; i++)
             {
-                if (starImages[i] != null)
-                    starImages[i].enabled = values[i];
+                if (starImages[i] == null)
+                    continue;
+
+                starImages[i].enabled = i < collectedStars;
             }
+        }
+
+        /// <summary>
+        /// VN: Đếm tổng số sao đã thu thập.
+        /// </summary>
+        protected virtual int GetCollectedStarCount(bool[] values)
+        {
+            if (values == null)
+                return 0;
+
+            int count = 0;
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i])
+                    count++;
+            }
+
+            return count;
         }
 
         /// <summary>
