@@ -60,8 +60,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   starsPerLevel: 3
-  initialRetries: 3
-  levelExitScene: MainMenu
+  initialRetries: 2
+  levelExitScene: MapSelect
   levels:
   - name: World Map
     description: The hub scene where players choose stages, track progress, and begin
