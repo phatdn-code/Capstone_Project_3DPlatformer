@@ -200,7 +200,7 @@ public class DungeonGenerator : MonoBehaviour
         GameObject room = null;
         if (puzzleRoomCount == 0)
         {
-            // Chọn ngẫu nhiên 1 phòng trong roomList để đặt minigame room
+            room = minigameRoomObjArray[minigameRoomCount];
             minigameRoomCount--;
         }
         else if (minigameRoomCount == 0)
@@ -218,7 +218,7 @@ public class DungeonGenerator : MonoBehaviour
             }
             else
             {
-                // Chọn ngẫu nhiên 1 phòng trong roomList để đặt minigame room
+                room = minigameRoomObjArray[minigameRoomCount];
                 minigameRoomCount--;
             }
         }
