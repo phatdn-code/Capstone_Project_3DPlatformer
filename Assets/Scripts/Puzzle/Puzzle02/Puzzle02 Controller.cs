@@ -14,6 +14,8 @@ public class Puzzle02Controller : MonoBehaviour
     [SerializeField] private GameObject _objPuzzle02;
     [SerializeField] private GameObject _puzzleCanvas;
     [SerializeField] private GameObject _objBlock;
+    [SerializeField] private GameObject _objVFX;
+    [SerializeField] private Transform _spawnPoint;
 
     [SerializeField, Min(3)] private int _puzzleSize = 3;
 
@@ -132,6 +134,8 @@ public class Puzzle02Controller : MonoBehaviour
 
     private void OnPuzzleCompleted()
     {
+        GameObject vfx = Instantiate(_objVFX, _spawnPoint.position, Quaternion.identity);
+        vfx.GetComponent<ParticleSystem>().Play();
         _puzzleSlots[_emptySlot.x, _emptySlot.y].SetPiece(_removedPiece);
         StartCoroutine(WaitOneSecondForDisiablePuzzlePanel());
         StartCoroutine(WaitOneSecondForDisiablePuzzleObject());
