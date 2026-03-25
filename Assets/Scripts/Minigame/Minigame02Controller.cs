@@ -20,27 +20,15 @@ public class Minigame02Controller : MonoBehaviour
 
         }
     }
-
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        if(IsRoomCleared())
+        if (starCollider.enabled == false)
         {
             MinigameCleared();
         }
     }
     
-    private bool IsRoomCleared()
-    {
-        if(starCollider.enabled == false)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
     private void MinigameCleared()
     {
         roomManager.isRoomCleared = true;
