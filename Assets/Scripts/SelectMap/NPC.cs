@@ -135,6 +135,8 @@ namespace PLAYERTWO.PlatformerProject
         private bool _isPlayingCredits;
         private bool _isCreditsFinished;
 
+        private bool _cachedCanPauseBeforeCredits;
+
         #endregion
 
         #region Unity Events
@@ -283,6 +285,8 @@ namespace PLAYERTWO.PlatformerProject
 
             HideBubbleForCredits();
 
+            DisablePauseForCredits();
+
             if (PlayerHub.Instance != null)
                 PlayerHub.Instance.LockGameplay(true, freezeCameraDuringCredits);
 
@@ -300,6 +304,8 @@ namespace PLAYERTWO.PlatformerProject
 
             if (PlayerHub.Instance != null)
                 PlayerHub.Instance.LockGameplay(false, freezeCameraDuringCredits);
+
+            RestorePauseAfterCredits();
 
             _isPlayingCredits = false;
             _creditsCoroutine = null;
@@ -339,6 +345,31 @@ namespace PLAYERTWO.PlatformerProject
             Fader.instance.FadeIn(() => finished = true);
 
             yield return new WaitUntil(() => finished);
+        }
+
+        /// <summary>
+        /// Khóa chức năng pause trong lúc chạy credits.
+        /// </summary>
+        private void DisablePauseForCredits()
+        {
+            if (LevelPauser.instance == null)
+                return;
+
+            _cachedCanPauseBeforeCredits = LevelPauser.instance.canPause;
+            LevelPauser.instance.Pause(false);
+            LevelPauser.instance.canPause = false;
+        }
+
+        /// <summary>
+        /// Trả lại trạng thái pause sau khi credits kết thúc.
+        /// </summary>
+        private void RestorePauseAfterCredits()
+        {
+            if (LevelPauser.instance == null)
+                return;
+
+            LevelPauser.instance.Pause(false);
+            LevelPauser.instance.canPause = _cachedCanPauseBeforeCredits;
         }
 
         #endregion
