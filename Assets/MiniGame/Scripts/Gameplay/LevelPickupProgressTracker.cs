@@ -54,7 +54,7 @@ namespace MiniGame
             _numPickupsTotal = pickups.Length;
 
             // ẩn UI lúc bắt đầu
-            if (pickupIconImage) pickupIconImage.enabled = false;
+            //if (pickupIconImage) pickupIconImage.enabled = false;
             if (pickupsText) pickupsText.enabled = false;
 
             UpdatePickupText();
@@ -179,12 +179,12 @@ namespace MiniGame
         /// </summary>
         private void ShowPickupCounter()
         {
-            if (pickupIconImage)
-            {
-                pickupIconImage.enabled = true;
-                pickupIconImage.canvasRenderer.SetAlpha(0f);
-                pickupIconImage.CrossFadeAlpha(1f, 1f, false);
-            }
+            //if (pickupIconImage)
+            //{
+            //    pickupIconImage.enabled = true;
+            //    pickupIconImage.canvasRenderer.SetAlpha(0f);
+            //    pickupIconImage.CrossFadeAlpha(1f, 1f, false);
+            //}
 
             if (pickupsText)
             {
