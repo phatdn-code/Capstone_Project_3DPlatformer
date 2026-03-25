@@ -50,6 +50,9 @@ namespace PLAYERTWO.PlatformerProject
         private const string k_mouseDeviceName = "Mouse";
         private const float k_jumpBuffer = 0.15f;
 
+        private bool m_isGameplayLocked = false;
+        public bool IsGameplayLocked => m_isGameplayLocked;
+
         #endregion
 
         //─────────────────────────────────────────────
@@ -79,7 +82,7 @@ namespace PLAYERTWO.PlatformerProject
         {
             EnsureCamera();
 
-            if (m_jump.WasPressedThisFrame())
+            if (!m_isGameplayLocked && m_jump.WasPressedThisFrame())
                 m_lastJumpTime = Time.time;
         }
 
@@ -116,6 +119,9 @@ namespace PLAYERTWO.PlatformerProject
 
         public virtual Vector3 GetMovementDirection()
         {
+            if (m_isGameplayLocked || !m_canMove)
+                return Vector3.zero;
+
             if (Time.time < m_movementDirectionUnlockTime)
                 return Vector3.zero;
 
@@ -211,29 +217,36 @@ namespace PLAYERTWO.PlatformerProject
                    m_look.activeControl.device.name.Equals(k_mouseDeviceName);
         }
 
-        public virtual bool GetRun() => m_run.IsPressed();
-        public virtual bool GetRunUp() => m_run.WasReleasedThisFrame();
-        public virtual bool GetJumpUp() => m_jump.WasReleasedThisFrame();
-        public virtual bool GetSwimUpward() => m_swimUpward.IsPressed();
-        public virtual bool GetDive() => m_dive.IsPressed();
-        public virtual bool GetSpinDown() => m_spin.WasPressedThisFrame();
-        public virtual bool GetPickAndDropDown() => m_pickAndDrop.WasPressedThisFrame();
-        public virtual bool GetCrouchAndCraw() => m_crouch.IsPressed();
-        public virtual bool GetAirDiveDown() => m_airDive.WasPressedThisFrame();
-        public virtual bool GetStompDown() => m_stomp.WasPressedThisFrame();
-        public virtual bool GetReleaseLedgeDown() => m_releaseLedge.WasPressedThisFrame();
-        public virtual bool GetGlide() => m_glide.IsPressed();
-        public virtual bool GetDashDown() => m_dash.WasPressedThisFrame();
-        public virtual bool GetGrindBrake() => m_grindBrake.IsPressed();
-        public virtual bool GetPauseDown() => m_pause.WasPressedThisFrame();
+        public virtual bool GetRun() => !m_isGameplayLocked && m_run.IsPressed();
+        public virtual bool GetRunUp() => !m_isGameplayLocked && m_run.WasReleasedThisFrame();
+        public virtual bool GetJumpUp() => !m_isGameplayLocked && m_jump.WasReleasedThisFrame();
+        public virtual bool GetSwimUpward() => !m_isGameplayLocked && m_swimUpward.IsPressed();
+        public virtual bool GetDive() => !m_isGameplayLocked && m_dive.IsPressed();
+        public virtual bool GetSpinDown() => !m_isGameplayLocked && m_spin.WasPressedThisFrame();
+        public virtual bool GetPickAndDropDown() => !m_isGameplayLocked && m_pickAndDrop.WasPressedThisFrame();
+        public virtual bool GetCrouchAndCraw() => !m_isGameplayLocked && m_crouch.IsPressed();
+        public virtual bool GetAirDiveDown() => !m_isGameplayLocked && m_airDive.WasPressedThisFrame();
+        public virtual bool GetStompDown() => !m_isGameplayLocked && m_stomp.WasPressedThisFrame();
+        public virtual bool GetReleaseLedgeDown() => !m_isGameplayLocked && m_releaseLedge.WasPressedThisFrame();
+        public virtual bool GetGlide() => !m_isGameplayLocked && m_glide.IsPressed();
+        public virtual bool GetDashDown() => !m_isGameplayLocked && m_dash.WasPressedThisFrame();
+        public virtual bool GetGrindBrake() => !m_isGameplayLocked && m_grindBrake.IsPressed();
+        public virtual bool GetPauseDown() => !m_isGameplayLocked && m_pause.WasPressedThisFrame();
 
         public virtual bool GetJumpDown()
         {
+            if (m_isGameplayLocked)
+            {
+                m_lastJumpTime = null;
+                return false;
+            }
+
             if (m_lastJumpTime != null && Time.time - m_lastJumpTime < k_jumpBuffer)
             {
                 m_lastJumpTime = null;
                 return true;
             }
+
             return false;
         }
 
@@ -276,6 +289,28 @@ namespace PLAYERTWO.PlatformerProject
             m_canMove = false;
             yield return new WaitForSeconds(duration);
             m_canMove = true;
+        }
+
+
+        /// <summary>
+        /// Khóa riêng phần gameplay nhưng vẫn giữ action asset hoạt động
+        /// để hệ thống cutscene/credits vẫn đọc được phím raw.
+        /// </summary>
+        public void LockGameplayInputs(bool locked)
+        {
+            m_isGameplayLocked = locked;
+
+            if (locked)
+                m_lastJumpTime = null;
+        }
+
+        /// <summary>
+        /// Đọc trạng thái đang giữ phím Jump (Space) mà không bị chặn bởi gameplay lock.
+        /// Dùng cho credits/cutscene.
+        /// </summary>
+        public bool GetJumpHeldRaw()
+        {
+            return m_jump != null && m_jump.IsPressed();
         }
 
         #endregion

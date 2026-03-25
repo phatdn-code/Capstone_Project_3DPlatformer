@@ -24,12 +24,7 @@ namespace PLAYERTWO.PlatformerProject
 
         [TitleGroup("Dialogue")]
         [SerializeField, ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true)]
-        private string[] conversations =
-        {
-            "Xin chào!",
-            "Rất vui được gặp bạn.",
-            "Chúc bạn có một hành trình vui vẻ."
-        };
+        private string[] conversations = { };
 
         [TitleGroup("Dialogue")]
         [SerializeField]
@@ -43,6 +38,12 @@ namespace PLAYERTWO.PlatformerProject
 
         [TitleGroup("Dialogue"), SerializeField, MinValue(0.01f)]
         private float textFadeDuration = 0.3f;
+
+        [TitleGroup("Credits"), SerializeField, Required]
+        private CreditsPanelScroller creditsPanelScroller;
+
+        [TitleGroup("Credits"), SerializeField]
+        private bool freezeCameraDuringCredits = true;
 
         #endregion
 
@@ -129,6 +130,11 @@ namespace PLAYERTWO.PlatformerProject
         private Coroutine _canvasScaleCoroutine;
         private Coroutine _dialogueCoroutine;
 
+        private Transform _playerInTrigger;
+        private Coroutine _creditsCoroutine;
+        private bool _isPlayingCredits;
+        private bool _isCreditsFinished;
+
         #endregion
 
         #region Unity Events
@@ -140,6 +146,21 @@ namespace PLAYERTWO.PlatformerProject
         {
             CacheReferences();
             InitializeVisualState();
+        }
+
+        /// <summary>
+        /// Khi đang chạy credits thì giữ Space sẽ tăng tốc.
+        /// </summary>
+        protected virtual void Update()
+        {
+            if (!_isPlayingCredits || creditsPanelScroller == null)
+                return;
+
+            if (PlayerHub.Instance == null || PlayerHub.Instance.InputManager == null)
+                return;
+
+            bool isHoldingJump = PlayerHub.Instance.InputManager.GetJumpHeldRaw();
+            creditsPanelScroller.SetFastMode(isHoldingJump);
         }
 
         /// <summary>
@@ -164,6 +185,9 @@ namespace PLAYERTWO.PlatformerProject
         /// </summary>
         protected virtual void OnTriggerStay(Collider other)
         {
+            if (_isPlayingCredits)
+                return;
+
             if (!other.CompareTag(GameTags.Player))
                 return;
 
@@ -173,9 +197,13 @@ namespace PLAYERTWO.PlatformerProject
                 RotateModelTowardsPlayer(other.transform);
                 ShowBubble();
             }
-
             else if (Time.time - _lastValidShowTime > hideGraceDuration)
+            {
                 HideBubbleTemporarily();
+            }
+
+            _playerInTrigger = other.transform;
+            TryStartCredits();
         }
 
         /// <summary>
@@ -185,6 +213,9 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (!other.CompareTag(GameTags.Player))
                 return;
+
+            if (_playerInTrigger == other.transform)
+                _playerInTrigger = null;
 
             HideBubbleCompletely();
         }
@@ -207,6 +238,107 @@ namespace PLAYERTWO.PlatformerProject
         public virtual void Hide()
         {
             HideBubbleCompletely();
+        }
+
+        #endregion
+
+        #region Credits
+
+        /// <summary>
+        /// Kiểm tra điều kiện và bắt đầu sequence credits.
+        /// </summary>
+        private void TryStartCredits()
+        {
+            if (_isPlayingCredits)
+                return;
+
+            if (_playerInTrigger == null)
+                return;
+
+            if (!_isBubbleVisible)
+                return;
+
+            if (creditsPanelScroller == null)
+                return;
+
+            if (PlayerHub.Instance == null || PlayerHub.Instance.InputManager == null)
+                return;
+
+            if (!PlayerHub.Instance.InputManager.GetStompDown())
+                return;
+
+            if (_creditsCoroutine != null)
+                StopCoroutine(_creditsCoroutine);
+
+            _creditsCoroutine = StartCoroutine(CreditsSequenceRoutine());
+        }
+
+        /// <summary>
+        /// Sequence: fade tối màn hình -> chạy credits -> fade sáng lại.
+        /// </summary>
+        private IEnumerator CreditsSequenceRoutine()
+        {
+            _isPlayingCredits = true;
+            _isCreditsFinished = false;
+
+            HideBubbleForCredits();
+
+            if (PlayerHub.Instance != null)
+                PlayerHub.Instance.LockGameplay(true, freezeCameraDuringCredits);
+
+            yield return FadeOutRoutine();
+
+            creditsPanelScroller.ShowPanel();
+            creditsPanelScroller.PlayFromStart(OnCreditsFinished);
+
+            yield return new WaitUntil(() => _isCreditsFinished);
+
+            creditsPanelScroller.SetFastMode(false);
+            creditsPanelScroller.HidePanel();
+
+            yield return FadeInRoutine();
+
+            if (PlayerHub.Instance != null)
+                PlayerHub.Instance.LockGameplay(false, freezeCameraDuringCredits);
+
+            _isPlayingCredits = false;
+            _creditsCoroutine = null;
+        }
+
+        /// <summary>
+        /// Callback khi credits chạy xong.
+        /// </summary>
+        private void OnCreditsFinished()
+        {
+            _isCreditsFinished = true;
+        }
+
+        /// <summary>
+        /// Chờ fader tối xong.
+        /// </summary>
+        private IEnumerator FadeOutRoutine()
+        {
+            if (Fader.instance == null)
+                yield break;
+
+            bool finished = false;
+            Fader.instance.FadeOut(() => finished = true);
+
+            yield return new WaitUntil(() => finished);
+        }
+
+        /// <summary>
+        /// Chờ fader sáng lại xong.
+        /// </summary>
+        private IEnumerator FadeInRoutine()
+        {
+            if (Fader.instance == null)
+                yield break;
+
+            bool finished = false;
+            Fader.instance.FadeIn(() => finished = true);
+
+            yield return new WaitUntil(() => finished);
         }
 
         #endregion
@@ -393,6 +525,24 @@ namespace PLAYERTWO.PlatformerProject
             ResetDialogue(clearText: true);
 
             _hasPlayedGreetingThisTrigger = false;
+        }
+
+        /// <summary>
+        /// Ẩn bubble để chạy credits nhưng không reset tiến trình hội thoại.
+        /// </summary>
+        protected virtual void HideBubbleForCredits()
+        {
+            if (_isBubbleVisible)
+            {
+                _isBubbleVisible = false;
+
+                PlayBubbleCanvasScale(
+                    _bubbleCanvas != null ? _bubbleCanvas.transform.localScale : Vector3.zero,
+                    Vector3.zero
+                );
+            }
+
+            StopDialogue();
         }
 
         #endregion

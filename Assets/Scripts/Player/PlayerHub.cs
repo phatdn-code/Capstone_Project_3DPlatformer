@@ -63,6 +63,19 @@ namespace PLAYERTWO.PlatformerProject
 
         #region === Public API ===
 
+        /// <summary>
+        /// Khóa riêng gameplay để player không di chuyển/nhảy/tấn công,
+        /// nhưng vẫn cho phép hệ thống credits đọc phím raw từ InputManager.
+        /// </summary>
+        public void LockGameplay(bool locked, bool freezeCamera = true)
+        {
+            if (InputManager != null)
+                InputManager.LockGameplayInputs(locked);
+
+            if (freezeCamera && m_camera != null)
+                m_camera.SetFreeze(locked);
+        }
+
         /// <summary>Khóa/mở toàn bộ input + freeze camera (cutscene/pause/death...).</summary>
         public void LockPlayer(bool locked)
         {
