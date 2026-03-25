@@ -23,6 +23,9 @@ TagManager:
   - Boss
   - ColliderChecking
   - DungeonController
+  - FxTemporaire
+  - TakeOffPlatform
+  - LevelBounds
   layers:
   - Default
   - TransparentFX
@@ -41,7 +44,7 @@ TagManager:
   - CombatZone
   - Shield
   - Ground
-  - 
+  - Boid
   - 
   - 
   - 
