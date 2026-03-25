@@ -47,7 +47,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060e050e653e9c3488ae9d330ca6b8bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: Hello World
+  text: '<color=#222222><size=130%><b>Welcome to the World Map!!!</b></size></color>
+
+
+    Move
+    to a portal to choose a level.
+
+
+    If a portal is unlocked, it will react when
+    you get close.
+
+
+    Stand inside the portal and press <color=#E38B2C><size=120%><b>E</b></size></color>
+    to enter.
+
+
+    Clear levels to unlock new areas.'
   viewAngle: 90
   canvas: {fileID: 273281686218419842}
   uiText: {fileID: 1079944775166532644}
@@ -90,7 +105,7 @@ GameObject:
   - component: {fileID: 273281685988390592}
   - component: {fileID: 273281685988390654}
   - component: {fileID: 273281685988390593}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,7 +181,7 @@ GameObject:
   - component: {fileID: 273281686218419842}
   - component: {fileID: 273281686218419845}
   - component: {fileID: 273281686218419844}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -256,7 +271,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 131063
 --- !u!1 &273281686422311216
 GameObject:
   m_ObjectHideFlags: 0
@@ -268,7 +283,7 @@ GameObject:
   - component: {fileID: 273281686422311217}
   - component: {fileID: 273281686422311215}
   - component: {fileID: 1079944775166532644}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -429,6 +444,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8841137340028315081}
   - {fileID: 306347320668053361}
   m_Father: {fileID: 273281685853183524}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -523,6 +539,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b4c83167e459c1947b9b4d5398d38e6f,
         type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b4c83167e459c1947b9b4d5398d38e6f,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -536,4 +557,93 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b4c83167e459c1947b9b4d5398d38e6f,
     type: 3}
   m_PrefabInstance: {fileID: 273281685115811994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6937141540677932993
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 294455497315071184}
+    m_Modifications:
+    - target: {fileID: 1278030839909902514, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_Name
+      value: Shell Robot
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267827764851502398, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5482998676741646450, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 50fa7b56d04598646b42a48f9da2f0cd, type: 2}
+    - target: {fileID: 5482998676741646450, guid: 1236b5c5f6ada884e8766ccae1252872,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1236b5c5f6ada884e8766ccae1252872, type: 3}
+--- !u!4 &8841137340028315081 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1943209692849418760, guid: 1236b5c5f6ada884e8766ccae1252872,
+    type: 3}
+  m_PrefabInstance: {fileID: 6937141540677932993}
   m_PrefabAsset: {fileID: 0}
