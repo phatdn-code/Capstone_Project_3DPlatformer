@@ -23,7 +23,7 @@ public class Minigame02Controller : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (starCollider.enabled == false)
+        if ((starCollider.enabled == false) || (star.gameObject.activeSelf == false))
         {
             MinigameCleared();
         }
