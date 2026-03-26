@@ -1,5 +1,6 @@
 ﻿using System;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,39 +8,83 @@ namespace PLAYERTWO.PlatformerProject
 {
     public class CreditsPanelScroller : MonoBehaviour
     {
-        [Header("UI References")]
+        #region Inspector
+
+        [TitleGroup("UI"), Required]
         [SerializeField] private RectTransform viewport;
+
+        [TitleGroup("UI"), Required]
         [SerializeField] private RectTransform creditsContent;
 
-        [Header("Optional Layout")]
+        [TitleGroup("Fast Hint"), Required]
+        [SerializeField] private Image fastHintIcon;
+
+        [TitleGroup("Fast Hint"), Required]
+        [SerializeField] private CanvasGroup fastHintTextCanvasGroup;
+
+        [TitleGroup("Layout")]
         [SerializeField] private VerticalLayoutGroup verticalLayoutGroup;
+
+        [TitleGroup("Layout")]
         [SerializeField] private ContentSizeFitter contentSizeFitter;
 
-        [Header("Scroll Settings")]
+        [TitleGroup("Scroll Settings"), MinValue(0.1f)]
         [SerializeField] private float scrollDuration = 20f;
+
+        [TitleGroup("Scroll Settings"), MinValue(1f)]
         [SerializeField] private float fastSpeedMultiplier = 4f;
+
+        [TitleGroup("Scroll Settings")]
         [SerializeField] private float startOffset = 50f;
+
+        [TitleGroup("Scroll Settings")]
         [SerializeField] private float endOffset = 50f;
+
+        [TitleGroup("Scroll Settings")]
         [SerializeField] private bool ignoreTimeScale = true;
 
+        [TitleGroup("Fast Hint Visual")]
+        [SerializeField] private float hintNormalScale = 1f;
+
+        [TitleGroup("Fast Hint Visual")]
+        [SerializeField] private float hintFastScale = 1.08f;
+
+        [TitleGroup("Fast Hint Visual"), MinValue(0.01f)]
+        [SerializeField] private float hintTweenDuration = 0.15f;
+
+        [TitleGroup("Fast Hint Visual"), Range(0f, 1f)]
+        [SerializeField] private float hintNormalAlpha = 0.82f;
+
+        [TitleGroup("Fast Hint Visual"), Range(0f, 1f)]
+        [SerializeField] private float hintFastAlpha = 1f;
+
+        #endregion
+
+        #region Runtime
+
         private Tween scrollTween;
-        private bool isFastMode;
         private Action onScrollFinished;
+        private bool isFastMode;
 
         public bool IsPlaying { get; private set; }
 
+        #endregion
+
+        #region Public API
+
         /// <summary>
-        /// Chạy credit từ dưới lên trên.
-        /// Yêu cầu CreditsContent: Anchor Top Center, Pivot (0.5, 1).
+        /// Bắt đầu chạy credits từ đầu.
         /// </summary>
         public void PlayFromStart(Action onFinished = null)
         {
             KillScrollTween();
-            RebuildLayout();
+            RebuildCreditsLayout();
 
             onScrollFinished = onFinished;
             IsPlaying = true;
             isFastMode = false;
+
+            ResetFastHintVisual();
 
             float contentHeight = creditsContent.rect.height;
             float viewportHeight = viewport.rect.height;
@@ -53,29 +98,23 @@ namespace PLAYERTWO.PlatformerProject
                 .DOAnchorPosY(endY, scrollDuration)
                 .SetEase(Ease.Linear)
                 .SetUpdate(ignoreTimeScale)
-                .OnComplete(HandleScrollCompleted);
+                .OnComplete(OnScrollCompleted);
 
-            ApplySpeed();
+            ApplyScrollSpeed();
         }
 
         /// <summary>
-        /// Bật/tắt tăng tốc credit.
+        /// Bật hoặc tắt chế độ tua nhanh credits.
         /// </summary>
         public void SetFastMode(bool fastMode)
         {
-            isFastMode = fastMode;
-            ApplySpeed();
-        }
+            if (isFastMode == fastMode)
+                return;
 
-        /// <summary>
-        /// Ẩn panel credits.
-        /// </summary>
-        public void HidePanel()
-        {
-            KillScrollTween();
-            IsPlaying = false;
-            isFastMode = false;
-            gameObject.SetActive(false);
+            isFastMode = fastMode;
+
+            ApplyScrollSpeed();
+            UpdateFastHintVisual(isFastMode);
         }
 
         /// <summary>
@@ -86,18 +125,45 @@ namespace PLAYERTWO.PlatformerProject
             gameObject.SetActive(true);
         }
 
-        private void HandleScrollCompleted()
+        /// <summary>
+        /// Ẩn panel credits và dừng mọi tween liên quan.
+        /// </summary>
+        public void HidePanel()
+        {
+            KillScrollTween();
+
+            IsPlaying = false;
+            isFastMode = false;
+            onScrollFinished = null;
+
+            ResetFastHintVisual();
+            gameObject.SetActive(false);
+        }
+
+        #endregion
+
+        #region Credits Flow
+
+        /// <summary>
+        /// Xử lý khi credits chạy xong.
+        /// </summary>
+        private void OnScrollCompleted()
         {
             KillScrollTween();
 
             IsPlaying = false;
             isFastMode = false;
 
+            ResetFastHintVisual();
+
             onScrollFinished?.Invoke();
             onScrollFinished = null;
         }
 
-        private void ApplySpeed()
+        /// <summary>
+        /// Áp dụng tốc độ scroll theo trạng thái hiện tại.
+        /// </summary>
+        private void ApplyScrollSpeed()
         {
             if (scrollTween == null || !scrollTween.IsActive())
                 return;
@@ -105,19 +171,22 @@ namespace PLAYERTWO.PlatformerProject
             scrollTween.timeScale = isFastMode ? fastSpeedMultiplier : 1f;
         }
 
-        private void RebuildLayout()
+        /// <summary>
+        /// Rebuild layout để lấy đúng chiều cao content.
+        /// </summary>
+        private void RebuildCreditsLayout()
         {
             Canvas.ForceUpdateCanvases();
 
-            if (verticalLayoutGroup != null)
-                LayoutRebuilder.ForceRebuildLayoutImmediate(creditsContent);
-
-            if (contentSizeFitter != null)
+            if (verticalLayoutGroup != null || contentSizeFitter != null)
                 LayoutRebuilder.ForceRebuildLayoutImmediate(creditsContent);
 
             Canvas.ForceUpdateCanvases();
         }
 
+        /// <summary>
+        /// Hủy tween scroll hiện tại nếu còn tồn tại.
+        /// </summary>
         private void KillScrollTween()
         {
             if (scrollTween != null && scrollTween.IsActive())
@@ -125,5 +194,53 @@ namespace PLAYERTWO.PlatformerProject
 
             scrollTween = null;
         }
+
+        #endregion
+
+        #region Fast Hint Visual
+
+        /// <summary>
+        /// Đưa hint về trạng thái mặc định.
+        /// </summary>
+        private void ResetFastHintVisual()
+        {
+            UpdateFastHintVisual(false, true);
+        }
+
+        /// <summary>
+        /// Cập nhật hiệu ứng hint khi giữ hoặc thả nút tua nhanh.
+        /// </summary>
+        private void UpdateFastHintVisual(bool fastMode, bool instant = false)
+        {
+            float duration = instant ? 0f : hintTweenDuration;
+            float targetScale = fastMode ? hintFastScale : hintNormalScale;
+            float targetAlpha = fastMode ? hintFastAlpha : hintNormalAlpha;
+
+            if (fastHintIcon != null)
+            {
+                fastHintIcon.rectTransform.DOKill();
+                fastHintIcon.rectTransform
+                    .DOScale(targetScale, duration)
+                    .SetEase(Ease.OutQuad)
+                    .SetUpdate(ignoreTimeScale);
+
+                fastHintIcon.DOKill();
+                fastHintIcon
+                    .DOFade(targetAlpha, duration)
+                    .SetEase(Ease.OutQuad)
+                    .SetUpdate(ignoreTimeScale);
+            }
+
+            if (fastHintTextCanvasGroup != null)
+            {
+                fastHintTextCanvasGroup.DOKill();
+                fastHintTextCanvasGroup
+                    .DOFade(targetAlpha, duration)
+                    .SetEase(Ease.OutQuad)
+                    .SetUpdate(ignoreTimeScale);
+            }
+        }
+
+        #endregion
     }
 }
