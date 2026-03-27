@@ -2351,18 +2351,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1796052456}
-        m_TargetAssemblyTypeName: PLAYERTWO.PlatformerProject.Fader, Assembly-CSharp
-        m_MethodName: FadeOut
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 2135228423}
         m_TargetAssemblyTypeName: UI_QuitGame, Assembly-CSharp
         m_MethodName: QuitGame
@@ -2827,18 +2815,6 @@ MonoBehaviour:
   useClickAudio: 0
   useHighlightAudio: 0
   audioType: 2
---- !u!114 &1796052456 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5650812969811259157, guid: d6e66bcd3d2123049855d2670ef53005,
-    type: 3}
-  m_PrefabInstance: {fileID: 1307958025}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b061817e0bdc8f4cbdefa6d100b389c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1981456539
 GameObject:
   m_ObjectHideFlags: 0
@@ -3127,6 +3103,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2135228422}
   - component: {fileID: 2135228423}
+  - component: {fileID: 2135228424}
   m_Layer: 5
   m_Name: Quit Panel
   m_TagString: Untagged
@@ -3165,6 +3142,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 826ffccb73325414db5a92f98d096801, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2135228424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2135228421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64765e474b45d450c9871c6595fb7bc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
