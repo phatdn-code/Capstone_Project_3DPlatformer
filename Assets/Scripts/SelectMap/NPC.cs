@@ -151,18 +151,27 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// Khi đang chạy credits thì giữ Space sẽ tăng tốc.
+        /// Đọc input mỗi frame để mở credits và tăng tốc khi giữ Space.
         /// </summary>
         protected virtual void Update()
         {
-            if (!_isPlayingCredits || creditsPanelScroller == null)
-                return;
-
             if (PlayerHub.Instance == null || PlayerHub.Instance.InputManager == null)
                 return;
 
-            bool isHoldingJump = PlayerHub.Instance.InputManager.GetJumpHeldRaw();
-            creditsPanelScroller.SetFastMode(isHoldingJump);
+            // Nếu đang chạy credits thì chỉ xử lý tăng tốc.
+            if (_isPlayingCredits)
+            {
+                if (creditsPanelScroller != null)
+                {
+                    bool isHoldingJump = PlayerHub.Instance.InputManager.GetJumpHeldRaw();
+                    creditsPanelScroller.SetFastMode(isHoldingJump);
+                }
+
+                return;
+            }
+
+            // Nếu chưa chạy credits thì kiểm tra nhấn E để bắt đầu.
+            TryStartCredits();
         }
 
         /// <summary>
@@ -185,6 +194,9 @@ namespace PLAYERTWO.PlatformerProject
         /// <summary>
         /// Trong trigger thì kiểm tra để hiện hoặc ẩn bubble.
         /// </summary>
+        /// <summary>
+        /// Ở trong trigger thì cập nhật player hiện tại và xử lý hiện bubble.
+        /// </summary>
         protected virtual void OnTriggerStay(Collider other)
         {
             if (_isPlayingCredits)
@@ -193,19 +205,17 @@ namespace PLAYERTWO.PlatformerProject
             if (!other.CompareTag(GameTags.Player))
                 return;
 
+            _playerInTrigger = other.transform;
+
             if (CanShowBubble(other.transform))
             {
                 _lastValidShowTime = Time.time;
                 RotateModelTowardsPlayer(other.transform);
                 ShowBubble();
             }
-            else if (Time.time - _lastValidShowTime > hideGraceDuration)
-            {
-                HideBubbleTemporarily();
-            }
 
-            _playerInTrigger = other.transform;
-            TryStartCredits();
+            else if (Time.time - _lastValidShowTime > hideGraceDuration)
+                HideBubbleTemporarily();
         }
 
         /// <summary>

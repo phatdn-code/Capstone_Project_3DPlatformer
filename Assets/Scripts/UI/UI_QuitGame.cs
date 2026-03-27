@@ -1,12 +1,15 @@
 using UnityEngine;
 
-public class UI_QuitGame : MonoBehaviour
+namespace PLAYERTWO.PlatformerProject
 {
-   public void QuitGame()
-   {
-      PLAYERTWO.PlatformerProject.Fader.instance.FadeOut(() =>
-      {
-         Application.Quit();
-      });
-   }
+    public class UI_QuitGame : MonoBehaviour
+    {
+        public void QuitGame()
+        {
+            Fader.instance.FadeOut(() =>
+            {
+                Application.Quit();
+            });
+        }
+    }
 }
