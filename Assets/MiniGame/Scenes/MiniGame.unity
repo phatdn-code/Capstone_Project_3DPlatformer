@@ -57821,11 +57821,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 22499272, guid: 67fdd13f2e7b44d9297e66b636fb7e0f, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -122.7
+      value: -122.69995
       objectReference: {fileID: 0}
     - target: {fileID: 22499272, guid: 67fdd13f2e7b44d9297e66b636fb7e0f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -31.1
+      value: -31.099976
       objectReference: {fileID: 0}
     - target: {fileID: 1723374585824196928, guid: 67fdd13f2e7b44d9297e66b636fb7e0f,
         type: 3}
@@ -114931,7 +114931,7 @@ PrefabInstance:
     - target: {fileID: 8232930, guid: 46c3ca9c66ef44be9a4bb358366eb167, type: 3}
       propertyPath: m_Resource
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8300000, guid: 6ad28bd64ea39634eb6acc190a43fa3f, type: 3}
     - target: {fileID: 8232930, guid: 46c3ca9c66ef44be9a4bb358366eb167, type: 3}
       propertyPath: OutputAudioMixerGroup
       value: 
