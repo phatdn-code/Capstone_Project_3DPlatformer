@@ -262,7 +262,9 @@ namespace PLAYERTWO.PlatformerProject
             if (health.isEmpty || health.recovering || !canTakeDamage)
                 return;
 
-            health.Damage(amount);
+            if (!m_isSelectMapPlayer)
+                health.Damage(amount);
+
             lastDamageOrigin = origin;
             states.Change<HurtPlayerState>();
             playerEvents.OnHurt?.Invoke();
