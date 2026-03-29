@@ -18344,21 +18344,27 @@ PrefabInstance:
     - target: {fileID: 273281685853183525, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
       propertyPath: text
-      value: '<color=#222222><size=130%><b>Boss: Pyrodrake</b></size></color>
+      value: '<color=#C62828><size=130%><b>Boss: Pyrodrake</b></size></color>
 
+        
 
         Find
-        the correct portal.
+        the <color=#2E7D32><b>correct portal</b></color>.
 
+        
 
-        Break its armor with the Water Beam Cannon.
+        Break
+        its armor with the <color=#1565C0><b>Water Beam Cannon</b></color>.
 
+        
 
         Damage
-        it with the Water Projectile Cannon.
+        it with the <color=#1E88E5><b>Water Projectile Cannon</b></color>.
 
+        
 
-        Dodge his other attacks.'
+        Dodge
+        his other attacks.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}

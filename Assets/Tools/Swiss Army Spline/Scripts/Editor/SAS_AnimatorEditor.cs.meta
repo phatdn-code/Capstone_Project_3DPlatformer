@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 72fe4f49b2c4f474c9154f5b36585e5c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 176382
+  packageName: Swiss Army Spline
+  packageVersion: 1.0
+  assetPath: Assets/Swiss Army Spline/Scripts/Editor/SAS_AnimatorEditor.cs
+  uploadId: 383695

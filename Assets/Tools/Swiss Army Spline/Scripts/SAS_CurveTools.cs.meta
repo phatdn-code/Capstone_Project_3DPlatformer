@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 88caef5b83bc62b4d931694bf7c0d498
+AssetOrigin:
+  serializedVersion: 1
+  productId: 176382
+  packageName: Swiss Army Spline
+  packageVersion: 1.0
+  assetPath: Assets/Swiss Army Spline/Scripts/SAS_CurveTools.cs
+  uploadId: 383695
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - meshGO: {instanceID: 0}
+  - standardMaterial: {fileID: 2100000, guid: 2cdba66580a0fbf4fb29103fc670185c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
