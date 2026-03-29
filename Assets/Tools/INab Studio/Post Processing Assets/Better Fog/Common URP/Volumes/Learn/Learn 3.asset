@@ -15,7 +15,7 @@ MonoBehaviour:
   active: 0
   shadows:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 1, z: 1, w: -0.2895102}
+    m_Value: {x: 1, y: 1, z: 1, w: -0.025359252}
   midtones:
     m_OverrideState: 0
     m_Value: {x: 1, y: 1, z: 1, w: 0}
@@ -65,16 +65,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5485954d14dfb9a4c8ead8edb0ded5b1, type: 3}
   m_Name: LiftGammaGain
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   lift:
-    m_OverrideState: 0
-    m_Value: {x: 0.94088185, y: 0.9792711, z: 1, w: 0.0073355464}
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: -0.012349491}
   gamma:
     m_OverrideState: 0
-    m_Value: {x: 0.8186758, y: 0.93787795, z: 1, w: 0.019685041}
+    m_Value: {x: 1, y: 1, z: 1, w: 0}
   gain:
-    m_OverrideState: 0
-    m_Value: {x: 0.9699864, y: 1, z: 0.9959331, w: 0.039370093}
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 0.09109924}
 --- !u!114 &-2593688278565948382
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -120,20 +120,20 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 1
   threshold:
-    m_OverrideState: 0
-    m_Value: 17.13
+    m_OverrideState: 1
+    m_Value: 2
   intensity:
-    m_OverrideState: 0
-    m_Value: 1.41
+    m_OverrideState: 1
+    m_Value: 0.2
   scatter:
     m_OverrideState: 0
-    m_Value: 0
+    m_Value: 0.35
   clamp:
     m_OverrideState: 0
     m_Value: 65472
   tint:
-    m_OverrideState: 0
-    m_Value: {r: 0.8773585, g: 0.44924143, b: 0.07035423, a: 1}
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 0.85490197, b: 0.5882353, a: 1}
   highQualityFiltering:
     m_OverrideState: 0
     m_Value: 0
@@ -305,7 +305,7 @@ MonoBehaviour:
         - serializedVersion: 3
           time: 0
           value: 0
-          inSlope: 0
+          inSlope: 1
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
@@ -315,7 +315,7 @@ MonoBehaviour:
           time: 1
           value: 1
           inSlope: 1
-          outSlope: 0
+          outSlope: 1
           tangentMode: 0
           weightedMode: 0
           inWeight: 0
@@ -400,8 +400,8 @@ MonoBehaviour:
           inWeight: 0
           outWeight: 0
         - serializedVersion: 3
-          time: 0.7721519
-          value: 1
+          time: 0.51960784
+          value: 0.53846157
           inSlope: -0.21398568
           outSlope: -0.21398568
           tangentMode: 0
@@ -533,22 +533,22 @@ MonoBehaviour:
   active: 1
   _FogIntensity:
     m_OverrideState: 1
-    m_Value: 0.87
+    m_Value: 1
   _EnergyLoss:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
   _UseGradient:
     m_OverrideState: 1
     m_Value: 0
   _FogColor:
     m_OverrideState: 1
-    m_Value: {r: 0.04150939, g: 0.04150939, b: 0.04150939, a: 1}
+    m_Value: {r: 0.68765575, g: 0.8530857, b: 0.9528302, a: 1}
   _GradientStart:
     m_OverrideState: 1
-    m_Value: -47.98
+    m_Value: 4.75
   _GradientEnd:
     m_OverrideState: 1
-    m_Value: 2005.3
+    m_Value: 2000
   _GradientTexture:
     m_OverrideState: 1
     m_Value: {fileID: 0}
@@ -560,13 +560,13 @@ MonoBehaviour:
     m_Value: 0
   _SunColor:
     m_OverrideState: 1
-    m_Value: {r: 0.6176254, g: 0.6087504, b: 0.7283019, a: 1}
+    m_Value: {r: 1, g: 0.88867927, b: 0.759434, a: 1}
   _SunIntensity:
     m_OverrideState: 1
-    m_Value: 0.86
+    m_Value: 0.91
   _SunPower:
     m_OverrideState: 1
-    m_Value: 2.76
+    m_Value: 1.78
   _UseDistanceFog:
     m_OverrideState: 1
     m_Value: 0
@@ -608,13 +608,13 @@ MonoBehaviour:
     m_Value: 1
   _Height:
     m_OverrideState: 1
-    m_Value: 0.86
+    m_Value: 2.28
   _HeightDensity:
     m_OverrideState: 1
-    m_Value: 0.5
+    m_Value: 0.453
   _HeightFogType:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 2
   _UseNoise:
     m_OverrideState: 1
     m_Value: 0
@@ -647,10 +647,10 @@ MonoBehaviour:
     m_Value: 1
   _Threshold:
     m_OverrideState: 1
-    m_Value: -0.3
+    m_Value: -0.32
   _SoftKnee:
     m_OverrideState: 1
-    m_Value: -9.04
+    m_Value: -8.54
   _Radius:
     m_OverrideState: 1
     m_Value: 7
@@ -659,7 +659,7 @@ MonoBehaviour:
     m_Value: 0.1
   _Intensity:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0.09
   _HighQuality:
     m_OverrideState: 1
     m_Value: 1
