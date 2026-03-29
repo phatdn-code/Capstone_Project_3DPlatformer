@@ -54,4 +54,10 @@
         VoltitanBoss,
         PyrodrakeBoss,
     }
+
+    public enum SideCheckAxis
+    {
+        LocalZ,
+        LocalX
+    }
 }

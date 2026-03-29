@@ -2,80 +2,82 @@ using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
 {
-	[RequireComponent(typeof(WaypointManager))]
-	[AddComponentMenu("PLAYER TWO/Platformer Project/Platform/Moving Platform")]
-	public class MovingPlatform : Platform
-	{
-		public enum RotationMode { Interpolate, LookAt }
+    [RequireComponent(typeof(WaypointManager))]
+    [AddComponentMenu("PLAYER TWO/Platformer Project/Platform/Moving Platform")]
+    public class MovingPlatform : Platform
+    {
+        public enum RotationMode { Interpolate, LookAt }
 
-		[Header("Movement Settings")]
-		[Tooltip("The speed at which the platform moves between waypoints.")]
-		public float speed = 3f;
+        [Header("Movement Settings")]
+        [Tooltip("The speed at which the platform moves between waypoints.")]
+        public float speed = 3f;
 
-		[Header("Rotation Settings")]
-		[Tooltip("Whether or not the platform should rotate to face the next waypoint.")]
-		public bool rotateToWaypoint;
+        [Header("Rotation Settings")]
+        [Tooltip("Whether or not the platform should rotate to face the next waypoint.")]
+        public bool rotateToWaypoint;
 
-		[Tooltip("The rotation mode to use when rotating to face the next waypoint.")]
-		public RotationMode rotationMode;
+        [Tooltip("The rotation mode to use when rotating to face the next waypoint.")]
+        public RotationMode rotationMode;
 
-		[Tooltip("The speed at which the platform rotates to face the next waypoint in the LookAt mode.")]
-		public float lookAtSpeed = 360f;
+        [Tooltip("The speed at which the platform rotates to face the next waypoint in the LookAt mode.")]
+        public float lookAtSpeed = 360f;
 
-		public WaypointManager waypoints { get; protected set; }
+        public WaypointManager waypoints { get; protected set; }
 
-		protected const float k_minDistance = 0.001f;
+        protected const float k_minDistance = 0.001f;
 
-		protected override void Awake()
-		{
-			base.Awake();
-			waypoints = GetComponent<WaypointManager>();
-		}
+        protected override void Awake()
+        {
+            base.Awake();
+            waypoints = GetComponent<WaypointManager>();
+        }
 
-		public override void PlatformUpdate()
-		{
-			CacheTransform();
-			HandleWaypoints();
-			HandleAttachedTransforms();
-		}
+        public override void PlatformUpdate()
+        {
+            CacheTransform();
+            HandleWaypoints();
+            HandleAttachedTransforms();
+        }
 
-		protected virtual void HandleWaypoints()
-		{
-			var position = transform.position;
-			var target = waypoints.current.position;
+        protected virtual void HandleWaypoints()
+        {
+            Debug.Log(gameObject.name);
 
-			position = Vector3.MoveTowards(position, target, speed * Time.deltaTime);
-			transform.position = position;
+            var position = transform.position;
+            var target = waypoints.current.position;
 
-			var distance = Vector3.Distance(transform.position, target);
+            position = Vector3.MoveTowards(position, target, speed * Time.deltaTime);
+            transform.position = position;
 
-			HandleRotation(distance);
+            var distance = Vector3.Distance(transform.position, target);
 
-			if (distance <= k_minDistance)
-				waypoints.Next();
-		}
+            HandleRotation(distance);
 
-		protected virtual void HandleRotation(float distance)
-		{
-			if (!rotateToWaypoint)
-				return;
+            if (distance <= k_minDistance)
+                waypoints.Next();
+        }
 
-			var targetRotation = waypoints.current.rotation;
-			var previousRotation = waypoints.previous.rotation;
+        protected virtual void HandleRotation(float distance)
+        {
+            if (!rotateToWaypoint)
+                return;
 
-			if (rotationMode == RotationMode.Interpolate)
-			{
-				var targetPosition = waypoints.current.position;
-				var previousPosition = waypoints.previous.position;
-				var t = 1f - (distance / Vector3.Distance(targetPosition, previousPosition));
-				transform.rotation = Quaternion.Lerp(previousRotation, targetRotation, t);
-			}
-			else if (rotationMode == RotationMode.LookAt)
-			{
-				var rotation = transform.rotation;
-				var rotationDelta = lookAtSpeed * Time.deltaTime;
-				transform.rotation = Quaternion.RotateTowards(rotation, targetRotation, rotationDelta);
-			}
-		}
-	}
+            var targetRotation = waypoints.current.rotation;
+            var previousRotation = waypoints.previous.rotation;
+
+            if (rotationMode == RotationMode.Interpolate)
+            {
+                var targetPosition = waypoints.current.position;
+                var previousPosition = waypoints.previous.position;
+                var t = 1f - (distance / Vector3.Distance(targetPosition, previousPosition));
+                transform.rotation = Quaternion.Lerp(previousRotation, targetRotation, t);
+            }
+            else if (rotationMode == RotationMode.LookAt)
+            {
+                var rotation = transform.rotation;
+                var rotationDelta = lookAtSpeed * Time.deltaTime;
+                transform.rotation = Quaternion.RotateTowards(rotation, targetRotation, rotationDelta);
+            }
+        }
+    }
 }
