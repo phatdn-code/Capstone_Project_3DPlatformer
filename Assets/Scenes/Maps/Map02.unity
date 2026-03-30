@@ -35456,6 +35456,8 @@ MonoBehaviour:
   enemyRoomObjArray:
   - {fileID: 9107197207860958244, guid: 18ca129d3c54c9e438bce51c39879b84, type: 3}
   - {fileID: 1453405475429561907, guid: 27a80beb6d359ea4eb54433515b76bdd, type: 3}
+  - {fileID: 1262350722708437134, guid: cb8a325ed3bf8d24cac7ea3246dc897f, type: 3}
+  - {fileID: 2287267840604709185, guid: 17616ce4ad4f6b54d934c0fd36eed33a, type: 3}
   puzzleRoomCount: 2
   minigameRoomCount: 1
 --- !u!4 &548741830
