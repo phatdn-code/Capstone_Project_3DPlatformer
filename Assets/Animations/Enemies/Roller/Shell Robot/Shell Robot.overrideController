@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Shell Robot
+  m_Controller: {fileID: 9100000, guid: 66acc70248ca63641aa906fdc9831e85, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 8e0bda7c51604f94f8e2e054df1afe12, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 5145a4705c8129645a34c7ed624e9c56, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: c0d0e13ee7cc2a44c8ed8c21b2219716, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 0a399b7493208d54d97ec78a4e26bd9e, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 3d5b8b801bf0b28408aa480571a11112, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 273fdb6f41d6bc34aa10006009f87500, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: cb6505771c6b4cf47a3c973b5591833f, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: feee6ea71b982bb49a6826cb3cfef8f8, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: a73959c4bff880641856f55328f85e65, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 1d9bd0fd1ae1d52428ec0fb5ba06793c, type: 2}

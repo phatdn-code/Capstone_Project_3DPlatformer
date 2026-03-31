@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Nozzle
+  m_Controller: {fileID: 9100000, guid: b34a461f869382540b0aaec44545a197, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 539eb550af8236b4e8ff92cec37bc5ea, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 539eb550af8236b4e8ff92cec37bc5ea, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: c1bf3b0efaa226e4181173f4c9297bcf, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: c1bf3b0efaa226e4181173f4c9297bcf, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 38c0df3d66909f34689c1a668c6941a2, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 38c0df3d66909f34689c1a668c6941a2, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 1514631c5f26d5547b7fcefd9a051652, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 1514631c5f26d5547b7fcefd9a051652, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 72b80bb605784164db9122779816e4fd, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 72b80bb605784164db9122779816e4fd, type: 2}

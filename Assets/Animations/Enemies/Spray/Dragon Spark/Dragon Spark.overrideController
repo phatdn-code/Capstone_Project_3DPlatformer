@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Dragon Spark
+  m_Controller: {fileID: 9100000, guid: 0d69b43698fcb4045922c7b3d38aa1ca, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 8658ae0a5a3717a439045613dba1da86, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 8658ae0a5a3717a439045613dba1da86, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: ba95cb9c12901734c8eda7e99bf1b1d7, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: ba95cb9c12901734c8eda7e99bf1b1d7, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 59a86b34c24368a49be125fa2b5caa88, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 59a86b34c24368a49be125fa2b5caa88, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 174ca068b2759134ca1e389770686fa8, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 174ca068b2759134ca1e389770686fa8, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 8a9b626cd020ac14c84a348c4b5e76e9, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 8a9b626cd020ac14c84a348c4b5e76e9, type: 2}

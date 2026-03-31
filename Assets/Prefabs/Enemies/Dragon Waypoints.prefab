@@ -419,7 +419,7 @@ MonoBehaviour:
   rollAcceleration: 40
   rollStopDistance: 0.4
   rollCooldown: 2
-  enableSprayAttack: 1
+  enableSprayAttack: 0
   sprayAttackRange: 5
   sprayTopSpeed: 6
   sprayAcceleration: 35
@@ -951,7 +951,7 @@ Animator:
   m_GameObject: {fileID: 3512093271545336062}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 0e2a9b9b1a491ca47a84e5f5bf8169ef, type: 3}
-  m_Controller: {fileID: 9100000, guid: fd27a39e3fd154c4981742d7435ed571, type: 2}
+  m_Controller: {fileID: 22100000, guid: 684594b49f5c75f4787d0a2b0fe02f99, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

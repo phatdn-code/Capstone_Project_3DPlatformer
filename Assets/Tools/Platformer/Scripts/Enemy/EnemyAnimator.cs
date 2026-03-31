@@ -61,22 +61,38 @@ namespace PLAYERTWO.PlatformerProject
 
         #region ===== UNITY LIFECYCLE =====
 
-        /// <summary>Start: cache Enemy, hash, đăng ký event, init animator an toàn.</summary>
-        protected virtual void Start()
+        /// <summary>
+        /// VN: Cache reference và hash ngay từ Awake.
+        /// Chỉ chạy 1 lần khi object được tạo.
+        /// </summary>
+        protected virtual void Awake()
         {
             CacheEnemy();
             CacheHashes();
+        }
+
+        /// <summary>
+        /// VN: Mỗi lần object được bật lại thì đăng ký event
+        /// và khởi tạo lại Animator cho an toàn.
+        /// </summary>
+        protected virtual void OnEnable()
+        {
             RegisterStateChangeEvent();
             InitializeAnimatorSafely();
         }
 
-        /// <summary>OnDestroy: hủy đăng ký event để tránh leak.</summary>
-        protected virtual void OnDestroy()
+        /// <summary>
+        /// VN: Khi object bị tắt thì hủy đăng ký event,
+        /// tránh đăng ký trùng khi bật lại.
+        /// </summary>
+        protected virtual void OnDisable()
         {
             UnregisterStateChangeEvent();
         }
 
-        /// <summary>LateUpdate: update param sau khi movement tính xong.</summary>
+        /// <summary>
+        /// VN: Cập nhật parameter Animator sau khi movement chạy xong.
+        /// </summary>
         protected virtual void LateUpdate()
         {
             if (!CanUpdateAnimator()) return;

@@ -11,6 +11,7 @@ public class EnemyRoomController : MonoBehaviour
     private void Start()
     {
         roomManager = transform.parent.GetComponentInParent<RoomManager>();
+
         if (roomManager != null)
         {
             roomManager.isRoomCleared = false;
@@ -21,13 +22,9 @@ public class EnemyRoomController : MonoBehaviour
     private void Update()
     {
         if (enemyList.Count > 0)
-        {
             RemoveEnemy();
-        }
-        else
-        {
-            GameClear();
-        }
+
+        else GameClear();
     }
     private void RemoveEnemy()
     {

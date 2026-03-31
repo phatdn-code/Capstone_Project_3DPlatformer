@@ -463,7 +463,7 @@ Animator:
   m_GameObject: {fileID: 4584478711269707794}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 67a2c6e59987c0d42b3a0a4b4c78c3f2, type: 3}
-  m_Controller: {fileID: 9100000, guid: 22cce050d8982ce4099a09a1e2a93b87, type: 2}
+  m_Controller: {fileID: 22100000, guid: 65a357e7c32a8f940abf1857bd2116c3, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1397,6 +1397,7 @@ MonoBehaviour:
   mode: 0
   damage: 1
   hitCooldown: 0.15
+  autoBindPlayerOnEnable: 1
 --- !u!1 &8941729059720019053 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100008, guid: 8a675b5b52196c748abb1ae97c2d0f55,
