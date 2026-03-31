@@ -1155,20 +1155,17 @@ PrefabInstance:
       propertyPath: text
       value: '<color=#2F9BFF><size=130%><b>Boss: Voltitan</b></size></color>
 
-        
 
         You
         cannot hurt Voltitan directly.
 
-        
 
-        Wait until he fires a
-        <color=#B36B00><b>bomb</b></color>, then <color=#D45A1F><b>hit it back</b></color>
-        at him.
+        Wait until he fires a <color=#B36B00><b>bomb</b></color>,
+        then <color=#D45A1F><b>hit it back</b></color> at him.
 
-        
 
-        Keep moving and dodge his other attacks to survive.'
+        Keep moving
+        and dodge his other attacks to survive.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
