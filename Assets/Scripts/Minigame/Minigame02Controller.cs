@@ -17,7 +17,7 @@ public class Minigame02Controller : MonoBehaviour
         if (roomManager != null)
         {
             roomManager.isRoomCleared = false;
-
+            this.gameObject.SetActive(false);
         }
     }
     // Update is called once per frame

@@ -6,6 +6,7 @@ public class RoomManager : MonoBehaviour
 {
     public GameObject roomSpawnPoint;
     public bool isRoomCleared = false;
+    public GameObject functionRoomPrefab;
     public GameObject roomblank;
     public DungeonController dungeonController;
 
@@ -52,10 +53,13 @@ public class RoomManager : MonoBehaviour
             if (dungeonController == null) return;
             dungeonController.SwitchCinemachine(baseCamera);
             roomblank.SetActive(false);
-
-            if (!isRoomCleared)
+            if (functionRoomPrefab != null)
             {
-                CloseAllDoors();
+                functionRoomPrefab.SetActive(true);
+                if (!isRoomCleared)
+                {
+                    CloseAllDoors();
+                }
             }
         }
     }

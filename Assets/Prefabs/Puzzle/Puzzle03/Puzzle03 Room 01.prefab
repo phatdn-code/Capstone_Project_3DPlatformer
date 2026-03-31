@@ -8731,7 +8731,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomManager: {fileID: 0}
-  starIndex: 0
   star: {fileID: 4954314296798422865}
 --- !u!1 &5723574635608761354
 GameObject:

@@ -16,7 +16,7 @@ public class Puzzle03Controller : MonoBehaviour
         if (roomManager != null)
         {
             roomManager.isRoomCleared = false;
-            
+            this.gameObject.SetActive(false);
         }
     }
 

@@ -193,6 +193,7 @@ public class DungeonGenerator : MonoBehaviour
         if (room == null) return;
         GameObject roomParent = location.GetComponent<RoomManager>().roomSpawnPoint;
         GameObject spawnRoom = Instantiate(room, roomParent.transform.position, Quaternion.identity, roomParent.transform);
+        location.GetComponent<RoomManager>().functionRoomPrefab = spawnRoom;
     }
 
     private GameObject ChooseFunctionRoom()
