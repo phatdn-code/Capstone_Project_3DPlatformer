@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace PLAYERTWO.PlatformerProject
@@ -6,8 +7,6 @@ namespace PLAYERTWO.PlatformerProject
     [AddComponentMenu("PLAYER TWO/Platformer Project/Enemy/Enemy Animator")]
     public class EnemyAnimator : MonoBehaviour
     {
-        #region ===== INSPECTOR =====
-
         [Header("Animator Reference")]
         public Animator animator;
 
@@ -23,47 +22,31 @@ namespace PLAYERTWO.PlatformerProject
         public string isGroundedName = "Is Grounded";
         public string onStateChangedName = "On State Changed";
 
-        public string attackName = "Attack";          // Trigger đánh thường
-        public string rollAttackName = "Roll";        // Bool roll
-        public string sprayAttackName = "SprayAttack"; // Bool spray
+        public string attackName = "Attack";
+        public string rollAttackName = "Roll";
+        public string sprayAttackName = "SprayAttack";
 
         public string initializedName = "Initialized";
 
-        #endregion
-
-        #region ===== RUNTIME CACHE =====
-
         protected Enemy m_enemy;
-
-        #endregion
-
-        #region ===== HASH CACHE =====
 
         protected int m_stateHash;
         protected int m_lastStateHash;
-
         protected int m_lateralSpeedHash;
         protected int m_verticalSpeedHash;
         protected int m_speed01Hash;
-
         protected int m_healthHash;
         protected int m_isGroundedHash;
-
         protected int m_onStateChangedHash;
-
         protected int m_attackHash;
         protected int m_rollBoolHash;
         protected int m_sprayBoolHash;
-
         protected int m_initializedHash;
 
-        #endregion
-
-        #region ===== UNITY LIFECYCLE =====
+        private Coroutine m_initializeCoroutine;
 
         /// <summary>
-        /// VN: Cache reference và hash ngay từ Awake.
-        /// Chỉ chạy 1 lần khi object được tạo.
+        /// VN: Cache reference và hash 1 lần.
         /// </summary>
         protected virtual void Awake()
         {
@@ -72,26 +55,52 @@ namespace PLAYERTWO.PlatformerProject
         }
 
         /// <summary>
-        /// VN: Mỗi lần object được bật lại thì đăng ký event
-        /// và khởi tạo lại Animator cho an toàn.
+        /// VN: Khi object bật lại, chưa init Animator ngay.
+        /// Chờ 1 frame để Health/State kịp khởi tạo xong rồi mới sync.
         /// </summary>
         protected virtual void OnEnable()
         {
             RegisterStateChangeEvent();
-            InitializeAnimatorSafely();
+
+            if (animator != null)
+                animator.SetBool(m_initializedHash, false);
+
+            if (m_initializeCoroutine != null)
+                StopCoroutine(m_initializeCoroutine);
+
+            m_initializeCoroutine = StartCoroutine(InitializeAnimatorNextFrame());
         }
 
         /// <summary>
-        /// VN: Khi object bị tắt thì hủy đăng ký event,
-        /// tránh đăng ký trùng khi bật lại.
+        /// VN: Khi object tắt thì hủy event và reset cờ init.
         /// </summary>
         protected virtual void OnDisable()
         {
             UnregisterStateChangeEvent();
+
+            if (m_initializeCoroutine != null)
+            {
+                StopCoroutine(m_initializeCoroutine);
+                m_initializeCoroutine = null;
+            }
+
+            if (animator != null)
+                animator.SetBool(m_initializedHash, false);
         }
 
         /// <summary>
-        /// VN: Cập nhật parameter Animator sau khi movement chạy xong.
+        /// VN: Chờ 1 frame rồi mới init Animator để tránh build bị sync Health = 0 quá sớm.
+        /// </summary>
+        private IEnumerator InitializeAnimatorNextFrame()
+        {
+            yield return null;
+
+            InitializeAnimatorSafely();
+            m_initializeCoroutine = null;
+        }
+
+        /// <summary>
+        /// VN: Update parameter Animator sau khi movement chạy xong.
         /// </summary>
         protected virtual void LateUpdate()
         {
@@ -99,17 +108,11 @@ namespace PLAYERTWO.PlatformerProject
             UpdateAnimatorParameters();
         }
 
-        #endregion
-
-        #region ===== INITIALIZE =====
-
-        /// <summary>Cache Enemy cùng GameObject.</summary>
         protected virtual void CacheEnemy()
         {
             m_enemy = GetComponent<Enemy>();
         }
 
-        /// <summary>Cache hash các parameter để tối ưu.</summary>
         protected virtual void CacheHashes()
         {
             m_stateHash = Animator.StringToHash(stateName);
@@ -131,7 +134,6 @@ namespace PLAYERTWO.PlatformerProject
             m_initializedHash = Animator.StringToHash(initializedName);
         }
 
-        /// <summary>Đăng ký event đổi state để bắn trigger OnStateChanged.</summary>
         protected virtual void RegisterStateChangeEvent()
         {
             if (animator == null) return;
@@ -140,14 +142,12 @@ namespace PLAYERTWO.PlatformerProject
             m_enemy.states.events.onChange.AddListener(OnStateChanged);
         }
 
-        /// <summary>Hủy đăng ký event đổi state.</summary>
         protected virtual void UnregisterStateChangeEvent()
         {
             if (m_enemy == null || m_enemy.states == null || m_enemy.states.events == null) return;
             m_enemy.states.events.onChange.RemoveListener(OnStateChanged);
         }
 
-        /// <summary>Check đủ điều kiện để update animator.</summary>
         protected virtual bool CanUpdateAnimator()
         {
             if (animator == null) return false;
@@ -158,60 +158,44 @@ namespace PLAYERTWO.PlatformerProject
             return true;
         }
 
-        #endregion
-
-        #region ===== PUBLIC API =====
-
-        /// <summary>Bắn trigger đánh thường.</summary>
         public void TriggerAttack()
         {
             SetTrigger(m_attackHash);
         }
 
-        /// <summary>Giữ tên cũ để không break code đang gọi: thực chất là bool Roll.</summary>
         public void SetAttackBool(bool value)
         {
             SetRollAttackBool(value);
         }
 
-        /// <summary>Bật/tắt bool RollAttack.</summary>
         public void SetRollAttackBool(bool value)
         {
             SetBool(m_rollBoolHash, value);
         }
 
-        /// <summary>Bật/tắt bool SprayAttack.</summary>
         public void SetSprayAttackBool(bool value)
         {
             SetBool(m_sprayBoolHash, value);
         }
 
-        /// <summary>Set trigger theo hash.</summary>
         public void SetTrigger(int hash)
         {
             if (animator == null) return;
             animator.SetTrigger(hash);
         }
 
-        /// <summary>Set bool theo hash.</summary>
         public void SetBool(int hash, bool value)
         {
             if (animator == null) return;
             animator.SetBool(hash, value);
         }
 
-        #endregion
-
-        #region ===== INTERNAL =====
-
-        /// <summary>Callback đổi state: bắn trigger OnStateChanged.</summary>
         protected virtual void OnStateChanged()
         {
             if (animator == null) return;
             animator.SetTrigger(m_onStateChangedHash);
         }
 
-        /// <summary>Update param animation: speed, health, grounded, state.</summary>
         protected virtual void UpdateAnimatorParameters()
         {
             float lateralSpeed = m_enemy.lateralVelocity.magnitude;
@@ -234,7 +218,9 @@ namespace PLAYERTWO.PlatformerProject
             animator.SetBool(m_isGroundedHash, m_enemy.isGrounded);
         }
 
-        /// <summary>Init an toàn: set param 1 lần để tránh transition sai ở frame đầu.</summary>
+        /// <summary>
+        /// VN: Khởi tạo Animator an toàn sau khi dữ liệu gameplay đã sẵn sàng.
+        /// </summary>
         protected virtual void InitializeAnimatorSafely()
         {
             if (animator == null) return;
@@ -249,7 +235,5 @@ namespace PLAYERTWO.PlatformerProject
 
             animator.SetBool(m_initializedHash, true);
         }
-
-        #endregion
     }
 }

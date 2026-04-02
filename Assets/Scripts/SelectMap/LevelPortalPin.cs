@@ -603,14 +603,21 @@ namespace PLAYERTWO.PlatformerProject
 
             _isLoading = true;
 
+            // Trả camera vùng về trạng thái bình thường trước khi load/teleport
+            SetFocused(false);
+            ApplyCameraPriority(exitPriority);
+
+#if UNITY_6000_0_OR_NEWER
+            FindFirstObjectByType<PlayerCameraManager>()?.ResetCurrentCamera();
+#else
+    FindObjectOfType<PlayerCameraManager>()?.ResetCurrentCamera();
+#endif
+
             PrepareForEnter();
 
             ClearTargetSceneReturnPointIfNeeded();
             RememberReturnPoint();
-
-            // VN: Lưu sao/coin hiện tại trước khi sang scene khác.
             SaveCurrentLevelProgressBeforeLoad();
-
             LoadTargetScene();
 
             AudioManager.Instance.PlaySound(SoundCategory.Normal, 1);
