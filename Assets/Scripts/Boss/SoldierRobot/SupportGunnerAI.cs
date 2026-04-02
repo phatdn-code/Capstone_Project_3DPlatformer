@@ -2,20 +2,8 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// 👹 AI quái phụ Phase 2:
-/// - Bay quanh vòng chiến đấu và bắn về tâm.
-/// - Không dùng NavMesh.
-/// - Animation điều khiển qua Bool: IsRunning, IsShooting.
-/// - Khi bắn: IsRunning = false, IsShooting = true.
-/// - Khi nghỉ: IsRunning = true, IsShooting = false.
-/// - Sử dụng PoolManager để spawn bullet & flash.
-/// </summary>
 public class SupportGunnerAI : MonoBehaviour
 {
-    //─────────────────────────────────────────────
-    #region ✦ THAM CHIẾU INSPECTOR ✦
-
     [Header("Tham chiếu đối tượng")]
     [SerializeField] private Transform firePoint;
     [SerializeField] private GameObject bulletPrefab;
@@ -23,20 +11,16 @@ public class SupportGunnerAI : MonoBehaviour
     [SerializeField] private Animator animator;
 
     [Header("Cài đặt di chuyển")]
-    [SerializeField] private float moveSpeed = 10f;        // tốc độ chạy vào vòng
-    [SerializeField] private float orbitSpeed = 5f;        // tốc độ bay quanh vòng
-    [SerializeField] private float orbitSmooth = 8f;       // độ mượt khi di chuyển
-    [SerializeField] private float orbitHeightOffset = 0.5f; // độ cao khi bay
-    [SerializeField] private float orbitDistanceOffset = 2f; // khoảng cách bay cách vòng tròn
+    [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private float orbitSpeed = 5f;
+    [SerializeField] private float orbitSmooth = 8f;
+    [SerializeField] private float orbitHeightOffset = 0.5f;
+    [SerializeField] private float orbitDistanceOffset = 2f;
 
     [Header("Cài đặt chiến đấu")]
-    [SerializeField] private float fireRate = 0.3f;        // tốc độ bắn
-    [SerializeField] private float burstDuration = 3f;     // thời gian bắn liên tục
-    [SerializeField] private float restDuration = 2.5f;    // thời gian nghỉ giữa các đợt bắn
-
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ BIẾN NỘI BỘ ✦
+    [SerializeField] private float fireRate = 0.3f;
+    [SerializeField] private float burstDuration = 3f;
+    [SerializeField] private float restDuration = 2.5f;
 
     private Vector3 orbitCenter;
     private float orbitRadius;
@@ -45,7 +29,10 @@ public class SupportGunnerAI : MonoBehaviour
     private bool isShooting;
     private bool isRunning;
 
-    // Lưu vị trí và hướng ban đầu để về sau quay lại
+    // VN: Cờ để biết sound bắn loop đang phát hay chưa.
+    private bool isFireLoopPlaying;
+    private bool wasPausedLastFrame;
+
     private Vector3 idlePosition;
     private Quaternion idleRotation;
 
@@ -53,24 +40,56 @@ public class SupportGunnerAI : MonoBehaviour
     private readonly int hashIsShooting = Animator.StringToHash("IsShooting");
     private readonly int hashIsDead = Animator.StringToHash("Death");
 
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ UNITY LIFECYCLE ✦
-
     private void Start()
     {
-        // ✅ Lưu vị trí và rotation ngay khi start
         idlePosition = transform.position;
         idleRotation = transform.rotation;
     }
 
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ KÍCH HOẠT AI ✦
+    private void Update()
+    {
+        bool isPaused = LevelPauser.instance != null && LevelPauser.instance.paused;
 
-    /// <summary>
-    /// 🔹 Gọi khi boss chuyển sang Phase 2.
-    /// </summary>
+        // Vừa pause -> tắt sound ngay
+        if (isPaused && !wasPausedLastFrame)
+            StopFireLoopSound();
+
+        // Vừa unpause -> nếu AI vẫn đang trong trạng thái bắn thì bật sound lại
+        else if (!isPaused && wasPausedLastFrame)
+        {
+            if (isOrbiting && isShooting)
+                PlayFireLoopSound();
+        }
+
+        wasPausedLastFrame = isPaused;
+    }
+
+    private void OnDisable()
+    {
+        StopFireLoopSound();
+    }
+
+    private void OnDestroy()
+    {
+        StopFireLoopSound();
+    }
+
+    private void PlayFireLoopSound()
+    {
+        if (isFireLoopPlaying) return;
+
+        AudioManager.Instance?.PlaySound(SoundCategory.VoltitanBoss, 3);
+        isFireLoopPlaying = true;
+    }
+
+    private void StopFireLoopSound()
+    {
+        if (!isFireLoopPlaying) return;
+
+        AudioManager.Instance?.StopSound(SoundCategory.VoltitanBoss, 3);
+        isFireLoopPlaying = false;
+    }
+
     public void ActivateGunner(Vector3 center, float radius)
     {
         if (isActive) return;
@@ -82,12 +101,11 @@ public class SupportGunnerAI : MonoBehaviour
         StartCoroutine(EnterArenaRoutine());
     }
 
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ VÀO VÒNG CHIẾN ✦
-
     private IEnumerator EnterArenaRoutine()
     {
+        // VN: Reset sound phòng trường hợp lần trước bị ngắt giữa chừng.
+        StopFireLoopSound();
+
         SetRunning(true);
         SetShooting(false);
 
@@ -112,10 +130,6 @@ public class SupportGunnerAI : MonoBehaviour
         StartCoroutine(FireCycleRoutine());
     }
 
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ CHUYỂN ĐỘNG BAY QUANH VÒNG ✦
-
     private IEnumerator OrbitMovementRoutine()
     {
         float currentAngle = Mathf.Atan2(transform.position.z - orbitCenter.z, transform.position.x - orbitCenter.x);
@@ -137,10 +151,6 @@ public class SupportGunnerAI : MonoBehaviour
         }
     }
 
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ CHU KỲ BẮN ✦
-
     private IEnumerator FireCycleRoutine()
     {
         while (isOrbiting)
@@ -148,8 +158,7 @@ public class SupportGunnerAI : MonoBehaviour
             SetRunning(false);
             SetShooting(true);
 
-            // VN: Bắt đầu đợt bắn -> phát sound bắn loop.
-            AudioManager.Instance?.PlaySound(SoundCategory.VoltitanBoss, 3);
+            PlayFireLoopSound();
 
             float timer = 0f;
             while (timer < burstDuration)
@@ -161,12 +170,13 @@ public class SupportGunnerAI : MonoBehaviour
 
             SetShooting(false);
             SetRunning(true);
-
-            // VN: Kết thúc đợt bắn -> dừng đúng sound bắn.
-            AudioManager.Instance?.StopSound(SoundCategory.VoltitanBoss, 3);
+            StopFireLoopSound();
 
             yield return new WaitForSeconds(restDuration);
         }
+
+        // VN: Nếu thoát khỏi vòng bắn thì đảm bảo sound cũng tắt.
+        StopFireLoopSound();
     }
 
     private void FireBullet()
@@ -177,12 +187,10 @@ public class SupportGunnerAI : MonoBehaviour
         Quaternion spread = Quaternion.Euler(0, randomOffset, 0);
         Vector3 dir = spread * (orbitCenter - firePoint.position).normalized;
 
-        // 🔸 Spawn bullet từ PoolManager
         Component bulletComp = PoolManager.Instance.ReuseComponent(bulletPrefab, firePoint.position, Quaternion.LookRotation(dir));
         if (bulletComp != null && bulletComp.TryGetComponent(out BulletProjectile bullet))
             bullet.Fire(dir);
 
-        // 🔸 Spawn muzzle flash
         if (muzzleFlashPrefab)
         {
             Component flash = PoolManager.Instance.ReuseComponent(muzzleFlashPrefab, firePoint.position, Quaternion.LookRotation(dir));
@@ -196,10 +204,6 @@ public class SupportGunnerAI : MonoBehaviour
         yield return new WaitForSeconds(delay);
         obj.SetActive(false);
     }
-
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ QUẢN LÝ ANIMATION ✦
 
     private void SetRunning(bool value)
     {
@@ -217,28 +221,20 @@ public class SupportGunnerAI : MonoBehaviour
 
     public void PlayDeath()
     {
+        // VN: Chết thì tắt sound bắn ngay.
+        StopFireLoopSound();
         animator?.SetTrigger(hashIsDead);
     }
 
-    #endregion
-    //─────────────────────────────────────────────
-    #region ✦ RETURN TO IDLE (FINAL PHASE END) ✦
-
-    /// <summary>
-    /// Cho quái phụ dừng combat và chạy về vị trí ban đầu (idle).
-    /// </summary>
     public IEnumerator ReturnToIdlePoint()
     {
-        // Dừng mọi hành động
         moveSpeed = 14;
         isOrbiting = false;
         StopAllCoroutines();
 
         SetShooting(false);
         SetRunning(true);
-
-        // VN: Kết thúc đợt bắn -> dừng đúng sound bắn.
-        AudioManager.Instance?.StopSound(SoundCategory.VoltitanBoss, 3);
+        StopFireLoopSound();
 
         while (Vector3.Distance(transform.position, idlePosition) > 0.2f)
         {
@@ -252,10 +248,7 @@ public class SupportGunnerAI : MonoBehaviour
             yield return null;
         }
 
-        // Đứng yên đúng rotation cũ
         transform.rotation = idleRotation;
         SetRunning(false);
     }
-
-    #endregion
 }
