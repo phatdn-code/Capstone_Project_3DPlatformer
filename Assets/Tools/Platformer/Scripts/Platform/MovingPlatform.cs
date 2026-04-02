@@ -41,8 +41,6 @@ namespace PLAYERTWO.PlatformerProject
 
         protected virtual void HandleWaypoints()
         {
-            Debug.Log(gameObject.name);
-
             var position = transform.position;
             var target = waypoints.current.position;
 
