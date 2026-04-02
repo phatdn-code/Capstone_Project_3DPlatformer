@@ -251,10 +251,10 @@ MonoBehaviour:
   skinWidth: 0.005
   center: {x: 0, y: 0.6, z: 0}
   m_radius: 0.6
-  m_height: 2.1
+  m_height: 2.2
   collisionLayer:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294524923
 --- !u!114 &7823799801990230173
 MonoBehaviour:
   m_ObjectHideFlags: 0

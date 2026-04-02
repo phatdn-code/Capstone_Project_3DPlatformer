@@ -251,7 +251,7 @@ MonoBehaviour:
   m_height: 1
   collisionLayer:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294524923
 --- !u!114 &3020197865195691866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -404,7 +404,7 @@ MonoBehaviour:
       type: 3}
     muzzleEffect: {fileID: 8088466424974234153}
     rangedAttackRange: 14
-    rangedAttackCooldown: 5
+    rangedAttackCooldown: 4
     projectileSpeed: 8
     rangedUseContactDamage: 1
     rangedOverrideDamage: 1

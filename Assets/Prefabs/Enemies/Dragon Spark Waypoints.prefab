@@ -468,7 +468,7 @@ MonoBehaviour:
   m_height: 2
   collisionLayer:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294524923
 --- !u!114 &7433823413523758504
 MonoBehaviour:
   m_ObjectHideFlags: 0

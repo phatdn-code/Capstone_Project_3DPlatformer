@@ -1683,12 +1683,12 @@ MonoBehaviour:
   slopeLimit: 45
   stepOffset: 0.3
   skinWidth: 0.005
-  center: {x: 0, y: 0.2, z: 0}
-  m_radius: 0.7
+  center: {x: 0, y: 0.5, z: 0}
+  m_radius: 1
   m_height: 1
   collisionLayer:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294524923
 --- !u!114 &1081793184338518611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1840,7 +1840,7 @@ MonoBehaviour:
     projectilePrefab: {fileID: 100004, guid: 0fe6d5add049f054da06bbb6566b1be3, type: 3}
     muzzleEffect: {fileID: 1565119974276675873}
     rangedAttackRange: 10
-    rangedAttackCooldown: 2
+    rangedAttackCooldown: 3
     projectileSpeed: 8
     rangedUseContactDamage: 1
     rangedOverrideDamage: 1
@@ -1855,7 +1855,7 @@ MonoBehaviour:
   rollAcceleration: 40
   rollStopDistance: 0.4
   rollCooldown: 2
-  enableSprayAttack: 1
+  enableSprayAttack: 0
   sprayAttackRange: 5
   sprayTopSpeed: 6
   sprayAcceleration: 35

@@ -302,12 +302,12 @@ MonoBehaviour:
   slopeLimit: 45
   stepOffset: 0.3
   skinWidth: 0.005
-  center: {x: 0, y: 0.5, z: 0}
+  center: {x: 0, y: 0.6, z: 0}
   m_radius: 0.8
-  m_height: 2
+  m_height: 2.2
   collisionLayer:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294524923
 --- !u!114 &6340415191034034919
 MonoBehaviour:
   m_ObjectHideFlags: 0
