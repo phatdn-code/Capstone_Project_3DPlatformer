@@ -542,7 +542,7 @@ MonoBehaviour:
     m_Value: 0
   _FogColor:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
+    m_Value: {r: 0.6666667, g: 0.83921576, b: 0.92549026, a: 1}
   _GradientStart:
     m_OverrideState: 1
     m_Value: -47.98
@@ -608,10 +608,10 @@ MonoBehaviour:
     m_Value: 1
   _Height:
     m_OverrideState: 1
-    m_Value: 0.86
+    m_Value: 0.31
   _HeightDensity:
     m_OverrideState: 1
-    m_Value: 0.27
+    m_Value: 0.39
   _HeightFogType:
     m_OverrideState: 1
     m_Value: 1
