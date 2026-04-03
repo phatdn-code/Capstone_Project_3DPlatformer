@@ -4470,6 +4470,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3406062537214024446, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3406062537214024446, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3406062537214024446, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3406062537214024446, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3406062537214024446, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4566279941985813258, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4566279941985813258, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4566279941985813258, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4566279941985813258, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4566279941985813258, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5177975233139812126, guid: 8ec8cfa23923a014fb85511f9256b664,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5682829067039051290, guid: 8ec8cfa23923a014fb85511f9256b664,
         type: 3}
       propertyPath: m_Name
