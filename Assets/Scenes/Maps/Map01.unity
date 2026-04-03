@@ -170181,8 +170181,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 273281686218419847, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.857176
+      objectReference: {fileID: 0}
+    - target: {fileID: 273281686218419847, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 3.4434614
+      objectReference: {fileID: 0}
+    - target: {fileID: 273281686218419847, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 4.4
+      value: 3.4999986
       objectReference: {fileID: 0}
     - target: {fileID: 1079944775166532644, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
@@ -170194,13 +170204,19 @@ PrefabInstance:
       propertyPath: m_fontSizeBase
       value: 20
       objectReference: {fileID: 0}
+    - target: {fileID: 1084116194039924171, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8212832052889010035, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8212832052889010035, guid: f2e2a0e9c1442b64a8a9c439534d7ac0, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 294455497315071184, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
