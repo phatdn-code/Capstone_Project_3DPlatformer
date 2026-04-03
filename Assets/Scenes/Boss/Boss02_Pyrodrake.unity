@@ -33827,6 +33827,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1831732524988258130, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2974335416959825385, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
         type: 3}
       propertyPath: m_DynamicOccludee
@@ -33872,8 +33877,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Character
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 1831732524988258130, guid: c2e3f170dbfbf354f8ff2c5dddadaff2, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 1942075130067948680, guid: c2e3f170dbfbf354f8ff2c5dddadaff2, type: 3}
     m_AddedGameObjects: []
