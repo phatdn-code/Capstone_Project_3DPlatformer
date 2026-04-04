@@ -17297,6 +17297,26 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 2778227450737056647, guid: fe981aa766757d54fb114f86d20362c9,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2778227450737056647, guid: fe981aa766757d54fb114f86d20362c9,
+        type: 3}
+      propertyPath: outlineLayer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2778227450737056647, guid: fe981aa766757d54fb114f86d20362c9,
+        type: 3}
+      propertyPath: outlineParameters.blurShift
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2778227450737056647, guid: fe981aa766757d54fb114f86d20362c9,
+        type: 3}
+      propertyPath: outlineParameters.dilateShift
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2970532347339576245, guid: fe981aa766757d54fb114f86d20362c9,
         type: 3}
       propertyPath: m_Layer
@@ -44500,15 +44520,15 @@ MonoBehaviour:
   stage: 1
   renderingStrategy: 0
   renderingMode: 0
-  outlineLayerMask: 1
+  outlineLayerMask: -1
   primaryBufferSizeMode: 0
   primaryRendererScale: 0.75
   primarySizeReference: 800
   blurShift: 1
   dilateShift: 1
-  dilateIterations: 1
+  dilateIterations: 2
   dilateQuality: 0
-  blurIterations: 5
+  blurIterations: 6
   blurType: 1
 --- !u!20 &4843316740302379993 stripped
 Camera:
