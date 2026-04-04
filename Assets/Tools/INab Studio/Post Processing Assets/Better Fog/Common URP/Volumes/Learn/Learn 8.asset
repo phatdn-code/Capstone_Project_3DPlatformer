@@ -608,10 +608,10 @@ MonoBehaviour:
     m_Value: 1
   _Height:
     m_OverrideState: 1
-    m_Value: 0.31
+    m_Value: 0.26
   _HeightDensity:
     m_OverrideState: 1
-    m_Value: 0.39
+    m_Value: 0.474
   _HeightFogType:
     m_OverrideState: 1
     m_Value: 1
@@ -647,19 +647,19 @@ MonoBehaviour:
     m_Value: 1
   _Threshold:
     m_OverrideState: 1
-    m_Value: -1
+    m_Value: 0.18
   _SoftKnee:
     m_OverrideState: 1
-    m_Value: 1.69
+    m_Value: 5.69
   _Radius:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 4.45
   _BlurWeight:
     m_OverrideState: 1
-    m_Value: 0.1
+    m_Value: 42
   _Intensity:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 0.21
   _HighQuality:
     m_OverrideState: 1
     m_Value: 1
