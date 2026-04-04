@@ -26,7 +26,8 @@ MonoBehaviour:
     probeSamplingDebugMesh: {fileID: 0}
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
-  m_RendererFeatures: []
+  m_RendererFeatures:
+  - {fileID: 1132535789503570591}
   m_RendererFeatureMap: 
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
@@ -53,3 +54,16 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &1132535789503570591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d111dc2a0b22b142804f4d59508b893, type: 3}
+  m_Name: EPO Feature
+  m_EditorClassIdentifier: 
+  m_Active: 1
