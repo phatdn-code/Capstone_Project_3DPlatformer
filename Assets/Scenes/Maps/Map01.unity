@@ -266732,19 +266732,24 @@ PrefabInstance:
     - target: {fileID: 273281685853183525, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
       propertyPath: text
-      value: '<color=#222222><size=130%><b>Welcome to the Skyspire Crystals!!!</b></size></color>
+      value: '<color=#222222><size=130%><b>Welcome to the <color=#6EC6FF>Skyspire
+        Crystals</color>!!!</b></size></color>
 
+        
 
-        Pilot
-        your plane through dangerous crystal paths and floating ruins.
+        Pilot your plane
+        through dangerous crystal paths and floating ruins.
 
+        
 
         Collect
-        enough coins to clear the stage and complete your journey.
+        enough <color=#FFD966><b>coins</b></color> to clear the stage and complete
+        your journey.
 
+        
 
-        Stay
-        sharp, avoid obstacles, and keep flying forward.'
+        Stay sharp, avoid <color=#FF6B6B><b>obstacles</b></color>,
+        and keep flying forward.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
@@ -312900,15 +312905,17 @@ PrefabInstance:
     - target: {fileID: 273281685853183525, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
       propertyPath: text
-      value: '<color=#222222><size=130%><b>Puzzle Challenge</b></size></color>
+      value: '<color=#222222><size=130%><b><color=#6EC6FF>Puzzle Challenge</color></b></size></color>
 
+        
 
         Complete
-        the puzzle to open the door ahead.
+        the <color=#FFD966><b>puzzle</b></color> to open the door ahead.
 
+        
 
-        Finish the minigame to continue
-        your journey.'
+        Finish
+        the <color=#FFD966><b>minigame</b></color> to continue your journey.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
