@@ -2467,6 +2467,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1066517027701827935}
     m_Modifications:
+    - target: {fileID: -9190581516677345106, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae8414e6f81d7004882334fda90202c3,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2517,15 +2522,45 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8115499731406344394, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8013035019394465337, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5276312232844570399, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -4189908459544442852, guid: ae8414e6f81d7004882334fda90202c3,
         type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: b529e629fb733f34190727eb194a9a5c, type: 2}
+    - target: {fileID: -100884781730149019, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ae8414e6f81d7004882334fda90202c3,
         type: 3}
       propertyPath: m_Name
       value: Protagonist_B
+      objectReference: {fileID: 0}
+    - target: {fileID: 2242832087778805691, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6635062864554912955, guid: ae8414e6f81d7004882334fda90202c3,
+        type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

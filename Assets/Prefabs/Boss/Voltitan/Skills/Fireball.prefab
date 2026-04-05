@@ -122,6 +122,11 @@ PrefabInstance:
       propertyPath: looping
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 843075212297694153, guid: 460f44020df05f44f9225890006bacf0,
+        type: 3}
+      propertyPath: m_Layer
+      value: 18
+      objectReference: {fileID: 0}
     - target: {fileID: 1144802340858692640, guid: 460f44020df05f44f9225890006bacf0,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -172,20 +177,40 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1997081183462225404, guid: 460f44020df05f44f9225890006bacf0,
+        type: 3}
+      propertyPath: m_Layer
+      value: 18
+      objectReference: {fileID: 0}
     - target: {fileID: 2933376830340557523, guid: 460f44020df05f44f9225890006bacf0,
         type: 3}
       propertyPath: looping
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3309985525780419109, guid: 460f44020df05f44f9225890006bacf0,
+        type: 3}
+      propertyPath: m_Layer
+      value: 18
       objectReference: {fileID: 0}
     - target: {fileID: 3617346945021829508, guid: 460f44020df05f44f9225890006bacf0,
         type: 3}
       propertyPath: m_Name
       value: Nova violet
       objectReference: {fileID: 0}
+    - target: {fileID: 3617346945021829508, guid: 460f44020df05f44f9225890006bacf0,
+        type: 3}
+      propertyPath: m_Layer
+      value: 18
+      objectReference: {fileID: 0}
     - target: {fileID: 5286779222474159071, guid: 460f44020df05f44f9225890006bacf0,
         type: 3}
       propertyPath: looping
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728031364766577272, guid: 460f44020df05f44f9225890006bacf0,
+        type: 3}
+      propertyPath: m_Layer
+      value: 18
       objectReference: {fileID: 0}
     - target: {fileID: 8308543396642138833, guid: 460f44020df05f44f9225890006bacf0,
         type: 3}
