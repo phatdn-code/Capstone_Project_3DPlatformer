@@ -17,6 +17,7 @@ public class StartRoomController : MonoBehaviour
 
     void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         StartCoroutine(SetCamera());
     }
 
@@ -31,15 +32,13 @@ public class StartRoomController : MonoBehaviour
             dungeonController.SwitchCinemachine(roomManager.BaseCamera);
             roomManager.roomblank.SetActive(false);
         }
-
-        player = GameObject.FindGameObjectWithTag("Player");
         StartCoroutine(SpawnEffectCouroutine());
     }
 
     private IEnumerator SpawnEffectCouroutine()
     {
         yield return new WaitForSeconds(2f);
-        player.transform.position = spawnPoint.transform.position;
+        
 
         effect01Obj = Instantiate(effect01Prefab, spawnPoint.transform.position, Quaternion.Euler(90f, 0f, 0f));
         effect02Obj = Instantiate(effect02Prefab, spawnPoint.transform.position, Quaternion.Euler(90f, 0f, 0f));
@@ -49,7 +48,9 @@ public class StartRoomController : MonoBehaviour
 
         effect02 = effect02Obj.GetComponent<ParticleSystem>();
         effect02.Play();
-
+        yield return new WaitForSeconds(0.5f);
+        player.transform.position = spawnPoint.transform.position;
+        yield return new WaitForSeconds(1f);
         player.GetComponent<EntityController>().enabled = true;
     }
 }
