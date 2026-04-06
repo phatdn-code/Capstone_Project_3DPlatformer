@@ -2,7 +2,7 @@
 
 namespace PLAYERTWO.PlatformerProject
 {
-    [RequireComponent(typeof(Collider), typeof(AudioSource))]
+    [RequireComponent(typeof(Collider))]
     [AddComponentMenu("PLAYER TWO/Platformer Project/Misc/Portal")]
     public class Portal : MonoBehaviour
     {
@@ -17,9 +17,6 @@ namespace PLAYERTWO.PlatformerProject
 
         [Tooltip("The forward offset to apply to the Player position when exiting the portal.")]
         public float exitOffset = 1f;
-
-        [Tooltip("The sound to play when teleported.")]
-        public AudioClip teleportClip;
 
         [Tooltip(
             "If true, the Player will be rotated to face the opposite direction when exiting the portal."
@@ -38,7 +35,6 @@ namespace PLAYERTWO.PlatformerProject
         #region === Runtime References ===
 
         protected Collider m_collider;
-        protected AudioSource m_audio;
 
         protected PlayerCamera m_camera;
         protected PlayerCameraManager m_cameraManager;
@@ -120,7 +116,7 @@ namespace PLAYERTWO.PlatformerProject
             if (useFlash && Flash.instance)
                 Flash.instance.Trigger();
 
-            m_audio.PlayOneShot(teleportClip);
+            AudioManager.Instance.PlaySound(SoundCategory.Normal, 8);
 
             if (saveRespawnPoint)
                 PortalZoneManager.Instance.TryRunReturnPortalCutscene(exit);
@@ -138,7 +134,6 @@ namespace PLAYERTWO.PlatformerProject
             player = PlayerHub.Instance.Player;
 
             m_collider = GetComponent<Collider>();
-            m_audio = GetComponent<AudioSource>();
 
 #if UNITY_6000_0_OR_NEWER
             m_camera = FindFirstObjectByType<PlayerCamera>();
