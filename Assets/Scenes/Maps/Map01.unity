@@ -31727,6 +31727,11 @@ PrefabInstance:
       propertyPath: Priority.m_Value
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9006190800082975960, guid: ff68e3cc08803644b861eb9509cd519d,
+        type: 3}
+      propertyPath: _eventSystem
+      value: 
+      objectReference: {fileID: 1653690535}
     - target: {fileID: 9050058489841757441, guid: ff68e3cc08803644b861eb9509cd519d,
         type: 3}
       propertyPath: FollowOffset.z
@@ -31738,7 +31743,8 @@ PrefabInstance:
       value: -15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5442271841120323507, guid: ff68e3cc08803644b861eb9509cd519d, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7210319017919051816, guid: ff68e3cc08803644b861eb9509cd519d,
         type: 3}
@@ -71894,6 +71900,11 @@ PrefabInstance:
       propertyPath: _selectionUI
       value: 
       objectReference: {fileID: 1981908049}
+    - target: {fileID: 1831732524988258130, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
+        type: 3}
+      propertyPath: _toggleCooldown
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6199132078359760638, guid: c2e3f170dbfbf354f8ff2c5dddadaff2,
         type: 3}
       propertyPath: m_Enabled
@@ -203719,6 +203730,10 @@ MonoBehaviour:
   - poolSize: 10
     prefab: {fileID: 1729166761864512, guid: b7720d9fd46dcc24ca97e7daf4cabf10, type: 3}
     componentType: 
+  - poolSize: 2
+    prefab: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55,
+      type: 3}
+    componentType: 
 --- !u!1001 &1177957425
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -266735,21 +266750,17 @@ PrefabInstance:
       value: '<color=#222222><size=130%><b>Welcome to the <color=#6EC6FF>Skyspire
         Crystals</color>!!!</b></size></color>
 
-        
 
-        Pilot your plane
-        through dangerous crystal paths and floating ruins.
+        Pilot your plane through
+        dangerous crystal paths and floating ruins.
 
-        
 
-        Collect
-        enough <color=#FFD966><b>coins</b></color> to clear the stage and complete
-        your journey.
+        Collect enough <color=#FFD966><b>coins</b></color>
+        to clear the stage and complete your journey.
 
-        
 
-        Stay sharp, avoid <color=#FF6B6B><b>obstacles</b></color>,
-        and keep flying forward.'
+        Stay sharp, avoid
+        <color=#FF6B6B><b>obstacles</b></color>, and keep flying forward.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
@@ -266775,6 +266786,24 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 4.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1079944775166532644, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
+      propertyPath: m_text
+      value: '<color=#222222><size=130%><b>Welcome to the <color=#6EC6FF>Skyspire
+        Crystals</color>!!!</b></size></color>
+
+
+        Pilot your plane through
+        dangerous crystal paths and floating ruins.
+
+
+        Collect enough <color=#FFD966><b>coins</b></color>
+        to clear the stage and complete your journey.
+
+
+        Stay sharp, avoid
+        <color=#FF6B6B><b>obstacles</b></color>, and keep flying forward.'
       objectReference: {fileID: 0}
     - target: {fileID: 8212832052889010035, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
@@ -274920,7 +274949,7 @@ Transform:
   m_GameObject: {fileID: 1606064820}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.4}
+  m_LocalPosition: {x: 0, y: 0, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -283338,6 +283367,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3709282458134962122, guid: 252c5346c2bb85b49af1f2f472fa842c,
     type: 3}
   m_PrefabInstance: {fileID: 1653646929}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1653690535 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 166108431134103429, guid: 8ec8cfa23923a014fb85511f9256b664,
+    type: 3}
+  m_PrefabInstance: {fileID: 834625252}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1655300918
 PrefabInstance:
@@ -312907,15 +312942,15 @@ PrefabInstance:
       propertyPath: text
       value: '<color=#222222><size=130%><b><color=#6EC6FF>Puzzle Challenge</color></b></size></color>
 
-        
+
 
         Complete
-        the <color=#FFD966><b>puzzle</b></color> to open the door ahead.
+        the <color=#F08A24><b>puzzle</b></color> to open the door ahead.
 
-        
+
 
         Finish
-        the <color=#FFD966><b>minigame</b></color> to continue your journey.'
+        the <color=#F08A24><b>minigame</b></color> to continue your journey.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
@@ -312936,6 +312971,19 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 4.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1079944775166532644, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
+      propertyPath: m_text
+      value: '<color=#222222><size=130%><b><color=#6EC6FF>Puzzle Challenge</color></b></size></color>
+
+
+        Complete
+        the <color=#F08A24><b>puzzle</b></color> to open the door ahead.
+
+
+        Finish
+        the <color=#F08A24><b>minigame</b></color> to continue your journey.'
       objectReference: {fileID: 0}
     - target: {fileID: 1084116194039924171, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}

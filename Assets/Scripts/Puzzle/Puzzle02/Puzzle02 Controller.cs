@@ -132,13 +132,48 @@ public class Puzzle02Controller : MonoBehaviour
         AudioManager.Instance.PlaySound(SoundCategory.Normal, 4);
     }
 
+    /// <summary>
+    /// VN: Khi puzzle hoàn thành thì hiện mảnh cuối, phát effect và xử lý đóng puzzle.
+    /// </summary>
     private void OnPuzzleCompleted()
     {
-        GameObject vfx = Instantiate(_objVFX, _spawnPoint.position, Quaternion.identity);
-        vfx.GetComponent<ParticleSystem>().Play();
+        SpawnCompleteVFX();
+
         _puzzleSlots[_emptySlot.x, _emptySlot.y].SetPiece(_removedPiece);
+
         StartCoroutine(WaitOneSecondForDisiablePuzzlePanel());
         StartCoroutine(WaitOneSecondForDisiablePuzzleObject());
+    }
+
+    /// <summary>
+    /// VN: Sinh effect khi hoàn thành puzzle, ưu tiên dùng PoolManager.
+    /// </summary>
+    private void SpawnCompleteVFX()
+    {
+        if (_objVFX == null || _spawnPoint == null)
+            return;
+
+        // Ưu tiên lấy effect từ pool để đỡ Instantiate/Destroy nhiều lần
+        Component pooledComponent = PoolManager.Instance != null
+            ? PoolManager.Instance.ReuseComponent(_objVFX, _spawnPoint.position, Quaternion.identity)
+            : null;
+
+        if (pooledComponent != null)
+        {
+            if (pooledComponent.TryGetComponent(out ParticleSystem pooledParticle))
+            {
+                pooledParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                pooledParticle.Play();
+            }
+
+            return;
+        }
+
+        // Fallback: nếu chưa có pool thì dùng Instantiate như cũ
+        GameObject vfx = Instantiate(_objVFX, _spawnPoint.position, Quaternion.identity);
+
+        if (vfx.TryGetComponent(out ParticleSystem particle))
+            particle.Play();
     }
 
     private IEnumerator WaitOneSecondForDisiablePuzzlePanel()

@@ -259,6 +259,15 @@ namespace PLAYERTWO.PlatformerProject
 #endif
         }
 
+        /// <summary>
+        /// VN: Đọc phím Stomp/E dạng raw, không bị chặn bởi gameplay lock.
+        /// Dùng riêng cho puzzle để đang mở puzzle vẫn bấm E thoát ra được.
+        /// </summary>
+        public virtual bool GetStompDownRaw()
+        {
+            return m_stomp != null && m_stomp.WasPressedThisFrame();
+        }
+
         #endregion
 
         //─────────────────────────────────────────────
