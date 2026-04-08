@@ -268043,18 +268043,18 @@ PrefabInstance:
     - target: {fileID: 273281685853183525, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
       propertyPath: text
-      value: '<color=#222222><size=130%><b>Basic Controls</b></size></color>
+      value: '<color=#222222><size=130%><b>Combat</b></size></color>
 
 
-        Move
-        with <color=#E38B2C><b>W A S D</b></color>.
+        Press
+        <color=#E38B2C><b>LEFT MOUSE BUTTON</b></color> to attack.
 
 
-        Jump with <color=#E38B2C><b>SPACE</b></color>.
+        Break
+        crates to find items.
 
 
-        Attack
-        with <color=#E38B2C><b>LEFT MOUSE BUTTON</b></color>.'
+        Attack enemies to clear the way.'
       objectReference: {fileID: 0}
     - target: {fileID: 273281685853183527, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}
@@ -268065,6 +268065,27 @@ PrefabInstance:
         type: 3}
       propertyPath: m_BlockingMask.m_Bits
       value: 131063
+      objectReference: {fileID: 0}
+    - target: {fileID: 273281686218419846, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1079944775166532644, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
+        type: 3}
+      propertyPath: m_text
+      value: '<color=#222222><size=130%><b>Combat</b></size></color>
+
+
+        Press
+        <color=#E38B2C><b>LEFT MOUSE BUTTON</b></color> to attack.
+
+
+        Break
+        crates to find items.
+
+
+        Attack enemies to clear the way.'
       objectReference: {fileID: 0}
     - target: {fileID: 1084116194039924171, guid: f2e2a0e9c1442b64a8a9c439534d7ac0,
         type: 3}

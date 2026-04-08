@@ -9587,12 +9587,12 @@ MonoBehaviour:
   bossName: 
   m_phases:
   - phaseName: Pyrodrake
-    maxHealth: 20
+    maxHealth: 40
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
   - phaseName: Pyrodrake
-    maxHealth: 40
+    maxHealth: 80
     moveSpeed: 5
     phaseColor: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 1, y: 1, z: 1}
@@ -15567,8 +15567,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shieldObject: {fileID: 935698568484544408}
   shieldSlider: {fileID: 549532177}
-  maxShieldValue: 50
-  shieldValue: 50
+  maxShieldValue: 120
+  shieldValue: 120
   enableOnStart: 1
   scaleTweenDuration: 0.3
   enableEase: 27
