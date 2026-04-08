@@ -75,7 +75,7 @@ public class Puzzle02Controller : MonoBehaviour
 
     private void ShufflePuzzle()
     {
-        int moves = Random.Range(10, 20);
+        int moves = Random.Range(10, 100);
         for (int i = 0; i < moves; i++)
         {
             var neighbors = GetAdjacentPositions(_emptySlot);
